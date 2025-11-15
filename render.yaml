@@ -3,7 +3,7 @@ services:
   - type: web
     name: vox-dashboard
     runtime: node
-    region: singapore # Change to your preferred region (oregon, frankfurt, singapore, etc.)
+    region: oregon # Change to your preferred region (oregon, frankfurt, singapore, etc.)
     plan: free # Options: 'free' for testing, 'starter' ($7/mo) for production
     rootDir: web
     buildCommand: npm install --legacy-peer-deps --include=dev && npm run build
