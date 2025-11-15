@@ -392,6 +392,8 @@ export function useMultiCallWebSocket(restaurantId) {
         // Route message to specific call handler
         if (callId) {
           handleMultiCallMessage(callId, data);
+        } else if (data.type !== "ping") {
+          console.warn(`⚠️ Message without callId:`, data);
         }
       };
 
@@ -422,7 +424,15 @@ export function useMultiCallWebSocket(restaurantId) {
   // 🔥 NEW: Handle messages for specific call
   const handleMultiCallMessage = (callId, data) => {
     const call = callsRef.current[callId];
-    if (!call) return;
+    if (!call) {
+      console.warn(`⚠️ Message for unknown call: ${callId}`);
+      return;
+    }
+
+    // 🔥 DEBUG: Log message types to see what's coming through
+    if (data.messageType !== "audio" && data.type !== "audio") {
+      console.log(`📨 Message for ${callId}: type=${data.messageType || data.type}, speaker=${data.speaker}`);
+    }
 
     // Handle call ended
     if (data.messageType === "callEnded") {
@@ -482,10 +492,6 @@ export function useMultiCallWebSocket(restaurantId) {
       const currentSelectedCallId = selectedCallIdRef.current;
       const shouldPlayAudio = callId === currentSelectedCallId;
 
-      console.log(
-        `🔊 AUDIO DEBUG - Call ${callId}: selected=${currentSelectedCallId}, shouldPlay=${shouldPlayAudio}, callMuted=${isCallMutedRef.current}`,
-      );
-
       const audioReady =
         audioCtxRef.current && audioCtxRef.current.state === "running";
 
@@ -495,24 +501,21 @@ export function useMultiCallWebSocket(restaurantId) {
 
       // 🔥 CRITICAL: ONLY PLAY AUDIO FOR THE SELECTED CALL
       if (!shouldPlayAudio) {
-        console.log(
-          `🔇 AUDIO BLOCKED - Call ${callId} is not selected (selected: ${currentSelectedCallId})`,
-        );
-        return; // Don't play audio for non-selected calls
+        // Don't spam logs for non-selected calls
+        return;
       }
 
       if (!audioReady) {
-        console.log(`🔇 AUDIO BLOCKED - Audio context not ready`);
+        if (!call.audioNotReadyWarned) {
+          console.warn(`⚠️ Audio context not ready - click "Enable Audio" button`);
+          updateCall(callId, { audioNotReadyWarned: true });
+        }
         return;
       }
 
       if (isCallMutedRef.current) {
-        console.log(`🔇 AUDIO BLOCKED - Call is muted`);
-        return;
+        return; // Silently skip if muted
       }
-
-      // 🔊 PLAY AUDIO FOR SELECTED CALL ONLY
-      console.log(`🎵 PLAYING AUDIO for selected call ${callId}`);
 
       const format = data.format || data.encoding || "mulaw";
       const sampleRate =
@@ -566,16 +569,20 @@ export function useMultiCallWebSocket(restaurantId) {
         data.messageType === "transcription" ||
         data.messageType === "transcript" ||
         data.type === "text" ||
+        data.type === "transcript" ||
         (data.speaker && data.text)) &&
       data.speaker &&
       data.text &&
       data.timestamp
     ) {
+      console.log(`💬 Transcript for ${callId}: [${data.speaker}] ${data.text.substring(0, 50)}...`);
+
       // Start timer on first customer message
       if (
         !call.callTimerStarted &&
         (data.speaker === "customer" || data.speaker === "Caller")
       ) {
+        console.log(`⏱️ Starting call timer for ${callId}`);
         updateCall(callId, {
           callTimerStarted: true,
           startTime: Date.now(),
