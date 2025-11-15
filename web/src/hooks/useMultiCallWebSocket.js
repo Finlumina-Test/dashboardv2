@@ -355,6 +355,11 @@ export function useMultiCallWebSocket(restaurantId) {
         // Extract call ID
         const callId = data.callSid || data.call_id || data.callId;
 
+        // 🔥 DEBUG: Log full message for first message of each call to see all fields
+        if (callId && !callsRef.current[callId]) {
+          console.log(`📨 First message for call ${callId}:`, JSON.stringify(data, null, 2));
+        }
+
         // Initialize call if new
         if (callId && !callsRef.current[callId]) {
           initializeCall(callId);
@@ -455,6 +460,17 @@ export function useMultiCallWebSocket(restaurantId) {
     ) {
       const base64Audio = data.audio || data.audioBase64;
       const speaker = data.speaker;
+
+      // 🔥 DEBUG: Log audio reception
+      if (!call.audioDebugLogged) {
+        console.log(`🔊 First audio chunk received for call ${callId}`);
+        console.log(`   Speaker: ${speaker}`);
+        console.log(`   Audio context state: ${audioCtxRef.current?.state || 'NOT_INITIALIZED'}`);
+        console.log(`   Audio enabled: ${audioEnabled}`);
+        console.log(`   Is muted: ${isCallMutedRef.current}`);
+        console.log(`   Is taken over: ${call.isTakenOver}`);
+        updateCall(callId, { audioDebugLogged: true });
+      }
 
       // Don't play AI audio if call is taken over
       if ((speaker === "AI" || speaker === "ai") && call.isTakenOver) {
@@ -690,12 +706,21 @@ export function useMultiCallWebSocket(restaurantId) {
     if (!callId) callId = selectedCallId;
     if (!callId) return;
 
+    console.log(`📞 ===== END CALL DEBUG =====`);
+    console.log(`📞 Call ID: ${callId}`);
+    console.log(`🏪 Restaurant ID (from URL): ${restaurantId}`);
+    console.log(`📍 Current restaurant param: ${restaurantId}`);
+
     try {
       await performEndCall({ current: callId }, restaurantId);
       updateCall(callId, { isTakenOver: false, isMicMuted: false });
       console.log(`✅ End call request sent for ${callId}`);
     } catch (error) {
-      console.error(`❌ End call failed for ${callId}:`, error);
+      console.error(`❌ ===== END CALL FAILED =====`);
+      console.error(`❌ Call ID: ${callId}`);
+      console.error(`❌ Restaurant ID sent: ${restaurantId}`);
+      console.error(`❌ Error:`, error);
+      console.error(`❌ Error message: ${error.message}`);
       setError(`Failed to end call: ${error.message}`);
     }
   };
