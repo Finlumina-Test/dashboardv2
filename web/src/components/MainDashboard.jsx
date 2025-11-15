@@ -132,13 +132,13 @@ export function MainDashboard({
   // If not connected and no selected call, show waiting state
   if (!isConnected && !selectedCall) {
     return (
-      <div className="flex-1 flex items-center justify-center h-full">
-        <div className="text-center">
-          <PhoneCall className="w-20 h-20 text-gray-800 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-400 mb-2">
+      <div className="flex-1 flex items-center justify-center h-full animate-fadeInUp">
+        <div className="text-center card-gradient rounded-lg p-12">
+          <PhoneCall className="w-20 h-20 text-accent mx-auto mb-4 animate-pulse-soft" />
+          <h3 className="text-xl font-light text-white mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
             Waiting for active call...
           </h3>
-          <p className="text-gray-600">
+          <p className="text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>
             Call details will appear when a customer connects
           </p>
         </div>
@@ -149,13 +149,13 @@ export function MainDashboard({
   // If connected but no call selected
   if (isConnected && !selectedCall && !selectedCallId) {
     return (
-      <div className="flex-1 flex items-center justify-center h-full">
-        <div className="text-center">
-          <PhoneCall className="w-20 h-20 text-gray-800 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-400 mb-2">
+      <div className="flex-1 flex items-center justify-center h-full animate-fadeInUp">
+        <div className="text-center card-gradient rounded-lg p-12">
+          <PhoneCall className="w-20 h-20 text-accent mx-auto mb-4" />
+          <h3 className="text-xl font-light text-white mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
             Select a call from the sidebar
           </h3>
-          <p className="text-gray-600">Click on a call to view its details</p>
+          <p className="text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>Click on a call to view its details</p>
         </div>
       </div>
     );
@@ -167,11 +167,11 @@ export function MainDashboard({
     <div
       className={`${
         isLiveView ? "flex flex-col flex-1 min-h-0" : ""
-      } p-4 lg:p-8 space-y-4 lg:space-y-6`}
+      } p-4 lg:p-8 space-y-4 lg:space-y-6 animate-fadeInUp`}
     >
       {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0">
-        <h2 className="text-xl lg:text-2xl font-bold text-white">
+        <h2 className="text-xl lg:text-2xl font-light text-white" style={{ fontFamily: 'var(--font-heading)' }}>
           {isLiveView ? t.liveConversation : "Live Dashboard"}
         </h2>
 
@@ -200,11 +200,12 @@ export function MainDashboard({
           <button
             onClick={handleSaveClick}
             disabled={!canSave}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-6 py-3 rounded transition-all ${
               canSave
-                ? "bg-white text-black hover:bg-gray-200"
-                : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                ? "bg-accent hover:bg-[#ff7272] text-white hover-lift shadow-lg"
+                : "bg-[#2a2a2c] text-[#666] cursor-not-allowed"
             }`}
+            style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
             title={getButtonTitle()}
           >
             {isSaving ? (
@@ -226,9 +227,9 @@ export function MainDashboard({
       {!isLiveView && (
         <>
           {/* Call Header */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between pb-4 lg:pb-6 border-b border-gray-800 gap-4 lg:gap-0">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between pb-4 lg:pb-6 border-b border-[rgba(79,79,80,0.3)] gap-4 lg:gap-0">
             <div className="flex items-center gap-3 lg:gap-6">
-              <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-gray-700 to-gray-800 text-white rounded-xl flex items-center justify-center font-bold text-sm lg:text-lg border-2 border-gray-700 shadow-lg flex-shrink-0">
+              <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-accent to-accent-light text-white rounded-lg flex items-center justify-center font-light text-sm lg:text-lg shadow-lg flex-shrink-0 hover-scale" style={{ fontFamily: 'var(--font-heading)' }}>
                 {orderData?.customer_name
                   ? orderData.customer_name
                       .split(" ")
@@ -238,27 +239,26 @@ export function MainDashboard({
                   : "??"}
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="text-lg lg:text-2xl font-bold text-white mb-1 truncate">
+                <h2 className="text-lg lg:text-2xl font-light text-white mb-1 truncate" style={{ fontFamily: 'var(--font-heading)' }}>
                   {displayName}
                 </h2>
-                <p className="text-gray-400 font-medium text-sm lg:text-base truncate">
+                <p className="text-[#b0b0b0] text-sm lg:text-base truncate" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
                   {displayPhone}
                 </p>
               </div>
               <div
-                className={`px-3 py-1 lg:px-4 lg:py-2 rounded-lg text-xs lg:text-sm font-bold border ${getStatusBadge(
-                  "in-progress",
-                )} flex-shrink-0`}
+                className="px-3 py-1 lg:px-4 lg:py-2 rounded text-xs lg:text-sm font-medium border border-accent bg-accent/10 text-accent flex-shrink-0 animate-pulse-soft"
+                style={{ fontFamily: 'var(--font-body)' }}
               >
                 IN-PROGRESS
               </div>
             </div>
             <div className="flex items-center justify-end lg:gap-8">
               <div className="text-center">
-                <div className="text-xs lg:text-sm text-gray-500 mb-1">
+                <div className="text-xs lg:text-sm text-[#b0b0b0] mb-1 uppercase tracking-wide" style={{ fontFamily: 'var(--font-body)' }}>
                   {t.duration}
                 </div>
-                <div className="text-lg lg:text-xl font-bold font-mono text-white">
+                <div className="text-lg lg:text-xl font-light font-mono text-accent" style={{ fontFamily: 'var(--font-heading)' }}>
                   {formatDuration(callDuration)}
                 </div>
               </div>
@@ -283,31 +283,31 @@ export function MainDashboard({
 
       {/* Order Summary Card - Show only for dashboard view when there's order data */}
       {!isLiveView && orderData && (
-        <div className="bg-[#111111] border border-gray-800 rounded-xl p-4 lg:p-6">
-          <h3 className="text-base lg:text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        <div className="card-gradient rounded-lg p-4 lg:p-6 hover-lift">
+          <h3 className="text-base lg:text-lg font-light text-white mb-4 flex items-center gap-2" style={{ fontFamily: 'var(--font-heading)' }}>
+            <div className="w-2 h-2 bg-accent rounded-full animate-pulse-soft"></div>
             Current Order
           </h3>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Order Items */}
             <div>
-              <h4 className="text-sm text-gray-500 mb-2">Items</h4>
+              <h4 className="text-sm text-[#b0b0b0] mb-2 uppercase tracking-wide" style={{ fontFamily: 'var(--font-body)' }}>Items</h4>
               {orderData.order_items && orderData.order_items.length > 0 ? (
                 <div className="space-y-2">
                   {orderData.order_items.slice(0, 3).map((item, idx) => (
-                    <div key={idx} className="text-sm text-white">
+                    <div key={idx} className="text-sm text-white" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
                       {item.quantity || 1}x {item.item}
                     </div>
                   ))}
                   {orderData.order_items.length > 3 && (
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-[#c0c0c0]" style={{ fontFamily: 'var(--font-body)' }}>
                       +{orderData.order_items.length - 3} more items
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="text-sm text-gray-400 italic">
+                <div className="text-sm text-[#c0c0c0] italic" style={{ fontFamily: 'var(--font-body)' }}>
                   Extracting items...
                 </div>
               )}
@@ -315,19 +315,19 @@ export function MainDashboard({
 
             {/* Delivery Info */}
             <div>
-              <h4 className="text-sm text-gray-500 mb-2 flex items-center gap-1">
+              <h4 className="text-sm text-[#b0b0b0] mb-2 uppercase tracking-wide flex items-center gap-1" style={{ fontFamily: 'var(--font-body)' }}>
                 <MapPin className="w-3 h-3" />
                 Delivery
               </h4>
-              <div className="text-sm text-white">
+              <div className="text-sm text-white" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
                 {orderData.delivery_address || (
-                  <span className="text-gray-400 italic">
+                  <span className="text-[#c0c0c0] italic">
                     Extracting address...
                   </span>
                 )}
               </div>
               {orderData.delivery_time && (
-                <div className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                <div className="text-xs text-[#c0c0c0] mt-1 flex items-center gap-1" style={{ fontFamily: 'var(--font-body)' }}>
                   <Clock className="w-3 h-3" />
                   {orderData.delivery_time}
                 </div>
@@ -336,16 +336,16 @@ export function MainDashboard({
 
             {/* Total */}
             <div>
-              <h4 className="text-sm text-gray-500 mb-2">Total</h4>
-              <div className="text-xl font-bold text-green-400">
+              <h4 className="text-sm text-[#b0b0b0] mb-2 uppercase tracking-wide" style={{ fontFamily: 'var(--font-body)' }}>Total</h4>
+              <div className="text-xl font-light text-accent" style={{ fontFamily: 'var(--font-heading)' }}>
                 {orderData.total_price || (
-                  <span className="text-gray-400 italic text-base">
+                  <span className="text-[#c0c0c0] italic text-base">
                     Calculating...
                   </span>
                 )}
               </div>
               {orderData.payment_method && (
-                <div className="text-xs text-gray-400 mt-1 capitalize">
+                <div className="text-xs text-[#c0c0c0] mt-1 capitalize" style={{ fontFamily: 'var(--font-body)' }}>
                   {orderData.payment_method}
                 </div>
               )}
@@ -353,11 +353,11 @@ export function MainDashboard({
           </div>
 
           {orderData.special_instructions && (
-            <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-              <h4 className="text-yellow-400 font-semibold text-sm mb-1">
+            <div className="mt-4 p-3 bg-accent/10 border border-accent/30 rounded">
+              <h4 className="text-accent font-medium text-sm mb-1" style={{ fontFamily: 'var(--font-body)' }}>
                 Special Instructions
               </h4>
-              <p className="text-gray-200 text-sm">
+              <p className="text-white text-sm" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
                 {orderData.special_instructions}
               </p>
             </div>
@@ -386,20 +386,20 @@ export function MainDashboard({
       </div>
 
       {/* Mobile Save Button */}
-      <div className="lg:hidden flex items-center justify-center gap-3 pt-4 border-t border-gray-800">
+      <div className="lg:hidden flex items-center justify-center gap-3 pt-4 border-t border-[rgba(79,79,80,0.3)]">
         {lastSaveStatus && (
           <div className="flex items-center gap-2 text-sm">
             {lastSaveStatus.success ? (
               <>
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                <span className="text-green-400 text-xs">
+                <CheckCircle className="w-4 h-4 text-accent" />
+                <span className="text-accent text-xs" style={{ fontFamily: 'var(--font-body)' }}>
                   Saved {lastSaveStatus.timestamp.toLocaleTimeString()}
                 </span>
               </>
             ) : (
               <>
                 <AlertCircle className="w-4 h-4 text-red-500" />
-                <span className="text-red-400 text-xs">Save failed</span>
+                <span className="text-red-400 text-xs" style={{ fontFamily: 'var(--font-body)' }}>Save failed</span>
               </>
             )}
           </div>
@@ -408,11 +408,12 @@ export function MainDashboard({
         <button
           onClick={handleSaveClick}
           disabled={!canSave}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          className={`flex items-center gap-2 px-6 py-3 rounded text-sm transition-all ${
             canSave
-              ? "bg-white text-black hover:bg-gray-200"
-              : "bg-gray-600 text-gray-400 cursor-not-allowed"
+              ? "bg-accent hover:bg-[#ff7272] text-white shadow-lg"
+              : "bg-[#2a2a2c] text-[#666] cursor-not-allowed"
           }`}
+          style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
           title={getButtonTitle()}
         >
           {isSaving ? (

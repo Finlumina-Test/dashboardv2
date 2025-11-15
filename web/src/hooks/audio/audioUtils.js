@@ -189,10 +189,28 @@ export const playAudioHQ = async (
       float32Data[i] = Math.max(-1, Math.min(1, processedData[i] / 32768.0));
     }
 
-    // 🔥 CRITICAL FIX: Only enhance AI audio, leave caller audio clean
-    // Caller audio is already good quality from Twilio, enhancement causes crackling
+    // 🔥 CRITICAL FIX: Different processing for AI vs Caller audio
     const isAI = speaker === "AI" || speaker === "ai" || speaker === "assistant";
-    const finalData = isAI ? enhanceAudio(float32Data) : float32Data;
+
+    let finalData;
+    if (isAI) {
+      // AI audio needs full enhancement (normalization + soft clipping)
+      finalData = enhanceAudio(float32Data);
+    } else {
+      // Caller audio: Apply moderate gain boost WITHOUT aggressive processing
+      // This preserves quality while increasing volume
+      const callerGain = 2.5; // 2.5x volume boost for caller audio
+      finalData = new Float32Array(float32Data.length);
+      for (let i = 0; i < float32Data.length; i++) {
+        // Apply gain with gentle soft clipping to prevent distortion
+        let sample = float32Data[i] * callerGain;
+        // Gentle soft clipping only for peaks
+        if (Math.abs(sample) > 0.95) {
+          sample = Math.tanh(sample) * 0.98;
+        }
+        finalData[i] = Math.max(-1, Math.min(1, sample));
+      }
+    }
 
     // Create audio buffer with final data
     const buffer = audioCtxRef.current.createBuffer(
