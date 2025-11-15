@@ -4,6 +4,8 @@ A real-time multi-restaurant dashboard for managing voice calls, orders, and tra
 
 ![VOX Dashboard](https://ucarecdn.com/318a2f4a-0da5-416c-b58e-d4512d02da5e/-/format/auto/)
 
+> **Backend Integration**: This dashboard connects to the [Vox-OpenAI-Database](https://github.com/Finlumina-Test/Vox-OpenAI-Database) AI voice agent backend via WebSocket for real-time call management.
+
 ## Features
 
 - 🎙️ **Real-time Call Management** - Handle multiple concurrent calls with live audio streaming
@@ -182,7 +184,25 @@ The dashboard has four main views:
 
 ## Deployment
 
-### Production Build
+### 🚀 Deploy to Render (Recommended)
+
+This dashboard is optimized for [Render](https://render.com) deployment with automatic configuration.
+
+**Quick Deploy:**
+
+1. Fork/clone this repository
+2. Go to [Render Dashboard](https://dashboard.render.com/)
+3. Click "New +" → "Blueprint"
+4. Select this repository
+5. Click "Apply" - Render will auto-deploy using `render.yaml`
+
+**Your dashboard will be live at**: `https://vox-dashboard.onrender.com` (or your chosen name)
+
+📖 **For detailed deployment instructions, see**: [RENDER_DEPLOYMENT.md](./RENDER_DEPLOYMENT.md)
+
+📋 **For production setup and security**: [PRODUCTION_SETUP.md](./PRODUCTION_SETUP.md)
+
+### Production Build (Manual)
 
 ```bash
 npm run build
@@ -190,26 +210,21 @@ npm run build
 
 This creates a production-optimized build in the `build/` directory.
 
-### Running in Production
+### Running in Production (Manual)
 
 ```bash
 npm run start
 ```
 
-### Deploy to Vercel
+### Other Deployment Options
+
+#### Deploy to Vercel
 
 1. Install Vercel CLI: `npm i -g vercel`
 2. Run: `vercel`
 3. Follow prompts
 
-### Deploy to Render
-
-1. Connect your GitHub repository
-2. Set build command: `npm run build`
-3. Set start command: `npm run start`
-4. Deploy
-
-### Deploy to Railway
+#### Deploy to Railway
 
 1. Connect your GitHub repository
 2. Railway will auto-detect the configuration
@@ -219,7 +234,10 @@ npm run start
 
 Make sure to set these in your hosting platform:
 - `NODE_ENV=production`
+- `PORT=4000`
 - Any custom `NEXT_PUBLIC_*` variables you're using
+
+See [PRODUCTION_SETUP.md](./PRODUCTION_SETUP.md) for full environment configuration.
 
 ## Development
 
