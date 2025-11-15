@@ -15,3 +15,15 @@ declare module '@auth/create/react' {
 	import { SessionProvider } from '@auth/react';
 	export { SessionProvider };
 }
+
+// Allow importing .jsx files
+declare module '*.jsx' {
+	const content: any;
+	export default content;
+}
+
+// Allow importing .js files
+declare module '*.js' {
+	const content: any;
+	export default content;
+}
