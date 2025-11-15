@@ -69,9 +69,9 @@ export function HistoryPanel({ t, backendUrl, isConnected }) {
   }
 
   return (
-    <div className="p-4 lg:p-8">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 lg:mb-8 pb-4 lg:pb-6 border-b border-gray-800 gap-4 lg:gap-0">
-        <h2 className="text-xl lg:text-2xl font-bold text-white">
+    <div className="p-4 lg:p-8 animate-fadeInUp">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 lg:mb-8 pb-4 lg:pb-6 border-b border-[rgba(79,79,80,0.3)] gap-4 lg:gap-0">
+        <h2 className="text-xl lg:text-2xl font-light text-white" style={{ fontFamily: 'var(--font-heading)' }}>
           {t.history || "Call History"}
         </h2>
         <input
@@ -80,19 +80,20 @@ export function HistoryPanel({ t, backendUrl, isConnected }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           disabled={!isConnected}
-          className="w-full lg:w-auto px-4 py-2 bg-[#1a1a1a] border border-gray-800 rounded-lg text-white text-sm lg:text-base focus:outline-none focus:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full lg:w-auto px-4 py-2 bg-[#1b1c1e] border border-[rgba(79,79,80,0.3)] rounded text-white text-sm lg:text-base focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          style={{ fontFamily: 'var(--font-body)' }}
         />
       </div>
 
       {!isConnected && (
-        <div className="text-center py-12">
+        <div className="text-center py-12 animate-fadeInUp">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-            <div className="w-8 h-8 rounded-full bg-red-500"></div>
+            <div className="w-8 h-8 rounded-full bg-red-500 animate-pulse-soft"></div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-400 mb-2">
+          <h3 className="text-lg font-light text-[#b0b0b0] mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
             Server Not Connected
           </h3>
-          <p className="text-gray-600">
+          <p className="text-[#666]" style={{ fontFamily: 'var(--font-body)' }}>
             Call history will appear when connected to the server
           </p>
         </div>
@@ -124,35 +125,35 @@ function CallListView({
 }) {
   if (error) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-12 animate-fadeInUp">
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-          <div className="w-8 h-8 rounded-full bg-red-500"></div>
+          <div className="w-8 h-8 rounded-full bg-red-500 animate-pulse-soft"></div>
         </div>
-        <h3 className="text-lg font-semibold text-gray-400 mb-2">
+        <h3 className="text-lg font-light text-[#b0b0b0] mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
           Error Loading History
         </h3>
-        <p className="text-gray-600 text-sm max-w-md mx-auto">{error}</p>
+        <p className="text-[#666] text-sm max-w-md mx-auto" style={{ fontFamily: 'var(--font-body)' }}>{error}</p>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="text-center py-12">
-        <div className="w-8 h-8 border-2 border-gray-700 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-gray-500">Loading call history...</p>
+      <div className="text-center py-12 animate-fadeInUp">
+        <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>Loading call history...</p>
       </div>
     );
   }
 
   if (calls.length === 0) {
     return (
-      <div className="text-center py-12">
-        <Phone className="w-16 h-16 text-gray-800 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-400 mb-2">
+      <div className="text-center py-12 animate-fadeInUp">
+        <Phone className="w-16 h-16 text-accent mx-auto mb-4 animate-pulse-soft" />
+        <h3 className="text-lg font-light text-[#b0b0b0] mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
           {search ? "No calls found" : "No call history yet"}
         </h3>
-        <p className="text-gray-600">
+        <p className="text-[#666]" style={{ fontFamily: 'var(--font-body)' }}>
           {search
             ? "Try adjusting your search terms"
             : "Call history will appear here after your first call"}
@@ -163,7 +164,7 @@ function CallListView({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>
         {calls.length} call{calls.length !== 1 ? "s" : ""} found
       </p>
 
@@ -172,10 +173,10 @@ function CallListView({
           <div
             key={call.id}
             onClick={() => onSelectCall(call)}
-            className="bg-[#111111] border border-gray-800 rounded-xl p-4 lg:p-6 hover:border-gray-700 transition-colors cursor-pointer group"
+            className="card-gradient rounded-lg p-4 lg:p-6 hover:border-accent/50 transition-all cursor-pointer group hover-lift animate-fadeInUp"
           >
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl flex items-center justify-center text-white font-bold text-sm lg:text-base border border-gray-700 flex-shrink-0">
+              <div className="w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-accent to-accent-light rounded-lg flex items-center justify-center text-white font-light text-sm lg:text-base shadow-lg flex-shrink-0" style={{ fontFamily: 'var(--font-heading)' }}>
                 {call.customer_name
                   ? call.customer_name
                       .split(" ")
@@ -186,27 +187,27 @@ function CallListView({
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="text-white font-semibold text-base lg:text-lg truncate group-hover:text-blue-400 transition-colors">
+                <h3 className="text-white text-base lg:text-lg truncate group-hover:text-accent transition-colors" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
                   {call.customer_name || "Unknown Customer"}
                 </h3>
-                <p className="text-gray-400 text-sm truncate flex items-center gap-2">
+                <p className="text-[#b0b0b0] text-sm truncate flex items-center gap-2" style={{ fontFamily: 'var(--font-body)' }}>
                   <Phone className="w-3 h-3" />
                   {call.phone_number || "No phone number"}
                 </p>
               </div>
 
               <div className="text-right flex-shrink-0">
-                <div className="text-green-400 font-semibold text-lg">
+                <div className="text-accent font-light text-lg" style={{ fontFamily: 'var(--font-heading)' }}>
                   {call.total_price || "—"}
                 </div>
-                <div className="text-gray-500 text-sm flex items-center gap-1">
+                <div className="text-[#b0b0b0] text-sm flex items-center gap-1" style={{ fontFamily: 'var(--font-body)' }}>
                   <Clock className="w-3 h-3" />
                   {formatCallDuration(call.call_duration)}
                 </div>
                 {/* 🎵 QUICK AUDIO ACCESS */}
                 {call.audio_url && (
                   <div className="mt-2">
-                    <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
+                    <div className="inline-flex items-center gap-1 px-2 py-1 bg-accent text-white text-xs rounded-full shadow-lg">
                       <Play className="w-3 h-3" />🎵 Audio
                     </div>
                   </div>
@@ -216,31 +217,31 @@ function CallListView({
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
               <div>
-                <span className="text-gray-500">Date:</span>
-                <div className="text-gray-300 flex items-center gap-1">
+                <span className="text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>Date:</span>
+                <div className="text-white flex items-center gap-1" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
                   <Calendar className="w-3 h-3" />
                   {formatDate(call.call_date)}
                 </div>
               </div>
 
               <div>
-                <span className="text-gray-500">Items:</span>
-                <div className="text-gray-300 flex items-center gap-1">
+                <span className="text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>Items:</span>
+                <div className="text-white flex items-center gap-1" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
                   <Package className="w-3 h-3" />
                   {call.order_items ? call.order_items.length : 0}
                 </div>
               </div>
 
               <div>
-                <span className="text-gray-500">Payment:</span>
-                <div className="text-gray-300 capitalize">
+                <span className="text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>Payment:</span>
+                <div className="text-white capitalize" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
                   {call.payment_method || "—"}
                 </div>
               </div>
 
               <div>
-                <span className="text-gray-500">Status:</span>
-                <span className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-400">
+                <span className="text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>Status:</span>
+                <span className="px-2 py-1 rounded text-xs bg-accent/20 text-accent shadow-lg" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
                   Completed
                 </span>
               </div>
