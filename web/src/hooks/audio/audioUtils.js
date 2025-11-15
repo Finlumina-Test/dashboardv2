@@ -189,16 +189,18 @@ export const playAudioHQ = async (
       float32Data[i] = Math.max(-1, Math.min(1, processedData[i] / 32768.0));
     }
 
-    // 🔥 NEW: Apply audio enhancement for crystal-clear playback
-    const enhancedData = enhanceAudio(float32Data);
+    // 🔥 CRITICAL FIX: Only enhance AI audio, leave caller audio clean
+    // Caller audio is already good quality from Twilio, enhancement causes crackling
+    const isAI = speaker === "AI" || speaker === "ai" || speaker === "assistant";
+    const finalData = isAI ? enhanceAudio(float32Data) : float32Data;
 
-    // Create audio buffer with enhanced data
+    // Create audio buffer with final data
     const buffer = audioCtxRef.current.createBuffer(
       1,
-      enhancedData.length,
+      finalData.length,
       targetRate,
     );
-    buffer.getChannelData(0).set(enhancedData);
+    buffer.getChannelData(0).set(finalData);
 
     // 🔥 NEW: Create gain node for volume control
     const gainNode = audioCtxRef.current.createGain();

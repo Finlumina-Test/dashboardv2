@@ -137,7 +137,7 @@ export default function FinluminaVoxDashboard({ params }) {
             setCurrentView={setCurrentView}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            selectedCall={selectedCall}
+            selectedCall={multiCallSelectedCall} // 🔥 FIX: Use multiCallSelectedCall
             setSelectedCall={setSelectedCall}
             // 🔥 NEW: Multi-call props
             calls={calls}
@@ -249,7 +249,7 @@ export default function FinluminaVoxDashboard({ params }) {
           <MainContent
             t={t}
             currentView={currentView}
-            selectedCall={selectedCall}
+            selectedCall={multiCallSelectedCall} // 🔥 FIX: Use multiCallSelectedCall instead of old selectedCall
             callDuration={callDuration}
             handleTakeOver={takeOverCall}
             isTakenOver={isTakenOver}
@@ -285,7 +285,7 @@ export default function FinluminaVoxDashboard({ params }) {
           <div className="hidden lg:block">
             <RightSidebar
               t={t}
-              selectedCall={selectedCall}
+              selectedCall={multiCallSelectedCall} // 🔥 FIX: Use multiCallSelectedCall
               orderData={orderData}
             />
           </div>
