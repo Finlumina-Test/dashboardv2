@@ -16,30 +16,36 @@ if (globalThis.fetch) {
 
 // Recursively find all route.js files
 async function findRouteFiles(dir: string): Promise<string[]> {
-  const files = await readdir(dir);
-  let routes: string[] = [];
+  try {
+    const files = await readdir(dir);
+    let routes: string[] = [];
 
-  for (const file of files) {
-    try {
-      const filePath = join(dir, file);
-      const statResult = await stat(filePath);
+    for (const file of files) {
+      try {
+        const filePath = join(dir, file);
+        const statResult = await stat(filePath);
 
-      if (statResult.isDirectory()) {
-        routes = routes.concat(await findRouteFiles(filePath));
-      } else if (file === 'route.js') {
-        // Handle root route.js specially
-        if (filePath === join(__dirname, 'route.js')) {
-          routes.unshift(filePath); // Add to beginning of array
-        } else {
-          routes.push(filePath);
+        if (statResult.isDirectory()) {
+          routes = routes.concat(await findRouteFiles(filePath));
+        } else if (file === 'route.js') {
+          // Handle root route.js specially
+          if (filePath === join(__dirname, 'route.js')) {
+            routes.unshift(filePath); // Add to beginning of array
+          } else {
+            routes.push(filePath);
+          }
         }
+      } catch (error) {
+        console.error(`Error reading file ${file}:`, error);
       }
-    } catch (error) {
-      console.error(`Error reading file ${file}:`, error);
     }
-  }
 
-  return routes;
+    return routes;
+  } catch (error) {
+    // Directory doesn't exist in production build - return empty array
+    console.log('API routes directory not found, skipping API route registration');
+    return [];
+  }
 }
 
 // Helper function to transform file path to Hono route path

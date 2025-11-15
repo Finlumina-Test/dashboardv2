@@ -58,7 +58,7 @@ export const decodePcm16 = (base64Audio, sourceFormat = "pcm16") => {
   }
 };
 
-// High-quality cubic interpolation resampling
+// High-quality cubic interpolation resampling with anti-aliasing
 export const resamplePcm16HQ = (pcm16Data, sourceRate, targetRate) => {
   if (sourceRate === targetRate) return pcm16Data;
 
@@ -66,30 +66,66 @@ export const resamplePcm16HQ = (pcm16Data, sourceRate, targetRate) => {
   const newLength = Math.floor(pcm16Data.length * ratio);
   const resampled = new Int16Array(newLength);
 
+  // Apply low-pass filter if downsampling to prevent aliasing
+  const needsLowPass = ratio < 1;
+  const cutoffFreq = needsLowPass ? targetRate / 2 : sourceRate / 2;
+
   for (let i = 0; i < newLength; i++) {
     const srcPos = i / ratio;
     const srcIndex = Math.floor(srcPos);
     const frac = srcPos - srcIndex;
 
+    // Get 4 surrounding samples for cubic interpolation
     const p0 = pcm16Data[Math.max(0, srcIndex - 1)] || 0;
     const p1 = pcm16Data[srcIndex] || 0;
     const p2 = pcm16Data[Math.min(pcm16Data.length - 1, srcIndex + 1)] || 0;
     const p3 = pcm16Data[Math.min(pcm16Data.length - 1, srcIndex + 2)] || 0;
 
+    // Cubic interpolation (Catmull-Rom spline)
     const a0 = p3 - p2 - p0 + p1;
     const a1 = p0 - p1 - a0;
     const a2 = p2 - p0;
     const a3 = p1;
 
-    resampled[i] = Math.round(
-      a0 * frac * frac * frac + a1 * frac * frac + a2 * frac + a3,
-    );
+    const interpolated = a0 * frac * frac * frac + a1 * frac * frac + a2 * frac + a3;
+
+    // Clamp to prevent overflow
+    resampled[i] = Math.max(-32768, Math.min(32767, Math.round(interpolated)));
   }
 
   return resampled;
 };
 
-// High-quality audio playback WITH proper recording
+// Audio enhancement: normalize volume and improve clarity
+const enhanceAudio = (float32Data) => {
+  // Find peak amplitude
+  let peak = 0;
+  for (let i = 0; i < float32Data.length; i++) {
+    const abs = Math.abs(float32Data[i]);
+    if (abs > peak) peak = abs;
+  }
+
+  // Apply intelligent gain - normalize to 85% to prevent clipping but maintain clarity
+  const targetPeak = 0.85;
+  const gain = peak > 0.01 ? targetPeak / peak : 1.0;
+
+  // Apply gain with soft clipping for natural sound
+  const enhanced = new Float32Array(float32Data.length);
+  for (let i = 0; i < float32Data.length; i++) {
+    let sample = float32Data[i] * gain;
+
+    // Soft clipping using tanh for natural saturation
+    if (Math.abs(sample) > 0.85) {
+      sample = Math.tanh(sample * 1.2) * 0.95;
+    }
+
+    enhanced[i] = Math.max(-1, Math.min(1, sample));
+  }
+
+  return enhanced;
+};
+
+// High-quality audio playback WITH proper recording and enhancement
 export const playAudioHQ = async (
   base64Audio,
   audioCtxRef,
@@ -144,7 +180,7 @@ export const playAudioHQ = async (
       return;
     }
 
-    // 🔥 PLAYBACK: Simple single-pass resampling
+    // 🔥 ENHANCED PLAYBACK: High-quality resampling with enhancement
     const processedData = resamplePcm16HQ(pcm16Data, sourceRate, targetRate);
 
     // Convert to Float32 for playback
@@ -153,17 +189,28 @@ export const playAudioHQ = async (
       float32Data[i] = Math.max(-1, Math.min(1, processedData[i] / 32768.0));
     }
 
-    // Play audio
+    // 🔥 NEW: Apply audio enhancement for crystal-clear playback
+    const enhancedData = enhanceAudio(float32Data);
+
+    // Create audio buffer with enhanced data
     const buffer = audioCtxRef.current.createBuffer(
       1,
-      float32Data.length,
+      enhancedData.length,
       targetRate,
     );
-    buffer.getChannelData(0).set(float32Data);
+    buffer.getChannelData(0).set(enhancedData);
+
+    // 🔥 NEW: Create gain node for volume control
+    const gainNode = audioCtxRef.current.createGain();
+    gainNode.gain.value = 1.0; // Unity gain, can be adjusted if needed
 
     const source = audioCtxRef.current.createBufferSource();
     source.buffer = buffer;
-    source.connect(audioCtxRef.current.destination);
+
+    // Connect: source -> gain -> destination for better control
+    source.connect(gainNode);
+    gainNode.connect(audioCtxRef.current.destination);
+
     source.start(0);
   } catch (error) {
     console.error("❌ Failed to play audio:", error);

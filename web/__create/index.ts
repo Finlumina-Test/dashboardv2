@@ -72,6 +72,15 @@ if (process.env.CORS_ORIGINS) {
   );
 }
 
+// Health check endpoint for monitoring and load balancers
+app.get('/health', (c) => {
+  return c.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
 if (process.env.AUTH_SECRET) {
   app.use(
     '*',
