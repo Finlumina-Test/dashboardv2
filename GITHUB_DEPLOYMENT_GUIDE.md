@@ -110,7 +110,7 @@ If you prefer manual setup:
    Branch: main
    Root Directory: web
    Runtime: Node
-   Build Command: npm install --legacy-peer-deps && npm run build
+   Build Command: npm install --legacy-peer-deps --include=dev && npm run build
    Start Command: npm run start
    ```
 5. Add Environment Variables:

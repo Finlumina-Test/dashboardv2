@@ -6,7 +6,7 @@ services:
     region: oregon # Change to your preferred region (oregon, frankfurt, singapore, etc.)
     plan: starter # Options: 'free' for testing, 'starter' ($7/mo) for production
     rootDir: web
-    buildCommand: npm install --legacy-peer-deps && npm run build
+    buildCommand: npm install --legacy-peer-deps --include=dev && npm run build
     startCommand: npm run start
     envVars:
       - key: NODE_ENV

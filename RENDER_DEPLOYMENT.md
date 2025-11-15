@@ -43,7 +43,7 @@ This guide will help you deploy the VOX Dashboard to Render.com for production u
    Branch: main (or your production branch)
    Root Directory: web
    Runtime: Node
-   Build Command: npm install --legacy-peer-deps && npm run build
+   Build Command: npm install --legacy-peer-deps --include=dev && npm run build
    Start Command: npm run start
    ```
 
@@ -218,8 +218,8 @@ When you push to your repository:
 
 **Error: peer dependency conflicts**
 ```bash
-Solution: Ensure build command uses --legacy-peer-deps flag
-Build Command: npm install --legacy-peer-deps && npm run build
+Solution: Ensure build command uses --legacy-peer-deps and --include=dev flags
+Build Command: npm install --legacy-peer-deps --include=dev && npm run build
 ```
 
 **Error: Out of memory**
