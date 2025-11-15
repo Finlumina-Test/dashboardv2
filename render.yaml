@@ -4,14 +4,14 @@ services:
     name: vox-dashboard
     runtime: node
     region: oregon # Change to your preferred region (oregon, frankfurt, singapore, etc.)
-    plan: free # Options: 'free' for testing, 'starter' ($7/mo) for production
+    plan: starter # Options: 'free' for testing, 'starter' ($7/mo) for production
     rootDir: web
     buildCommand: npm install --legacy-peer-deps --include=dev && npm run build
-    startCommand: npm run start
+    startCommand: node --trace-warnings server.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 4000
+        value: 10000
     healthCheckPath: /health
     autoDeploy: true
