@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { initAudioContext } from "./audio/audioUtils";
+import { initAudioContext, playAudioHQ } from "./audio/audioUtils";
 import { uploadCallAudio } from "./audio/audioRecording";
 import {
   takeOverCall as takeover,
@@ -523,40 +523,24 @@ export function useMultiCallWebSocket(restaurantId) {
         data.sample_rate ||
         (format === "pcm16" ? 24000 : 8000);
 
+      const audioId =
+        data.id ||
+        data.audioId ||
+        `audio_${data.timestamp || Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // 🔥 USE PROPER AUDIO PLAYBACK with full mulaw support
       try {
-        // Convert base64 to array buffer
-        const binaryString = atob(base64Audio);
-        const len = binaryString.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-
-        // Create audio buffer and play it
-        if (format === "pcm16") {
-          // PCM16 format
-          const samples = new Int16Array(bytes.buffer);
-          const audioBuffer = audioCtxRef.current.createBuffer(
-            1,
-            samples.length,
-            sampleRate,
-          );
-          const channelData = audioBuffer.getChannelData(0);
-
-          for (let i = 0; i < samples.length; i++) {
-            channelData[i] = samples[i] / 32768.0; // Convert to float
-          }
-
-          const source = audioCtxRef.current.createBufferSource();
-          source.buffer = audioBuffer;
-          source.connect(audioCtxRef.current.destination);
-          source.start();
-
-          console.log(`✅ Audio played successfully for call ${callId}`);
-        } else {
-          // μ-law format (fallback)
-          console.warn("μ-law audio format not fully implemented for playback");
-        }
+        playAudioHQ(
+          base64Audio,
+          audioCtxRef,
+          { current: call.audioChunks },
+          { current: true }, // callSessionActive
+          format,
+          sampleRate,
+          speaker,
+          audioId,
+          false // not muted (already checked above)
+        );
       } catch (audioError) {
         console.error("❌ Audio playback error:", audioError);
       }
