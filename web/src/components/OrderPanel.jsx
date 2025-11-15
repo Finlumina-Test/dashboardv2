@@ -84,13 +84,13 @@ export function OrderPanel({
     isConnected && orderData ? orderData : selectedHistoryCall;
 
   return (
-    <div className="flex flex-col lg:flex-row h-full">
+    <div className="flex flex-col lg:flex-row h-full animate-fadeInUp">
       {/* Left Panel - Call History */}
-      <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-gray-800 bg-[#111111]">
-        <div className="p-4 lg:p-6 border-b border-gray-800">
+      <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-[rgba(79,79,80,0.3)] bg-[#1b1c1e]">
+        <div className="p-4 lg:p-6 border-b border-[rgba(79,79,80,0.3)]">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 gap-3 lg:gap-0">
-            <h2 className="text-lg lg:text-xl font-bold text-white flex items-center gap-2">
-              <History className="w-4 h-4 lg:w-5 lg:h-5" />
+            <h2 className="text-lg lg:text-xl font-light text-white flex items-center gap-2" style={{ fontFamily: 'var(--font-heading)' }}>
+              <History className="w-4 h-4 lg:w-5 lg:h-5 text-accent" />
               Order History
             </h2>
 
@@ -101,8 +101,8 @@ export function OrderPanel({
                 <div className="flex items-center gap-2 text-sm">
                   {lastSaveStatus.success ? (
                     <>
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span className="text-green-400 text-xs">
+                      <CheckCircle className="w-4 h-4 text-accent" />
+                      <span className="text-accent text-xs" style={{ fontFamily: 'var(--font-body)' }}>
                         Saved{" "}
                         {lastSaveStatus.timestamp
                           ? new Date(
@@ -114,7 +114,7 @@ export function OrderPanel({
                   ) : (
                     <>
                       <AlertCircle className="w-4 h-4 text-red-500" />
-                      <span className="text-red-400 text-xs">Save failed</span>
+                      <span className="text-red-400 text-xs" style={{ fontFamily: 'var(--font-body)' }}>Save failed</span>
                     </>
                   )}
                 </div>
@@ -124,11 +124,12 @@ export function OrderPanel({
               <button
                 onClick={manualSaveCall}
                 disabled={!canSave}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-all shadow-lg ${
                   canSave
-                    ? "bg-white text-black hover:bg-gray-200"
-                    : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    ? "bg-accent text-white hover:bg-[#ff7272]"
+                    : "bg-[#2a2a2c] text-[#666] cursor-not-allowed"
                 }`}
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
                 title={
                   !isConnected
                     ? "Not connected"
