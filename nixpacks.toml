@@ -2,14 +2,13 @@
 nixPkgs = ["nodejs-20_x"]
 
 [phases.install]
-cmds = ["cd web && npm install --legacy-peer-deps"]
+cmds = ["npm install --legacy-peer-deps --include=dev"]
 
 [phases.build]
-cmds = ["cd web && npm run build"]
+cmds = ["npm run build"]
 
 [start]
-cmd = "cd web && npm run start"
+cmd = "npm run start"
 
-[variables]
-NODE_ENV = "production"
-PORT = "4000"
+[build]
+workingDir = "web"
