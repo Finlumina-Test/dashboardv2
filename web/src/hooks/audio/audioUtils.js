@@ -224,23 +224,59 @@ export const initAudioContext = async (
   setError,
 ) => {
   try {
+    console.log("🔊 Initializing audio context...");
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
     if (!audioCtxRef.current) {
       audioCtxRef.current = new AudioContextClass({
         sampleRate: 48000,
         latencyHint: "interactive",
       });
+      console.log(`🔊 Audio context created (sample rate: ${audioCtxRef.current.sampleRate}Hz)`);
     }
 
     if (audioCtxRef.current.state === "suspended") {
+      console.log("🔊 Resuming suspended audio context...");
       await audioCtxRef.current.resume();
     }
 
+    console.log(`✅ Audio context ready! State: ${audioCtxRef.current.state}`);
     setAudioEnabled(true);
+
+    // Play a short beep to confirm audio is working
+    playTestBeep(audioCtxRef);
+
     return true;
   } catch (error) {
     console.error("❌ Failed to initialize audio context:", error);
-    setError("Audio initialization failed");
+    setError("Audio initialization failed - check browser permissions");
     return false;
+  }
+};
+
+// Play a test beep to confirm audio is working
+export const playTestBeep = (audioCtxRef) => {
+  try {
+    if (!audioCtxRef.current || audioCtxRef.current.state !== "running") {
+      console.warn("⚠️ Cannot play test beep - audio context not running");
+      return;
+    }
+
+    console.log("🔔 Playing test beep...");
+    const oscillator = audioCtxRef.current.createOscillator();
+    const gainNode = audioCtxRef.current.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtxRef.current.destination);
+
+    oscillator.frequency.value = 800; // 800Hz beep
+    gainNode.gain.value = 0.1; // Quiet beep
+
+    oscillator.start(audioCtxRef.current.currentTime);
+    oscillator.stop(audioCtxRef.current.currentTime + 0.1); // 100ms beep
+
+    console.log("✅ Test beep played");
+  } catch (error) {
+    console.error("❌ Failed to play test beep:", error);
   }
 };

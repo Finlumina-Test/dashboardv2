@@ -183,6 +183,12 @@ export const handleWebSocketMessage = (
         audioCtxRef.current && audioCtxRef.current.state === "running";
 
       if (!audioReady) {
+        // Log audio context issues (throttled to avoid spam)
+        if (!audioCtxRef.current) {
+          console.warn("⚠️ Audio context not initialized - click 'Enable Audio' button");
+        } else if (audioCtxRef.current.state !== "running") {
+          console.warn(`⚠️ Audio context state: ${audioCtxRef.current.state} - user interaction required`);
+        }
         return;
       }
 

@@ -57,7 +57,8 @@ export function useMultiCallWebSocket(restaurantId) {
 
   // 🔥 NEW: Initialize a new call
   const initializeCall = (callId) => {
-    console.log(`📞 Initializing new call: ${callId}`);
+    console.log(`📞 ===== NEW CALL STARTED =====`);
+    console.log(`📞 Call ID: ${callId}`);
 
     setCalls((prev) => ({
       ...prev,
@@ -329,15 +330,19 @@ export function useMultiCallWebSocket(restaurantId) {
       );
       wsUrl.searchParams.append("audio_format", "pcm16");
       wsUrl.searchParams.append("sample_rate", "24000");
+      wsUrl.searchParams.append("restaurant_id", restaurantId); // 🔥 FIX: Add restaurant ID
 
+      console.log(`🔌 Connecting to WebSocket: ${wsUrl.toString()}`);
       const ws = new WebSocket(wsUrl.toString());
       wsRef.current = ws;
 
       ws.onopen = async () => {
-        console.log("✅ WebSocket CONNECTED");
+        console.log("✅ WebSocket CONNECTED to dashboard stream");
+        console.log(`🏪 Restaurant: ${restaurantId}`);
+        console.log(`🔗 URL: ${wsUrl.toString()}`);
         setIsConnected(true);
         setError(null);
-        await initAudioContext(audioCtxRef, setAudioEnabled, setError);
+        // Note: Audio context initialization requires user gesture - use "Enable Audio" button
         callSessionActiveRef.current = true;
       };
 
@@ -386,18 +391,21 @@ export function useMultiCallWebSocket(restaurantId) {
       };
 
       ws.onclose = async (event) => {
-        console.log("🔴 WebSocket CLOSED");
+        console.log("🔴 WebSocket DISCONNECTED");
+        console.log(`   Code: ${event.code}, Reason: ${event.reason || "none"}, Clean: ${event.wasClean}`);
         setIsConnected(false);
         callSessionActiveRef.current = false;
 
         if (event.code !== 1000) {
+          console.log("🔄 Will attempt reconnect in 3 seconds...");
           reconnectTimeoutRef.current = setTimeout(() => connect(), 3000);
         }
       };
 
       ws.onerror = (error) => {
-        console.error("❌ WebSocket error:", error);
-        setError("Connection error occurred");
+        console.error("❌ WebSocket ERROR:", error);
+        console.error("   This usually means network issues or backend is down");
+        setError("Connection error - check network and backend status");
         setIsConnected(false);
       };
     } catch (connectError) {
