@@ -46,25 +46,25 @@ export function AudioWaveform({ t, audioActivity = 0 }) {
   }, [audioActivity]);
 
   return (
-    <div className="bg-gradient-to-br from-[#111111] to-[#0a0a0a] border border-gray-800 rounded-2xl p-4 lg:p-8 mb-4 lg:mb-8 shadow-2xl">
+    <div className="card-gradient rounded-lg p-4 lg:p-8 mb-4 lg:mb-8 shadow-lg hover-lift">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 lg:mb-6 gap-3 lg:gap-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-white to-gray-200 rounded-xl flex items-center justify-center shadow-lg">
-            <Mic className="w-4 h-4 lg:w-5 lg:h-5 text-black" />
+          <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-accent to-accent-light rounded-lg flex items-center justify-center shadow-lg">
+            <Mic className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
           </div>
           <div>
-            <h3 className="text-base lg:text-lg font-bold text-white">
+            <h3 className="text-base lg:text-lg font-light text-white" style={{ fontFamily: 'var(--font-heading)' }}>
               Audio Monitor
             </h3>
-            <p className="text-xs text-gray-400">Real-time voice activity</p>
+            <p className="text-xs text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>Real-time voice activity</p>
           </div>
         </div>
         <div className="flex items-center gap-2 lg:gap-4">
           <div className="flex items-center gap-2">
-            <Volume2 className="w-3 h-3 lg:w-4 lg:h-4 text-gray-400" />
-            <div className="w-16 lg:w-20 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+            <Volume2 className="w-3 h-3 lg:w-4 lg:h-4 text-[#b0b0b0]" />
+            <div className="w-16 lg:w-20 h-1.5 bg-[#2a2a2c] rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-green-500 to-blue-500 rounded-full transition-all duration-200 ease-out"
+                className="h-full bg-gradient-to-r from-accent to-accent-light rounded-full transition-all duration-200 ease-out"
                 style={{ width: `${Math.min(100, audioActivity * 1.2)}%` }}
               ></div>
             </div>
@@ -73,11 +73,11 @@ export function AudioWaveform({ t, audioActivity = 0 }) {
             <div
               className={`w-2 h-2 rounded-full shadow-lg transition-all duration-200 ${
                 audioActivity > 10
-                  ? "bg-green-400 shadow-green-400/50 animate-pulse"
-                  : "bg-gray-600 shadow-gray-600/50"
+                  ? "bg-accent shadow-accent/50 animate-pulse-soft"
+                  : "bg-[#666] shadow-[#666]/50"
               }`}
             ></div>
-            <span className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+            <span className="text-xs text-[#b0b0b0] uppercase tracking-wide" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
               {audioActivity > 10 ? "LIVE" : "IDLE"}
             </span>
           </div>
@@ -85,9 +85,9 @@ export function AudioWaveform({ t, audioActivity = 0 }) {
       </div>
 
       {/* Modern Waveform Display */}
-      <div className="relative h-20 lg:h-28 flex items-end justify-center gap-0.5 bg-black/50 rounded-xl p-3 lg:p-6 border border-gray-700/50 backdrop-blur-sm overflow-hidden">
+      <div className="relative h-20 lg:h-28 flex items-end justify-center gap-0.5 bg-[#141416] rounded-lg p-3 lg:p-6 border border-[rgba(79,79,80,0.3)] backdrop-blur-sm overflow-hidden">
         {/* Background grid effect */}
-        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-transparent pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-accent/5 to-transparent pointer-events-none"></div>
 
         {waveformBars.map((height, i) => {
           const normalizedIndex = i / waveformBars.length;
@@ -103,17 +103,17 @@ export function AudioWaveform({ t, audioActivity = 0 }) {
                 height: `${height}px`,
                 width: "2px",
                 background: isCenter
-                  ? `linear-gradient(to top, 
-                      ${audioActivity > 20 ? "#10b981" : "#3b82f6"} 0%, 
-                      ${audioActivity > 20 ? "#34d399" : "#60a5fa"} 50%, 
-                      ${audioActivity > 20 ? "#6ee7b7" : "#93c5fd"} 100%)`
-                  : `linear-gradient(to top, 
-                      #374151 0%, 
-                      #6b7280 50%, 
-                      #9ca3af 100%)`,
+                  ? `linear-gradient(to top,
+                      ${audioActivity > 20 ? "#FD6262" : "#FEB0B0"} 0%,
+                      ${audioActivity > 20 ? "#ff7272" : "#FD6262"} 50%,
+                      ${audioActivity > 20 ? "#ff8989" : "#ff7272"} 100%)`
+                  : `linear-gradient(to top,
+                      #3a3d50 0%,
+                      #4a4d60 50%,
+                      #5a5d70 100%)`,
                 boxShadow:
                   isCenter && audioActivity > 10
-                    ? `0 0 10px ${audioActivity > 20 ? "#10b981" : "#3b82f6"}40`
+                    ? `0 0 10px ${audioActivity > 20 ? "#FD6262" : "#FEB0B0"}40`
                     : "none",
                 transform:
                   audioActivity > 0 && isCenter ? "scaleY(1.1)" : "scaleY(1)",
@@ -124,15 +124,15 @@ export function AudioWaveform({ t, audioActivity = 0 }) {
 
         {/* Center glow effect */}
         {audioActivity > 15 && (
-          <div className="absolute inset-0 bg-gradient-radial from-green-400/10 via-transparent to-transparent rounded-xl pointer-events-none animate-pulse"></div>
+          <div className="absolute inset-0 bg-gradient-radial from-accent/10 via-transparent to-transparent rounded-lg pointer-events-none animate-pulse-soft"></div>
         )}
       </div>
 
       {/* Audio Level Indicator */}
-      <div className="mt-3 lg:mt-4 flex items-center justify-between text-xs text-gray-500">
+      <div className="mt-3 lg:mt-4 flex items-center justify-between text-xs text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>
         <span>Voice Level:</span>
         <span
-          className={`font-mono ${audioActivity > 20 ? "text-green-400" : "text-gray-400"}`}
+          className={`font-mono ${audioActivity > 20 ? "text-accent" : "text-[#b0b0b0]"}`}
         >
           {Math.round(audioActivity)}dB
         </span>
