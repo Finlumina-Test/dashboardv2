@@ -244,7 +244,9 @@ app.use('/api/auth/*', async (c, next) => {
 });
 app.route(API_BASENAME, api);
 
-export default await createHonoServer({
+export default createHonoServer({
   app,
   defaultLogger: false,
+  port: parseInt(process.env.PORT || '3000', 10),
+  hostname: '0.0.0.0',
 });

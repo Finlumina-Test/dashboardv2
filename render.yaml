@@ -7,7 +7,7 @@ services:
     plan: starter # Options: 'free' for testing, 'starter' ($7/mo) for production
     rootDir: web
     buildCommand: npm install --legacy-peer-deps --include=dev && npm run build
-    startCommand: node --trace-warnings server.js
+    startCommand: node ./build/server/index.js
     envVars:
       - key: NODE_ENV
         value: production
