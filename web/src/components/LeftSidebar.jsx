@@ -93,21 +93,21 @@ export function LeftSidebar({
   };
 
   return (
-    <div className="w-80 bg-[#111111] border-r border-gray-800 flex flex-col h-screen">
-      <div className="bg-[#0a0a0a] border-b border-gray-800 p-6">
+    <div className="w-80 bg-[#1b1c1e] border-r border-[rgba(79,79,80,0.3)] flex flex-col h-screen">
+      <div className="card-gradient border-b border-[rgba(79,79,80,0.3)] p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             {/* Vox logo image - increased size */}
             <img
               src="https://ucarecdn.com/318a2f4a-0da5-416c-b58e-d4512d02da5e/-/format/auto/"
               alt="Vox Logo"
-              className="w-16 h-16 object-contain rounded-lg"
+              className="w-16 h-16 object-contain rounded-lg hover-scale"
             />
             <div>
-              <h1 className="text-xl font-bold text-white tracking-wide">
+              <h1 className="text-xl font-light text-white tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>
                 VOX
               </h1>
-              <div className="text-xs text-gray-400 font-medium tracking-widest uppercase">
+              <div className="text-xs text-[#b0b0b0] tracking-widest uppercase" style={{ fontFamily: 'var(--font-body)' }}>
                 {backendUrl
                   ? `${backendUrl.toUpperCase()} DASHBOARD`
                   : "DASHBOARD"}
@@ -117,17 +117,17 @@ export function LeftSidebar({
           <div className="flex items-center gap-3">
             <button
               onClick={toggleLanguage}
-              className="p-2 bg-[#1a1a1a] hover:bg-[#222222] rounded-lg transition-all border border-gray-800"
+              className="p-2 bg-[#1b1c1e] hover:bg-[#2a2a2c] rounded transition-all border border-[rgba(79,79,80,0.3)] hover-scale"
               title={
                 language === "english" ? "Switch to Urdu" : "Switch to English"
               }
             >
-              <Globe className="w-4 h-4 text-gray-400 hover:text-white" />
+              <Globe className="w-4 h-4 text-[#b0b0b0] hover:text-accent" />
             </button>
             {onLogout && (
               <button
                 onClick={onLogout}
-                className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-all"
+                className="p-2 bg-red-600 hover:bg-red-700 rounded transition-all hover-scale"
                 title="Logout"
               >
                 <LogOut className="w-4 h-4 text-white" />
@@ -136,28 +136,30 @@ export function LeftSidebar({
           </div>
         </div>
 
-        <div className="text-xs text-gray-500 mb-4 text-center">
+        <div className="text-xs text-[#b0b0b0] mb-4 text-center" style={{ fontFamily: 'var(--font-body)' }}>
           {language === "english" ? "English" : "Roman Urdu"}
         </div>
 
         <div className="flex gap-2 mb-4">
           <button
             onClick={() => setCurrentView("dashboard")}
-            className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`flex-1 px-3 py-2 rounded text-sm transition-all ${
               currentView === "dashboard"
-                ? "bg-white text-black"
-                : "bg-[#1a1a1a] text-gray-400 hover:bg-[#222222] hover:text-white"
+                ? "bg-accent text-white shadow-lg"
+                : "bg-[#1b1c1e] text-[#b0b0b0] hover:bg-[#2a2a2c] hover:text-white border border-[rgba(79,79,80,0.3)]"
             }`}
+            style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
           >
             Dashboard
           </button>
           <button
             onClick={() => setCurrentView("pos")}
-            className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 justify-center ${
+            className={`flex-1 px-3 py-2 rounded text-sm transition-all flex items-center gap-2 justify-center ${
               currentView === "pos"
-                ? "bg-white text-black"
-                : "bg-[#1a1a1a] text-gray-400 hover:bg-[#222222] hover:text-white"
+                ? "bg-accent text-white shadow-lg"
+                : "bg-[#1b1c1e] text-[#b0b0b0] hover:bg-[#2a2a2c] hover:text-white border border-[rgba(79,79,80,0.3)]"
             }`}
+            style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
           >
             <ShoppingCart className="w-4 h-4" />
             POS & History
@@ -166,13 +168,14 @@ export function LeftSidebar({
 
         {currentView === "dashboard" && (
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#b0b0b0]" />
             <input
               type="text"
               placeholder={t.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg pl-10 pr-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all"
+              className="w-full bg-[#1b1c1e] border border-[rgba(79,79,80,0.3)] rounded pl-10 pr-4 py-3 text-sm text-white placeholder-[#666] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
+              style={{ fontFamily: 'var(--font-body)' }}
             />
           </div>
         )}
@@ -181,24 +184,25 @@ export function LeftSidebar({
       {currentView === "dashboard" && (
         <div className="p-6 flex-1 flex flex-col">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+            <h3 className="text-sm text-[#b0b0b0] uppercase tracking-wider" style={{ fontFamily: 'var(--font-body)' }}>
               {t.activeCalls}
             </h3>
             <span
-              className={`text-xs px-3 py-1 rounded-full font-bold ${
+              className={`text-xs px-3 py-1 rounded-full ${
                 filteredCalls.length > 0
-                  ? "bg-[#FF4444] text-white animate-pulse"
-                  : "bg-gray-800 text-gray-500"
+                  ? "bg-accent text-white animate-pulse-soft"
+                  : "bg-[#2a2a2c] text-[#666]"
               }`}
+              style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
             >
               {filteredCalls.length}
             </span>
           </div>
 
           {filteredCalls.length === 0 ? (
-            <div className="text-center py-12 flex-1 flex flex-col justify-center">
-              <PhoneCall className="w-12 h-12 text-gray-700 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">
+            <div className="text-center py-12 flex-1 flex flex-col justify-center animate-fadeInUp">
+              <PhoneCall className="w-12 h-12 text-accent mx-auto mb-3 animate-pulse-soft" />
+              <p className="text-sm text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>
                 {isConnected
                   ? "Waiting for calls..."
                   : "Connecting to server..."}
@@ -210,33 +214,33 @@ export function LeftSidebar({
                 <div
                   key={call.id}
                   onClick={() => handleCallClick(call)}
-                  className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                  className={`p-4 rounded border cursor-pointer transition-all duration-200 ${
                     call.isSelected
-                      ? "bg-[#1a1a1a] border-white shadow-lg shadow-white/10"
-                      : "bg-[#151515] border-gray-800 hover:border-gray-700 hover:bg-[#1a1a1a]"
+                      ? "card-gradient border-accent shadow-lg shadow-accent/20"
+                      : "bg-[#1b1c1e] border-[rgba(79,79,80,0.3)] hover:border-accent/50 hover:bg-[#2a2a2c]"
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-800 text-white rounded-lg flex items-center justify-center text-sm font-bold border border-gray-700">
+                    <div className="w-10 h-10 bg-gradient-to-br from-accent to-accent-light text-white rounded flex items-center justify-center text-sm font-light shadow-lg" style={{ fontFamily: 'var(--font-heading)' }}>
                       {call.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-sm text-white truncate">
+                      <div className="text-sm text-white truncate" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
                         {call.callerName}
                       </div>
-                      <div className="text-xs text-gray-500 truncate">
+                      <div className="text-xs text-[#b0b0b0] truncate" style={{ fontFamily: 'var(--font-body)' }}>
                         {call.phoneNumber}
                       </div>
                     </div>
-                    <div className="w-3 h-3 rounded-full bg-green-500 shadow-lg animate-pulse"></div>
+                    <div className="w-3 h-3 rounded-full bg-accent shadow-lg animate-pulse-soft"></div>
                   </div>
 
                   <div className="flex items-center justify-between text-xs mb-3">
-                    <span className="flex items-center gap-1 text-gray-400">
+                    <span className="flex items-center gap-1 text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>
                       <Clock className="w-3 h-3" />
                       {call.duration}
                     </span>
-                    <span className="text-xs px-2 py-1 rounded bg-green-500/20 text-green-400 font-bold">
+                    <span className="text-xs px-2 py-1 rounded bg-accent/20 text-accent" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
                       LIVE
                     </span>
                   </div>
