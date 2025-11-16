@@ -1,12 +1,216 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Features Section</title>
-</head>
-<body>
-    <!-- PASTE YOUR FEATURES SECTION HTML HERE -->
-    <h1>Features Section - Replace this file</h1>
-</body>
-</html>
+<!-- FEATURES - Enhanced Interactive Version -->
+<style>
+.vox-features-section {
+  background: #141416;
+  padding: 100px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.vox-features-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 70% 50%, rgba(253, 98, 98, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.vox-features-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.vox-features-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 200;
+  font-size: clamp(40px, 6vw, 56px);
+  color: #FFFFFF;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.5px;
+}
+
+.vox-features-header p {
+  font-family: 'Open Sans', sans-serif;
+  font-size: clamp(16px, 3vw, 18px);
+  color: #b0b0b0;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.vox-features-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+  position: relative;
+  z-index: 1;
+}
+
+.vox-feature {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(79, 79, 80, 0.3);
+  padding: 40px 24px;
+  transition: all 0.4s ease;
+  opacity: 0;
+  transform: translateY(30px);
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.vox-feature::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(253, 98, 98, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.vox-feature:hover::before {
+  left: 100%;
+}
+
+.vox-feature.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vox-feature:hover {
+  border-color: #FD6262;
+  transform: translateY(-8px);
+  background: rgba(253, 98, 98, 0.08);
+  box-shadow: 0 20px 50px rgba(253, 98, 98, 0.2);
+}
+
+.vox-feature-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 24px;
+  transition: all 0.4s ease;
+  filter: drop-shadow(0 0 10px rgba(253, 98, 98, 0));
+}
+
+.vox-feature:hover .vox-feature-icon {
+  transform: scale(1.15) rotate(5deg);
+  filter: drop-shadow(0 0 20px rgba(253, 98, 98, 0.6));
+}
+
+.vox-feature h3 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 300;
+  font-size: clamp(18px, 3vw, 22px);
+  color: #FFFFFF;
+  margin: 0 0 12px 0;
+  transition: color 0.3s ease;
+}
+
+.vox-feature:hover h3 {
+  color: #FEB0B0;
+}
+
+.vox-feature p {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 15px;
+  color: #b0b0b0;
+  line-height: 1.7;
+  font-weight: 300;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.vox-feature:hover p {
+  color: #d0d0d0;
+}
+
+@media (max-width: 768px) {
+  .vox-features-section {
+    padding: 80px 16px;
+  }
+}
+</style>
+
+<div class="vox-features-section">
+  <div class="vox-features-header">
+    <h2>Everything You Need</h2>
+    <p>Enterprise-grade features for businesses of all sizes</p>
+  </div>
+  
+  <div class="vox-features-grid">
+    <div class="vox-feature">
+      <svg class="vox-feature-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <h3>Real-Time Monitoring</h3>
+      <p>Watch live calls, see transcripts as they happen, monitor AI performance in real-time from any device.</p>
+    </div>
+    
+    <div class="vox-feature">
+      <svg class="vox-feature-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+        <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+      <h3>Instant Human Takeover</h3>
+      <p>Jump into any call in <100ms. Seamless handoff from AI to human agent without caller noticing.</p>
+    </div>
+    
+    <div class="vox-feature">
+      <svg class="vox-feature-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+      </svg>
+      <h3>Automatic Order Extraction</h3>
+      <p>AI extracts order details, customer info, and preferences automatically. Export to your systems via API.</p>
+    </div>
+    
+    <div class="vox-feature">
+      <svg class="vox-feature-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+      <h3>Multi-Language Support</h3>
+      <p>Fluent conversations in English, Urdu, and 50+ languages. Understands accents and dialects perfectly.</p>
+    </div>
+    
+    <div class="vox-feature">
+      <svg class="vox-feature-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+      <h3>Call Analytics</h3>
+      <p>Track call volume, duration, success rates. Export transcripts and recordings. API access included.</p>
+    </div>
+    
+    <div class="vox-feature">
+      <svg class="vox-feature-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <h3>Enterprise Security</h3>
+      <p>Built on SOC 2 certified infrastructure. Bank-level encryption. GDPR compliant data handling.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<script>
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 100);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '-50px' });
+  
+  document.querySelectorAll('.vox-feature').forEach(el => observer.observe(el));
+})();
+</script>
