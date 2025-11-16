@@ -316,21 +316,47 @@ export const playAudioHQ = async (
       float32Data[i] = Math.max(-1, Math.min(1, processedData[i] / 32768.0));
     }
 
-    // 🔥 PROFESSIONAL AUDIO PROCESSING for crystal clear quality
-    const isAI = speaker === "AI" || speaker === "ai" || speaker === "assistant";
+    // 🔥 DEBUGGING: Log audio details
+    const peakBefore = Math.max(...float32Data.map(Math.abs));
+    console.log(`🎧 ===== AUDIO DEBUG =====`);
+    console.log(`   Speaker: ${speaker || 'UNKNOWN'}`);
+    console.log(`   Format: ${sourceFormat}, Rate: ${sourceRate}Hz → ${targetRate}Hz`);
+    console.log(`   Chunk size: ${float32Data.length} samples (${(float32Data.length / targetRate).toFixed(3)}s)`);
+    console.log(`   Peak level BEFORE processing: ${peakBefore.toFixed(4)}`);
+
+    // 🔥 EXPERIMENTAL: Toggle between processed and raw audio
+    // Set to true to bypass ALL processing and hear raw audio
+    const BYPASS_PROCESSING = false;
 
     let finalData;
-    if (isAI) {
-      // AI audio: Professional processing chain
-      console.log("🎙️ Processing AI audio with professional chain");
-      finalData = enhanceAIAudio(float32Data);
+    if (BYPASS_PROCESSING) {
+      // RAW AUDIO: No processing at all, just simple gain boost
+      console.log(`   🔧 BYPASS MODE: Raw audio with simple 2x gain boost`);
+      finalData = new Float32Array(float32Data.length);
+      const isAI = speaker === "AI" || speaker === "ai" || speaker === "assistant";
+      const gain = isAI ? 1.0 : 2.0; // Only boost caller audio
+      for (let i = 0; i < float32Data.length; i++) {
+        finalData[i] = Math.max(-1, Math.min(1, float32Data[i] * gain));
+      }
     } else {
-      // Caller audio: Professional processing chain optimized for phone audio
-      console.log("📞 Processing caller audio with professional chain");
-      finalData = enhanceCallerAudio(float32Data);
+      // 🔥 PROFESSIONAL AUDIO PROCESSING for crystal clear quality
+      const isAI = speaker === "AI" || speaker === "ai" || speaker === "assistant";
+
+      if (isAI) {
+        // AI audio: Professional processing chain
+        console.log(`   🎙️ Applying AI audio processing chain`);
+        finalData = enhanceAIAudio(float32Data);
+      } else {
+        // Caller audio: Professional processing chain optimized for phone audio
+        console.log(`   📞 Applying CALLER audio processing chain`);
+        finalData = enhanceCallerAudio(float32Data);
+      }
     }
 
-    console.log(`✨ Audio processed - Peak level: ${Math.max(...finalData.map(Math.abs)).toFixed(3)}`);
+    const peakAfter = Math.max(...finalData.map(Math.abs));
+    console.log(`   Peak level AFTER processing: ${peakAfter.toFixed(4)}`);
+    console.log(`   Gain change: ${(peakAfter / peakBefore).toFixed(2)}x`);
+    console.log(`========================`);
 
 
     // Create audio buffer with final data
