@@ -163,9 +163,14 @@ export function useMultiCallWebSocket(restaurantId) {
 
   // 🔥 NEW: Remove/end a call
   const endCallSession = (callId) => {
-    console.log(`📞 Ending call session: ${callId}`);
+    console.log(`📞 ===== ENDING CALL SESSION: ${callId} =====`);
 
     const call = callsRef.current[callId];
+
+    if (!call) {
+      console.warn(`⚠️ Cannot end call - call ${callId} not found`);
+      return;
+    }
 
     // 🔥 FIX: Capture final duration when call ends
     const finalDuration = call?.startTime
@@ -173,6 +178,7 @@ export function useMultiCallWebSocket(restaurantId) {
       : call?.duration || 0;
 
     console.log(`⏱️ Final call duration: ${finalDuration} seconds`);
+    console.log(`⏱️ Setting isCallEnded = true for call ${callId}`);
 
     updateCall(callId, {
       isCallEnded: true,
@@ -231,7 +237,9 @@ export function useMultiCallWebSocket(restaurantId) {
     }
 
     updateCall(callId, { isSaving: true, lastSaveStatus: null });
-    console.log(`💾 Starting manual save for call ${callId}...`);
+    console.log(`💾 ===== MANUAL SAVE CALL ${callId} =====`);
+    console.log(`💾 Audio chunks available: ${call.audioChunks?.length || 0}`);
+    console.log(`💾 Transcript messages: ${call.transcript?.length || 0}`);
 
     try {
       // 🔥 NEW: Pass audioChunksRef directly - saveCallToDatabase will upload to Supabase
@@ -283,7 +291,9 @@ export function useMultiCallWebSocket(restaurantId) {
 
     if (!hasOrderData) return;
 
-    console.log(`💾 Auto-saving call ${callId} (${triggerReason})...`);
+    console.log(`💾 ===== AUTO-SAVING CALL ${callId} (${triggerReason}) =====`);
+    console.log(`💾 Audio chunks available: ${call.audioChunks?.length || 0}`);
+    console.log(`💾 Transcript messages: ${call.transcript?.length || 0}`);
 
     try {
       // 🔥 NEW: Pass audioChunksRef directly - saveCallToDatabase will upload to Supabase
@@ -318,12 +328,20 @@ export function useMultiCallWebSocket(restaurantId) {
 
         Object.keys(updated).forEach((callId) => {
           const call = updated[callId];
+          // Only update duration if call has started and NOT ended
           if (call.startTime && !call.isCallEnded) {
             const newDuration = Math.floor(
               (Date.now() - call.startTime) / 1000,
             );
             if (newDuration !== call.duration) {
               updated[callId] = { ...call, duration: newDuration };
+              hasChanges = true;
+            }
+          } else if (call.isCallEnded && call.startTime) {
+            // Log when we skip updating a ended call (for debugging)
+            if (!call._endedLogged) {
+              console.log(`⏱️ Timer stopped for call ${callId} - call has ended`);
+              updated[callId] = { ...call, _endedLogged: true };
               hasChanges = true;
             }
           }
@@ -570,9 +588,13 @@ export function useMultiCallWebSocket(restaurantId) {
 
         // 🔥 FIX: Append new chunks to existing chunks (don't overwrite!)
         if (tempChunksArray.length > 0) {
-          updateCall(callId, (prevCall) => ({
-            audioChunks: [...prevCall.audioChunks, ...tempChunksArray]
-          }));
+          updateCall(callId, (prevCall) => {
+            const newTotal = prevCall.audioChunks.length + tempChunksArray.length;
+            console.log(`🎵 Audio chunks for ${callId}: ${prevCall.audioChunks.length} + ${tempChunksArray.length} = ${newTotal} total`);
+            return {
+              audioChunks: [...prevCall.audioChunks, ...tempChunksArray]
+            };
+          });
         }
       } catch (audioError) {
         console.error("❌ Audio playback error:", audioError);
@@ -594,15 +616,8 @@ export function useMultiCallWebSocket(restaurantId) {
     ) {
       console.log(`💬 Transcript for ${callId}: [${data.speaker}] ${data.text.substring(0, 50)}...`);
 
-      // 🔥 FIX: Start timer on first customer/caller message (handle all variants)
-      const isCustomerSpeaker =
-        data.speaker === "customer" ||
-        data.speaker === "Caller" ||
-        data.speaker === "caller" ||
-        data.speaker === "user" ||
-        data.speaker === "User";
-
-      if (!call.callTimerStarted && isCustomerSpeaker) {
+      // 🔥 FIX: Start timer on FIRST message from ANY speaker (AI or caller)
+      if (!call.callTimerStarted) {
         console.log(`⏱️ Starting call timer for ${callId} (speaker: ${data.speaker})`);
         updateCall(callId, {
           callTimerStarted: true,
