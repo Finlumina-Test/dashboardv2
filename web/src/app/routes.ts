@@ -13,7 +13,6 @@ type Tree = {
 	path: string;
 	children: Tree[];
 	hasPage: boolean;
-	hasRoute: boolean; // API routes (route.js)
 	isParam: boolean;
 	paramName: string;
 	isCatchAll: boolean;
@@ -25,7 +24,6 @@ function buildRouteTree(dir: string, basePath = ''): Tree {
 		path: basePath,
 		children: [],
 		hasPage: false,
-		hasRoute: false,
 		isParam: false,
 		isCatchAll: false,
 		paramName: '',
@@ -56,9 +54,7 @@ function buildRouteTree(dir: string, basePath = ''): Tree {
 			node.children.push(childNode);
 		} else if (file === 'page.jsx') {
 			node.hasPage = true;
-		} else if (file === 'route.js') {
-			node.hasRoute = true;
-		}
+    }
 	}
 
 	return node;
@@ -67,13 +63,9 @@ function buildRouteTree(dir: string, basePath = ''): Tree {
 function generateRoutes(node: Tree): RouteConfigEntry[] {
 	const routes: RouteConfigEntry[] = [];
 
-	// Handle both page.jsx (UI routes) and route.js (API routes)
-	const hasFile = node.hasPage || node.hasRoute;
-
-	if (hasFile) {
-		const componentPath = node.hasRoute
-			? (node.path === '' ? `./${node.path}route.js` : `./${node.path}/route.js`)
-			: (node.path === '' ? `./${node.path}page.jsx` : `./${node.path}/page.jsx`);
+	if (node.hasPage) {
+		const componentPath =
+			node.path === '' ? `./${node.path}page.jsx` : `./${node.path}/page.jsx`;
 
 		if (node.path === '') {
 			routes.push(index(componentPath));
@@ -114,7 +106,6 @@ function generateRoutes(node: Tree): RouteConfigEntry[] {
 }
 if (import.meta.env.DEV) {
 	import.meta.glob('./**/page.jsx', {});
-	import.meta.glob('./**/route.js', {}); // Also hot-reload API routes
 	if (import.meta.hot) {
 		import.meta.hot.accept((newSelf) => {
 			import.meta.hot?.invalidate();
