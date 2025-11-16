@@ -312,23 +312,46 @@ export const playAudioHQ = async (
       return;
     }
 
-    // 🔥 RAW PLAYBACK: No resampling, no processing - just play as-is
-    // Let Web Audio API handle resampling natively (highest quality, least artifacts)
+    // 🔥 MATCH RECORDING QUALITY: Resample to higher rate like recordings do!
+    // Recordings resample to 16kHz - we'll resample directly to 48kHz for best quality
 
-    // Convert PCM16 to Float32 at ORIGINAL sample rate (no resampling!)
-    const float32Data = new Float32Array(pcm16Data.length);
+    // First convert PCM16 to Float32
+    const originalFloat32 = new Float32Array(pcm16Data.length);
     for (let i = 0; i < pcm16Data.length; i++) {
-      float32Data[i] = Math.max(-1, Math.min(1, pcm16Data[i] / 32768.0));
+      originalFloat32[i] = Math.max(-1, Math.min(1, pcm16Data[i] / 32768.0));
+    }
+
+    // Resample to target rate (48kHz) using linear interpolation (same method as recordings)
+    let float32Data;
+    if (sourceRate === targetRate) {
+      // No resampling needed
+      float32Data = originalFloat32;
+    } else {
+      const ratio = targetRate / sourceRate;
+      const newLength = Math.floor(originalFloat32.length * ratio);
+      float32Data = new Float32Array(newLength);
+
+      for (let i = 0; i < newLength; i++) {
+        const srcPos = i / ratio;
+        const srcIndex = Math.floor(srcPos);
+        const frac = srcPos - srcIndex;
+
+        const s1 = originalFloat32[srcIndex] || 0;
+        const s2 = originalFloat32[Math.min(originalFloat32.length - 1, srcIndex + 1)] || 0;
+
+        // Linear interpolation (same as recording code)
+        float32Data[i] = s1 + (s2 - s1) * frac;
+      }
     }
 
     const peak = Math.max(...float32Data.map(Math.abs));
-    console.log(`🎧 RAW AUDIO: Speaker=${speaker}, Peak=${peak.toFixed(4)}, Samples=${pcm16Data.length}, Rate=${sourceRate}Hz (no processing)`);
+    console.log(`🎧 RESAMPLED AUDIO: Speaker=${speaker}, Peak=${peak.toFixed(4)}, ${sourceRate}Hz→${targetRate}Hz, Samples=${float32Data.length}`);
 
-    // Create audio buffer at ORIGINAL sample rate - Web Audio will resample automatically
+    // Create audio buffer at TARGET sample rate (48kHz) - no browser resampling needed!
     const buffer = audioCtxRef.current.createBuffer(
       1,
       float32Data.length,
-      sourceRate, // Use ORIGINAL rate - let Web Audio handle resampling!
+      targetRate, // Use target rate - audio is already resampled!
     );
     buffer.getChannelData(0).set(float32Data);
 
