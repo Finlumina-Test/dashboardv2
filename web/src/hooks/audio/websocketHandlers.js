@@ -1,6 +1,7 @@
 // WebSocket message handlers for dashboard stream
 
 import { playAudioHQ } from "./audioUtils";
+import { uploadCallAudioToSupabase } from "./audioRecording";
 
 // Save call to database (used by manual and auto-save)
 export const saveCallToDatabase = async (
@@ -10,7 +11,7 @@ export const saveCallToDatabase = async (
   callStartTime,
   audioUrl = null,
   restaurantId, // ✅ REQUIRED
-  uploadFn = null, // 🔥 NEW: Upload function for large files
+  audioChunksRef = null, // 🔥 NEW: Audio chunks for Supabase upload
 ) => {
   try {
     const callDuration = callStartTime
@@ -21,6 +22,7 @@ export const saveCallToDatabase = async (
     console.log("💾 Call ID:", callId || "❌ MISSING");
     console.log("💾 Restaurant ID:", restaurantId || "❌ MISSING");
     console.log("💾 Audio URL received:", audioUrl || "❌ NULL/MISSING");
+    console.log("💾 Audio chunks available:", !!audioChunksRef?.current);
     console.log("💾 Order Data exists:", !!finalOrderData);
     console.log("💾 Transcript length:", finalTranscript?.length || 0);
     console.log("💾 Call duration:", callDuration, "seconds");
@@ -35,7 +37,19 @@ export const saveCallToDatabase = async (
       throw new Error("No restaurant ID provided");
     }
 
-    // ✅ THROTTLED: Only log save details every 9+ seconds
+    // 🔥 NEW: Upload audio to Supabase if chunks are available
+    let finalAudioUrl = audioUrl;
+    if (audioChunksRef?.current && audioChunksRef.current.length > 0) {
+      console.log("📤 Uploading audio to Supabase Storage...");
+      const uploadedUrl = await uploadCallAudioToSupabase(callId, audioChunksRef);
+      if (uploadedUrl) {
+        finalAudioUrl = uploadedUrl;
+        console.log("✅ Audio uploaded to Supabase:", finalAudioUrl);
+      } else {
+        console.warn("⚠️ Audio upload to Supabase failed, proceeding without audio");
+      }
+    }
+
     console.log("💾 Saving call to database...");
 
     const payload = {
@@ -50,14 +64,13 @@ export const saveCallToDatabase = async (
       total_price: finalOrderData?.total_price || null,
       call_duration: callDuration,
       transcript: finalTranscript || [],
-      audio_url: audioUrl, // ✅ THIS IS THE KEY FIELD!
-      restaurant_id: restaurantId, // ✅ NEW
+      audio_url: finalAudioUrl, // ✅ Use Supabase URL or fallback
+      restaurant_id: restaurantId,
     };
 
     console.log("💾 ===== SAVE PAYLOAD DEBUG =====");
     console.log("💾 Audio URL in payload:", payload.audio_url);
     console.log("💾 Payload keys:", Object.keys(payload));
-    console.log("💾 Full payload:", JSON.stringify(payload, null, 2));
 
     // Use internal API endpoint
     const response = await fetch(`/api/calls/save`, {
@@ -67,10 +80,8 @@ export const saveCallToDatabase = async (
     });
 
     console.log("💾 API Response status:", response.status);
-    console.log("💾 API Response ok:", response.ok);
 
     const responseText = await response.text();
-    console.log("💾 API Response text:", responseText);
 
     if (!response.ok) {
       throw new Error(
@@ -79,12 +90,11 @@ export const saveCallToDatabase = async (
     }
 
     const result = JSON.parse(responseText);
-    console.log("✅ CALL SAVED SUCCESSFULLY"); // ✅ Keep success log
-    console.log("✅ Saved call result:", JSON.stringify(result, null, 2));
+    console.log("✅ CALL SAVED SUCCESSFULLY");
     console.log("✅ Audio URL in saved result:", result?.call?.audio_url);
     return result;
   } catch (error) {
-    console.error("❌ ===== SAVE CALL FAILED ====="); // ✅ Keep error logs
+    console.error("❌ ===== SAVE CALL FAILED =====");
     console.error("❌ Error:", error);
     console.error("❌ Error message:", error.message);
     console.error("❌ Error stack:", error.stack);

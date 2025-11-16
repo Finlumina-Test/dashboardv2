@@ -1,4 +1,5 @@
 // Audio recording and WAV file creation utilities
+import { uploadAudioToSupabase } from '@/utils/supabaseStorage';
 
 // Convert accumulated audio chunks to WAV blob - FIXED VERSION
 export const createWavBlob = (audioChunks) => {
@@ -183,7 +184,59 @@ export const createWavBlob = (audioChunks) => {
   return new Blob([wavBuffer], { type: "audio/wav" });
 };
 
-// Upload audio using frontend upload hook (handles large files)
+// Upload audio using Supabase Storage
+export const uploadCallAudioToSupabase = async (callId, audioChunksRef) => {
+  try {
+    console.log("🎵 Starting audio upload to Supabase...");
+
+    if (!audioChunksRef || !audioChunksRef.current) {
+      console.log("🔇 No audio chunks ref");
+      return null;
+    }
+
+    if (audioChunksRef.current.length === 0) {
+      console.log("🔇 No audio chunks to upload");
+      return null;
+    }
+
+    console.log(
+      `🔍 Processing ${audioChunksRef.current.length} audio chunks...`,
+    );
+    const wavBlob = createWavBlob(audioChunksRef.current);
+
+    if (!wavBlob) {
+      console.error("❌ Failed to create WAV blob");
+      return null;
+    }
+
+    console.log(
+      `🎵 Uploading ${(wavBlob.size / 1024 / 1024).toFixed(1)}MB audio file to Supabase...`,
+    );
+
+    // Upload to Supabase Storage
+    const { url, error } = await uploadAudioToSupabase(wavBlob, callId);
+
+    if (error) {
+      console.error("❌ Supabase upload failed:", error);
+      return null;
+    }
+
+    if (!url) {
+      console.error("❌ Upload succeeded but no URL returned");
+      return null;
+    }
+
+    console.log("✅ Audio uploaded successfully to Supabase:", url);
+    return url;
+  } catch (error) {
+    console.error("❌ Audio upload failed:", error.message);
+    console.error("Stack:", error.stack);
+    return null;
+  }
+};
+
+// DEPRECATED: Upload audio using frontend upload hook (CreateAnything)
+// Kept for backward compatibility
 export const uploadCallAudio = async (callId, audioChunksRef, uploadFn) => {
   try {
     console.log("🎵 Starting audio upload process...");

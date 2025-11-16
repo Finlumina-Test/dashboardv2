@@ -204,19 +204,15 @@ export function useMultiCallWebSocket(restaurantId) {
     console.log(`💾 Starting manual save for call ${callId}...`);
 
     try {
-      const audioUrl = await uploadCallAudio(
-        callId,
-        { current: call.audioChunks },
-        upload,
-      );
-
+      // 🔥 NEW: Pass audioChunksRef directly - saveCallToDatabase will upload to Supabase
       const saveResult = await saveCallToDatabase(
         call.orderData || {},
         call.transcript || [],
         callId,
         call.startTime,
-        audioUrl,
+        null, // No pre-uploaded audio URL
         restaurantId,
+        { current: call.audioChunks }, // Pass audio chunks for Supabase upload
       );
 
       updateCall(callId, {
@@ -260,19 +256,15 @@ export function useMultiCallWebSocket(restaurantId) {
     console.log(`💾 Auto-saving call ${callId} (${triggerReason})...`);
 
     try {
-      const audioUrl = await uploadCallAudio(
-        callId,
-        { current: call.audioChunks },
-        upload,
-      );
-
+      // 🔥 NEW: Pass audioChunksRef directly - saveCallToDatabase will upload to Supabase
       await saveCallToDatabase(
         call.orderData || {},
         call.transcript || [],
         callId,
         call.startTime,
-        audioUrl,
+        null, // No pre-uploaded audio URL
         restaurantId,
+        { current: call.audioChunks }, // Pass audio chunks for Supabase upload
       );
 
       updateCall(callId, { hasBeenSaved: true });
