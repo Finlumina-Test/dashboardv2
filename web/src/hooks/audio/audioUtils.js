@@ -312,69 +312,29 @@ export const playAudioHQ = async (
       return;
     }
 
-    // 🔥 ENHANCED PLAYBACK: High-quality resampling with enhancement
-    const processedData = resamplePcm16HQ(pcm16Data, sourceRate, targetRate);
+    // 🔥 RAW PLAYBACK: No resampling, no processing - just play as-is
+    // Let Web Audio API handle resampling natively (highest quality, least artifacts)
 
-    // Convert to Float32 for playback
-    const float32Data = new Float32Array(processedData.length);
-    for (let i = 0; i < processedData.length; i++) {
-      float32Data[i] = Math.max(-1, Math.min(1, processedData[i] / 32768.0));
+    // Convert PCM16 to Float32 at ORIGINAL sample rate (no resampling!)
+    const float32Data = new Float32Array(pcm16Data.length);
+    for (let i = 0; i < pcm16Data.length; i++) {
+      float32Data[i] = Math.max(-1, Math.min(1, pcm16Data[i] / 32768.0));
     }
 
-    // 🔥 DEBUGGING: Log audio details
-    const peakBefore = Math.max(...float32Data.map(Math.abs));
-    console.log(`🎧 ===== AUDIO DEBUG =====`);
-    console.log(`   Speaker: ${speaker || 'UNKNOWN'}`);
-    console.log(`   Format: ${sourceFormat}, Rate: ${sourceRate}Hz → ${targetRate}Hz`);
-    console.log(`   Chunk size: ${float32Data.length} samples (${(float32Data.length / targetRate).toFixed(3)}s)`);
-    console.log(`   Peak level BEFORE processing: ${peakBefore.toFixed(4)}`);
+    const peak = Math.max(...float32Data.map(Math.abs));
+    console.log(`🎧 RAW AUDIO: Speaker=${speaker}, Peak=${peak.toFixed(4)}, Samples=${pcm16Data.length}, Rate=${sourceRate}Hz (no processing)`);
 
-    // 🔥 SIMPLE VOLUME BOOST (no complex processing that degrades quality)
-    const isAI = speaker === "AI" || speaker === "ai" || speaker === "assistant";
-
-    let finalData = new Float32Array(float32Data.length);
-
-    if (isAI) {
-      // AI audio: No boost needed, already loud enough
-      console.log(`   🎙️ AI audio - no boost`);
-      for (let i = 0; i < float32Data.length; i++) {
-        finalData[i] = float32Data[i];
-      }
-    } else {
-      // Caller audio: AGGRESSIVE volume boost to match AI levels
-      console.log(`   📞 Caller audio - applying 15x BOOST`);
-      const CALLER_GAIN = 15.0; // Aggressive boost to match AI audio levels
-      for (let i = 0; i < float32Data.length; i++) {
-        // Apply gain and hard clip to prevent distortion
-        finalData[i] = Math.max(-0.95, Math.min(0.95, float32Data[i] * CALLER_GAIN));
-      }
-    }
-
-    const peakAfter = Math.max(...finalData.map(Math.abs));
-    console.log(`   Peak level AFTER processing: ${peakAfter.toFixed(4)}`);
-    console.log(`   Gain change: ${(peakAfter / peakBefore).toFixed(2)}x`);
-    console.log(`========================`);
-
-
-    // Create audio buffer with final data
+    // Create audio buffer at ORIGINAL sample rate - Web Audio will resample automatically
     const buffer = audioCtxRef.current.createBuffer(
       1,
-      finalData.length,
-      targetRate,
+      float32Data.length,
+      sourceRate, // Use ORIGINAL rate - let Web Audio handle resampling!
     );
-    buffer.getChannelData(0).set(finalData);
-
-    // 🔥 NEW: Create gain node for volume control
-    const gainNode = audioCtxRef.current.createGain();
-    gainNode.gain.value = 1.0; // Unity gain, can be adjusted if needed
+    buffer.getChannelData(0).set(float32Data);
 
     const source = audioCtxRef.current.createBufferSource();
     source.buffer = buffer;
-
-    // Connect: source -> gain -> destination for better control
-    source.connect(gainNode);
-    gainNode.connect(audioCtxRef.current.destination);
-
+    source.connect(audioCtxRef.current.destination);
     source.start(0);
   } catch (error) {
     console.error("❌ Failed to play audio:", error);
