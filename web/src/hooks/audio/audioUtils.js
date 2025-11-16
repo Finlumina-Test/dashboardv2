@@ -283,6 +283,14 @@ export const playAudioHQ = async (
     const pcm16Data = decodePcm16(base64Audio, sourceFormat);
     const targetRate = audioCtxRef.current.sampleRate;
 
+    // 🔥 DEBUG: Log ORIGINAL decoded audio before ANY processing
+    const originalFloat32 = new Float32Array(pcm16Data.length);
+    for (let i = 0; i < pcm16Data.length; i++) {
+      originalFloat32[i] = Math.max(-1, Math.min(1, pcm16Data[i] / 32768.0));
+    }
+    const originalPeak = Math.max(...originalFloat32.map(Math.abs));
+    console.log(`📥 ORIGINAL DECODED AUDIO: Speaker=${speaker}, Format=${sourceFormat}, Peak=${originalPeak.toFixed(4)}, Samples=${pcm16Data.length}`);
+
     // 🔥 RECORD ONCE: Store original audio for recording (BEFORE any playback processing)
     if (callSessionActiveRef.current) {
       // Convert to Float32 at ORIGINAL rate
@@ -326,32 +334,24 @@ export const playAudioHQ = async (
     console.log(`   Chunk size: ${float32Data.length} samples (${(float32Data.length / targetRate).toFixed(3)}s)`);
     console.log(`   Peak level BEFORE processing: ${peakBefore.toFixed(4)}`);
 
-    // 🔥 EXPERIMENTAL: Toggle between processed and raw audio
-    // Set to true to bypass ALL processing and hear raw audio
-    const BYPASS_PROCESSING = false;
+    // 🔥 SIMPLE VOLUME BOOST (no complex processing that degrades quality)
+    const isAI = speaker === "AI" || speaker === "ai" || speaker === "assistant";
 
-    let finalData;
-    if (BYPASS_PROCESSING) {
-      // RAW AUDIO: No processing at all, just simple gain boost
-      console.log(`   🔧 BYPASS MODE: Raw audio with simple 2x gain boost`);
-      finalData = new Float32Array(float32Data.length);
-      const isAI = speaker === "AI" || speaker === "ai" || speaker === "assistant";
-      const gain = isAI ? 1.0 : 2.0; // Only boost caller audio
+    let finalData = new Float32Array(float32Data.length);
+
+    if (isAI) {
+      // AI audio: No boost needed, already loud enough
+      console.log(`   🎙️ AI audio - no boost`);
       for (let i = 0; i < float32Data.length; i++) {
-        finalData[i] = Math.max(-1, Math.min(1, float32Data[i] * gain));
+        finalData[i] = float32Data[i];
       }
     } else {
-      // 🔥 PROFESSIONAL AUDIO PROCESSING for crystal clear quality
-      const isAI = speaker === "AI" || speaker === "ai" || speaker === "assistant";
-
-      if (isAI) {
-        // AI audio: Professional processing chain
-        console.log(`   🎙️ Applying AI audio processing chain`);
-        finalData = enhanceAIAudio(float32Data);
-      } else {
-        // Caller audio: Professional processing chain optimized for phone audio
-        console.log(`   📞 Applying CALLER audio processing chain`);
-        finalData = enhanceCallerAudio(float32Data);
+      // Caller audio: AGGRESSIVE volume boost to match AI levels
+      console.log(`   📞 Caller audio - applying 15x BOOST`);
+      const CALLER_GAIN = 15.0; // Aggressive boost to match AI audio levels
+      for (let i = 0; i < float32Data.length; i++) {
+        // Apply gain and hard clip to prevent distortion
+        finalData[i] = Math.max(-0.95, Math.min(0.95, float32Data[i] * CALLER_GAIN));
       }
     }
 
