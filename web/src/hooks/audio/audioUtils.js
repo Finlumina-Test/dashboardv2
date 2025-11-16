@@ -254,6 +254,10 @@ const enhanceCallerAudio = (float32Data) => {
   return processed;
 };
 
+// 🔥 GLOBAL: Separate Set to track played audio IDs (not tied to audioChunks array)
+const playedAudioIds = new Set();
+const MAX_PLAYED_IDS = 1000; // Prevent memory leak - keep last 1000 IDs
+
 // High-quality audio playback WITH proper recording and enhancement
 export const playAudioHQ = async (
   base64Audio,
@@ -271,13 +275,19 @@ export const playAudioHQ = async (
     const uniqueId =
       audioId || `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // 🔥 PREVENT DUPLICATES: Check if we've already recorded this audio
-    if (!audioChunksRef.current.recordedIds) {
-      audioChunksRef.current.recordedIds = new Set();
+    // 🔥 PREVENT DUPLICATES: Check if we've already played/recorded this audio
+    if (playedAudioIds.has(uniqueId)) {
+      console.log(`⏭️ SKIPPING DUPLICATE AUDIO: ${uniqueId}`);
+      return; // Already played, skip silently
     }
 
-    if (audioChunksRef.current.recordedIds.has(uniqueId)) {
-      return; // Already recorded, skip silently
+    // Add to played set (with size limit to prevent memory leak)
+    playedAudioIds.add(uniqueId);
+    if (playedAudioIds.size > MAX_PLAYED_IDS) {
+      // Remove oldest entries (convert to array, slice, convert back to Set)
+      const idsArray = Array.from(playedAudioIds);
+      playedAudioIds.clear();
+      idsArray.slice(-MAX_PLAYED_IDS).forEach(id => playedAudioIds.add(id));
     }
 
     const pcm16Data = decodePcm16(base64Audio, sourceFormat);
@@ -302,9 +312,6 @@ export const playAudioHQ = async (
         speaker: speaker,
         timestamp: Date.now(),
       });
-
-      // Mark as recorded
-      audioChunksRef.current.recordedIds.add(uniqueId);
     }
 
     // 🔥 SKIP PLAYBACK: If muted, don't play audio

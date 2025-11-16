@@ -208,11 +208,17 @@ export const handleWebSocketMessage = (
         data.sample_rate ||
         (format === "pcm16" ? 24000 : 8000);
 
-      // 🔥 CRITICAL: Create unique ID from timestamp + random to prevent duplicates
+      // 🔥 CRITICAL FIX: Create STABLE ID based on content hash, not random!
+      // This prevents duplicate audio chunks from being played multiple times
+      const timestamp = data.timestamp || Date.now();
+      const audioLength = base64Audio.length;
+
+      // Create stable ID: timestamp + speaker + audio length
+      // If server sends same chunk twice, it will have same ID and be deduplicated
       const audioId =
         data.id ||
         data.audioId ||
-        `audio_${data.timestamp || Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        `audio_${timestamp}_${speaker}_${audioLength}`;
 
       // 🔥 NEW: Pass mute state to audio playback
       playAudioHQ(
@@ -223,7 +229,7 @@ export const handleWebSocketMessage = (
         format,
         sampleRate,
         speaker,
-        audioId, // 🔥 Pass unique ID
+        audioId, // 🔥 Pass stable ID
         isCallMutedRef.current, // 🔥 NEW: Pass mute state
       );
       return;
