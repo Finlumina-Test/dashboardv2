@@ -13,6 +13,25 @@ import {
 import { getBaseUrl } from "@/utils/restaurantConfig";
 import useUpload from "@/utils/useUpload";
 
+// 🔥 NEW: Check call status from backend
+const checkCallStatus = async (callId) => {
+  try {
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}/call-status?callSid=${callId}`);
+
+    if (!response.ok) {
+      throw new Error(`Call status check failed: ${response.status}`);
+    }
+
+    const status = await response.json();
+    console.log(`📊 Call status for ${callId}:`, status);
+    return status;
+  } catch (error) {
+    console.error(`❌ Failed to check call status for ${callId}:`, error);
+    throw error;
+  }
+};
+
 export function useMultiCallWebSocket(restaurantId) {
   // 🔥 NEW: Multi-call state structure
   // calls = { [callId]: { transcript, orderData, startTime, duration, isTakenOver, isMicMuted, audioChunks, hasBeenSaved, ... } }
@@ -440,6 +459,16 @@ export function useMultiCallWebSocket(restaurantId) {
     // Handle call ended
     if (data.messageType === "callEnded") {
       console.log(`📞 Call ${callId} ended`);
+
+      // 🔥 NEW: Check call-status endpoint to verify call state
+      checkCallStatus(callId).then((status) => {
+        if (status) {
+          console.log(`✅ Call status verified:`, status);
+        }
+      }).catch((err) => {
+        console.warn(`⚠️ Call status check failed:`, err.message);
+      });
+
       performAutoSave(callId, "CALL_ENDED").finally(() => {
         endCallSession(callId);
       });

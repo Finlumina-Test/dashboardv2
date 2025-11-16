@@ -258,6 +258,20 @@ const enhanceCallerAudio = (float32Data) => {
 const playedAudioIds = new Set();
 const MAX_PLAYED_IDS = 1000; // Prevent memory leak - keep last 1000 IDs
 
+// 🔥 GLOBAL: Audio queue system to prevent stuttering
+const audioQueue = new Map(); // Map of speaker -> queue data
+
+// Get or create queue for a speaker
+const getAudioQueue = (speaker) => {
+  if (!audioQueue.has(speaker)) {
+    audioQueue.set(speaker, {
+      nextStartTime: 0,
+      scheduledSources: [],
+    });
+  }
+  return audioQueue.get(speaker);
+};
+
 // High-quality audio playback WITH proper recording and enhancement
 export const playAudioHQ = async (
   base64Audio,
@@ -320,11 +334,18 @@ export const playAudioHQ = async (
       return;
     }
 
-    // 🔥 SIMPLE PLAYBACK: Backend now sends high-quality audio (pcm16 24kHz)
-    // Just play it as-is, let Web Audio API handle any resampling to 48kHz
-
+    // 🔥 QUEUED PLAYBACK: Schedule audio to play sequentially without gaps or overlaps
     const peak = Math.max(...originalFloat32.map(Math.abs));
-    console.log(`🎧 PLAYING AUDIO: Speaker=${speaker}, Peak=${peak.toFixed(4)}, Rate=${sourceRate}Hz, Samples=${originalFloat32.length}`);
+    console.log(`🎧 QUEUEING AUDIO: Speaker=${speaker}, Peak=${peak.toFixed(4)}, Rate=${sourceRate}Hz, Samples=${originalFloat32.length}`);
+
+    // Get audio queue for this speaker
+    const queue = getAudioQueue(speaker);
+    const currentTime = audioCtxRef.current.currentTime;
+
+    // Calculate when this chunk should start
+    // If queue is ahead of current time, use queue time
+    // Otherwise, start immediately (catches up to real-time)
+    let startTime = Math.max(currentTime, queue.nextStartTime);
 
     // Create audio buffer at SOURCE sample rate - Web Audio API will handle resampling
     const buffer = audioCtxRef.current.createBuffer(
@@ -334,10 +355,38 @@ export const playAudioHQ = async (
     );
     buffer.getChannelData(0).set(originalFloat32);
 
+    // Calculate duration
+    const duration = buffer.duration;
+
+    // Clean up old scheduled sources that have finished playing
+    queue.scheduledSources = queue.scheduledSources.filter(src => {
+      if (src.endTime < currentTime) {
+        // This source has finished, don't keep it
+        return false;
+      }
+      return true;
+    });
+
+    // Create and schedule source
     const source = audioCtxRef.current.createBufferSource();
     source.buffer = buffer;
     source.connect(audioCtxRef.current.destination);
-    source.start(0);
+    source.start(startTime);
+
+    // Track this source
+    const endTime = startTime + duration;
+    queue.scheduledSources.push({ source, startTime, endTime });
+
+    // Update next start time for this speaker's queue
+    queue.nextStartTime = endTime;
+
+    console.log(`✅ SCHEDULED: Start=${startTime.toFixed(3)}s, Duration=${duration.toFixed(3)}s, End=${endTime.toFixed(3)}s, QueueDepth=${queue.scheduledSources.length}`);
+
+    // Clean up source reference when it ends
+    source.onended = () => {
+      queue.scheduledSources = queue.scheduledSources.filter(src => src.source !== source);
+    };
+
   } catch (error) {
     console.error("❌ Failed to play audio:", error);
   }
