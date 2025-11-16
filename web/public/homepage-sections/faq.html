@@ -1,12 +1,259 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ Section</title>
-</head>
-<body>
-    <!-- PASTE YOUR FAQ SECTION HTML HERE -->
-    <h1>FAQ Section - Replace this file</h1>
-</body>
-</html>
+<!-- FAQ SECTION - Mobile Responsive -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;600&family=Open+Sans:wght@300;400;600&display=swap');
+
+.vox-faq-section {
+  background: #1B1C1E;
+  padding: 100px 20px;
+}
+
+.vox-faq-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 80px;
+}
+
+.vox-faq-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 200;
+  font-size: clamp(32px, 6vw, 56px);
+  color: #FFFFFF;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.5px;
+}
+
+.vox-faq-header p {
+  font-family: 'Open Sans', sans-serif;
+  font-size: clamp(14px, 3vw, 18px);
+  color: #b0b0b0;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.vox-faq-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.vox-faq-item {
+  border-bottom: 1px solid rgba(79, 79, 80, 0.3);
+  padding: 24px 0;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.vox-faq-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.vox-faq-question {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 300;
+  font-size: clamp(16px, 3vw, 20px);
+  color: #FFFFFF;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  transition: color 0.3s ease;
+  padding-right: 8px;
+  line-height: 1.4;
+}
+
+.vox-faq-question:hover {
+  color: #FD6262;
+}
+
+.vox-faq-toggle {
+  color: #FD6262;
+  font-size: 24px;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  line-height: 1;
+  min-width: 24px;
+}
+
+.vox-faq-item.active .vox-faq-toggle {
+  transform: rotate(45deg);
+}
+
+.vox-faq-answer {
+  font-family: 'Open Sans', sans-serif;
+  font-size: clamp(13px, 2.5vw, 15px);
+  color: #c0c0c0;
+  line-height: 1.8;
+  font-weight: 300;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, margin-top 0.4s ease;
+}
+
+.vox-faq-item.active .vox-faq-answer {
+  max-height: 600px;
+  margin-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .vox-faq-section {
+    padding: 80px 16px;
+  }
+  
+  .vox-faq-header {
+    margin-bottom: 60px;
+  }
+  
+  .vox-faq-item {
+    padding: 20px 0;
+  }
+  
+  .vox-faq-question {
+    padding-right: 4px;
+    gap: 12px;
+  }
+  
+  .vox-faq-toggle {
+    font-size: 20px;
+    min-width: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .vox-faq-section {
+    padding: 60px 16px;
+  }
+  
+  .vox-faq-header h2 {
+    margin-bottom: 16px;
+  }
+  
+  .vox-faq-item {
+    padding: 18px 0;
+  }
+}
+</style>
+
+<div class="vox-faq-section">
+  <div class="vox-faq-header">
+    <h2>Frequently Asked Questions</h2>
+    <p>Everything you need to know about Vox</p>
+  </div>
+  
+  <div class="vox-faq-container">
+    <div class="vox-faq-item">
+      <div class="vox-faq-question">
+        <span>How does Vox handle multiple languages?</span>
+        <span class="vox-faq-toggle">+</span>
+      </div>
+      <div class="vox-faq-answer">
+        Vox uses OpenAI's Realtime API which supports fluent conversations in English, Urdu, Hindi, Arabic, and 50+ other languages. It automatically detects the caller's language and responds naturally. The AI understands various accents and dialects without any additional setup.
+      </div>
+    </div>
+    
+    <div class="vox-faq-item">
+      <div class="vox-faq-question">
+        <span>Can I use my existing phone number?</span>
+        <span class="vox-faq-toggle">+</span>
+      </div>
+      <div class="vox-faq-answer">
+        Yes! You can forward your existing number to Vox or we can provide you with new local numbers in Pakistan, US, UK, or any of 50+ countries. Number porting is also available for businesses that want to fully migrate. Setup takes less than 5 minutes.
+      </div>
+    </div>
+    
+    <div class="vox-faq-item">
+      <div class="vox-faq-question">
+        <span>What happens if the AI doesn't understand?</span>
+        <span class="vox-faq-toggle">+</span>
+      </div>
+      <div class="vox-faq-answer">
+        You can take over any call instantly from the dashboard with less than 100ms delay. The AI can also be configured to automatically transfer complex queries to human agents. All calls are recorded and transcribed, so you can review any conversation and improve the AI's responses over time.
+      </div>
+    </div>
+    
+    <div class="vox-faq-item">
+      <div class="vox-faq-question">
+        <span>Is my data secure?</span>
+        <span class="vox-faq-toggle">+</span>
+      </div>
+      <div class="vox-faq-answer">
+        Absolutely. Vox is built on SOC 2 certified infrastructure and uses bank-level encryption. All call data is encrypted in transit and at rest. We're GDPR-ready and comply with international data protection regulations. Your data is never used to train AI models. You maintain full ownership and can export or delete data anytime.
+      </div>
+    </div>
+    
+    <div class="vox-faq-item">
+      <div class="vox-faq-question">
+        <span>How accurate is the order extraction?</span>
+        <span class="vox-faq-toggle">+</span>
+      </div>
+      <div class="vox-faq-answer">
+        Our AI achieves 95%+ accuracy on order extraction for restaurants and e-commerce. It understands menu items, quantities, delivery addresses, and special requests. Orders are automatically structured and can be sent to your POS system, kitchen display, or order management software via API or webhook.
+      </div>
+    </div>
+    
+    <div class="vox-faq-item">
+      <div class="vox-faq-question">
+        <span>What's the call quality like?</span>
+        <span class="vox-faq-toggle">+</span>
+      </div>
+      <div class="vox-faq-answer">
+        Vox uses Twilio's carrier-grade infrastructure with less than 500ms latency. The AI voice sounds natural and conversational, not robotic. We support HD voice where available. The system automatically handles background noise, cross-talk, and poor connections better than traditional IVR systems.
+      </div>
+    </div>
+    
+    <div class="vox-faq-item">
+      <div class="vox-faq-question">
+        <span>Can I customize the AI's personality?</span>
+        <span class="vox-faq-toggle">+</span>
+      </div>
+      <div class="vox-faq-answer">
+        Yes! You can customize the AI's tone, style, greetings, and responses. Make it formal for professional services or casual for restaurants. You can also upload your menu, FAQs, and business policies so the AI gives accurate information specific to your business.
+      </div>
+    </div>
+    
+    <div class="vox-faq-item">
+      <div class="vox-faq-question">
+        <span>How quickly can I get started?</span>
+        <span class="vox-faq-toggle">+</span>
+      </div>
+      <div class="vox-faq-answer">
+        Most businesses are live within 24 hours. The process: 1) Contact sales, 2) Get a local phone number or forward your existing one, 3) Customize the AI's responses for your business, 4) Go live. Our team helps with setup and training is included.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<script>
+(function() {
+  // FAQ toggle
+  document.querySelectorAll('.vox-faq-question').forEach(question => {
+    question.addEventListener('click', function() {
+      const item = this.parentElement;
+      const wasActive = item.classList.contains('active');
+      
+      // Close all items
+      document.querySelectorAll('.vox-faq-item').forEach(i => i.classList.remove('active'));
+      
+      // Open clicked item if it wasn't active
+      if (!wasActive) {
+        item.classList.add('active');
+      }
+    });
+  });
+  
+  // Animate FAQ items on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 100);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '-50px' });
+  
+  document.querySelectorAll('.vox-faq-item').forEach(el => observer.observe(el));
+})();
+</script>
