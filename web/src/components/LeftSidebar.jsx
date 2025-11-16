@@ -45,9 +45,11 @@ export function LeftSidebar({
         const customerName = call.orderData?.customer_name || "Incoming Call";
         const phoneNumber = call.orderData?.phone_number || "Connecting...";
 
-        // Format duration
-        const formatDuration = (seconds) => {
-          if (!seconds || seconds === 0) return "Live";
+        // 🔥 FIXED: Format duration - show timer even at 0:00
+        const formatDuration = (seconds, timerStarted) => {
+          // If timer hasn't started yet, show "Live"
+          if (!timerStarted) return "Live";
+          // If timer started, show the duration (even if 0)
           const mins = Math.floor(seconds / 60);
           const secs = seconds % 60;
           return `${mins}:${secs.toString().padStart(2, "0")}`;
@@ -66,8 +68,9 @@ export function LeftSidebar({
                   .toUpperCase()
               : "??",
           status: "in-progress",
-          duration: formatDuration(call.duration),
+          duration: formatDuration(call.duration, call.callTimerStarted),
           isSelected: callId === selectedCallId,
+          isAudioMuted: call.isAudioMuted || false, // 🔥 NEW: Per-call audio mute state
         };
       })
       .filter(Boolean);
@@ -245,7 +248,7 @@ export function LeftSidebar({
                     </span>
                   </div>
 
-                  {/* 🔥 NEW: Mute button for individual call - only show for selected call */}
+                  {/* 🔥 FIXED: Mute button for individual call - only show for selected call */}
                   {call.isSelected && (
                     <button
                       onClick={(e) => {
@@ -253,15 +256,15 @@ export function LeftSidebar({
                         if (toggleCallMute) toggleCallMute();
                       }}
                       className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                        isCallMuted
+                        call.isAudioMuted
                           ? "bg-red-600 hover:bg-red-700 text-white border border-red-500"
                           : "bg-green-600 hover:bg-green-700 text-white border border-green-500"
                       }`}
                       title={
-                        isCallMuted ? "Unmute call audio" : "Mute call audio"
+                        call.isAudioMuted ? "Unmute this call's audio" : "Mute this call's audio"
                       }
                     >
-                      {isCallMuted ? (
+                      {call.isAudioMuted ? (
                         <>
                           <VolumeX className="w-3 h-3" />
                           Call Muted

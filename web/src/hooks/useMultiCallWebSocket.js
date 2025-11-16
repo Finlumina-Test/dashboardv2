@@ -70,6 +70,7 @@ export function useMultiCallWebSocket(restaurantId) {
         duration: 0,
         isTakenOver: false,
         isMicMuted: false,
+        isAudioMuted: false, // 🔥 NEW: Per-call audio mute state
         audioChunks: [],
         hasBeenSaved: false,
         isCallEnded: false,
@@ -505,8 +506,10 @@ export function useMultiCallWebSocket(restaurantId) {
         return;
       }
 
-      if (isCallMutedRef.current) {
-        return; // Silently skip if muted
+      // 🔥 FIXED: Check per-call mute state instead of global
+      if (call.isAudioMuted) {
+        console.log(`🔇 Call ${callId} is muted - skipping audio playback`);
+        return;
       }
 
       const format = data.format || data.encoding || "mulaw";
@@ -617,7 +620,27 @@ export function useMultiCallWebSocket(restaurantId) {
   };
 
   const toggleCallMute = () => {
-    setIsCallMuted((prev) => !prev);
+    // 🔥 FIXED: Toggle mute for SELECTED call only, not all calls
+    if (!selectedCallId) {
+      console.warn("⚠️ No call selected to mute");
+      return;
+    }
+
+    const call = callsRef.current[selectedCallId];
+    if (!call) {
+      console.warn(`⚠️ Call ${selectedCallId} not found`);
+      return;
+    }
+
+    const newMuteState = !call.isAudioMuted;
+    console.log(`🔇 ${newMuteState ? 'Muting' : 'Unmuting'} call ${selectedCallId}`);
+
+    updateCall(selectedCallId, {
+      isAudioMuted: newMuteState,
+    });
+
+    // 🔥 Also update global state for backward compatibility
+    setIsCallMuted(newMuteState);
   };
 
   const toggleAudio = async () => {
