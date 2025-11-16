@@ -531,9 +531,6 @@ export function useMultiCallWebSocket(restaurantId) {
         data.audioId ||
         `audio_${data.timestamp || Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      // 🔥 FIX: Create a mutable ref that playAudioHQ can update
-      const audioChunksRef = { current: [...call.audioChunks] };
-
       // 🔥 CRITICAL FIX: Determine if we should PLAY audio (only for selected call)
       const currentSelectedCallId = selectedCallIdRef.current;
       const shouldPlayAudio = callId === currentSelectedCallId;
@@ -555,6 +552,10 @@ export function useMultiCallWebSocket(restaurantId) {
 
       // 🔥 FIX: ALWAYS record audio (even for non-selected calls), but only PLAY for selected call
       try {
+        // Create a temporary array to collect new chunks from playAudioHQ
+        const tempChunksArray = [];
+        const audioChunksRef = { current: tempChunksArray };
+
         playAudioHQ(
           base64Audio,
           audioCtxRef,
@@ -567,8 +568,12 @@ export function useMultiCallWebSocket(restaurantId) {
           isMuted // Mute non-selected calls
         );
 
-        // 🔥 FIX: Update call state with new audio chunks AFTER recording
-        updateCall(callId, { audioChunks: audioChunksRef.current });
+        // 🔥 FIX: Append new chunks to existing chunks (don't overwrite!)
+        if (tempChunksArray.length > 0) {
+          updateCall(callId, (prevCall) => ({
+            audioChunks: [...prevCall.audioChunks, ...tempChunksArray]
+          }));
+        }
       } catch (audioError) {
         console.error("❌ Audio playback error:", audioError);
       }
