@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from "@/utils/supabase";
 
-export async function POST(request) {
+// React Router v7 uses 'action' for POST requests
+export async function action({ request }) {
   try {
     console.log("🔵 API /calls/save hit");
     const body = await request.json();

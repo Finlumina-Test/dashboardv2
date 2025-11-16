@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from "@/utils/supabase";
 
-export async function GET(request) {
+// React Router v7 uses 'loader' for GET requests
+export async function loader({ request }) {
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
