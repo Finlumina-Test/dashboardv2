@@ -231,23 +231,25 @@ const enhanceAIAudio = (float32Data) => {
 
 // Professional audio enhancement for caller voice
 const enhanceCallerAudio = (float32Data) => {
-  // Step 1: More aggressive noise gate for phone audio
-  let processed = applyNoiseGate(float32Data, 0.012, 0.002, 0.08);
+  // 🔥 FIX: Caller audio is VERY quiet (peak ~0.004), so use gentle threshold
+  // Step 1: VERY gentle noise gate for quiet phone audio (0.001 instead of 0.012!)
+  let processed = applyNoiseGate(float32Data, 0.001, 0.002, 0.08);
 
   // Step 2: Voice EQ to enhance clarity
   processed = applyVoiceEQ(processed);
 
-  // Step 3: Moderate gain boost (1.8x instead of 2.5x for cleaner sound)
+  // 🔥 FIX: Use AGGRESSIVE gain boost for quiet caller audio (8x instead of 1.8x!)
+  // Step 3: Boost quiet caller audio significantly
   const boosted = new Float32Array(processed.length);
   for (let i = 0; i < processed.length; i++) {
-    boosted[i] = processed[i] * 1.8;
+    boosted[i] = processed[i] * 8.0;
   }
 
-  // Step 4: Compression to even out levels
-  processed = applyCompression(boosted, 0.45, 3.0, 0.1);
+  // Step 4: Compression to even out levels after boosting
+  processed = applyCompression(boosted, 0.35, 3.5, 0.1);
 
   // Step 5: Final limiting to prevent any clipping
-  processed = applyLimiter(processed, 0.97, 0.05);
+  processed = applyLimiter(processed, 0.95, 0.05);
 
   return processed;
 };
