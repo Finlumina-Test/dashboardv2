@@ -37,19 +37,25 @@ export function MainDashboard({
   isSaving, // 🔥 FIXED: Use prop instead of extracting from selectedCall
   lastSaveStatus, // 🔥 FIXED: Use prop instead of extracting from selectedCall
   manualSaveCall, // 🔥 NEW: Takes callId parameter
+  isDemo, // 🔥 NEW: Demo mode flag
+  callStatus, // 🔥 NEW: Call status for demo
+  // 🔥 NEW: Demo props (when not using selectedCall)
+  transcript: transcriptProp,
+  orderData: orderDataProp,
+  callDuration: callDurationProp,
 }) {
   // Only show for dashboard and live views
   if (currentView !== "dashboard" && currentView !== "live") {
     return null;
   }
 
-  // 🔥 NEW: Get data from selected call object
-  const callDuration = selectedCall?.duration || 0;
-  const orderData = selectedCall?.orderData || null;
-  const transcript = selectedCall?.transcript || [];
+  // 🔥 FIXED: Get data from selected call object OR demo props
+  const callDuration = callDurationProp ?? selectedCall?.duration ?? 0;
+  const orderData = orderDataProp ?? selectedCall?.orderData ?? null;
+  const transcript = transcriptProp ?? selectedCall?.transcript ?? [];
   const currentAudioActivity = selectedCallId
-    ? audioActivity[selectedCallId] || 0
-    : 0;
+    ? (typeof audioActivity === 'object' ? audioActivity[selectedCallId] : audioActivity) || 0
+    : (typeof audioActivity === 'number' ? audioActivity : 0); // 🔥 FIXED: Support both object (multi-call) and number (demo) modes
 
   // ✅ IMPROVED: Save button logic with better validation and feedback
   const hasTranscript = transcript && transcript.length > 0;
@@ -61,12 +67,12 @@ export function MainDashboard({
       orderData.total_price ||
       (orderData.order_items && orderData.order_items.length > 0));
   const hasContent = hasTranscript || hasOrderData;
-  const canSave = hasContent && !isSaving && selectedCallId;
+  const canSave = hasContent && !isSaving && (selectedCallId || isDemo); // 🔥 FIXED: Allow saving in demo mode without selectedCallId
 
   // ✅ IMPROVED: Dynamic button text based on actual content
   const getButtonText = () => {
     if (isSaving) return "Saving...";
-    if (!selectedCallId) return "No Call Selected";
+    if (!selectedCallId && !isDemo) return "No Call Selected";
     if (!hasContent) return "No Content to Save";
     if (hasTranscript && hasOrderData) {
       const itemCount = orderData.order_items?.length || 0;
@@ -83,7 +89,7 @@ export function MainDashboard({
 
   const getButtonTitle = () => {
     if (isSaving) return "Saving call data...";
-    if (!selectedCallId) return "Please select a call first";
+    if (!selectedCallId && !isDemo) return "Please select a call first";
     if (!hasContent) return "No transcript or order data available to save";
 
     let details = [];
@@ -106,10 +112,16 @@ export function MainDashboard({
       : "Save current call data";
   };
 
-  // 🔥 NEW: Handle save call button click
+  // 🔥 FIXED: Handle save call button click (demo vs multi-call)
   const handleSaveClick = () => {
-    if (canSave && selectedCallId) {
-      manualSaveCall(selectedCallId);
+    if (canSave) {
+      // In demo mode, manualSaveCall doesn't need a parameter
+      // In multi-call mode, it needs the callId
+      if (isDemo) {
+        manualSaveCall();
+      } else if (selectedCallId) {
+        manualSaveCall(selectedCallId);
+      }
     }
   };
 
@@ -129,8 +141,9 @@ export function MainDashboard({
       "..."
     ));
 
+  // 🔥 FIXED: Skip waiting states in demo mode (demo handles its own waiting state)
   // If not connected and no selected call, show waiting state
-  if (!isConnected && !selectedCall) {
+  if (!isDemo && !isConnected && !selectedCall) {
     return (
       <div className="flex-1 flex items-center justify-center h-full animate-fadeInUp">
         <div className="text-center card-gradient rounded-lg p-12">
@@ -147,7 +160,7 @@ export function MainDashboard({
   }
 
   // If connected but no call selected
-  if (isConnected && !selectedCall && !selectedCallId) {
+  if (!isDemo && isConnected && !selectedCall && !selectedCallId) {
     return (
       <div className="flex-1 flex items-center justify-center h-full animate-fadeInUp">
         <div className="text-center card-gradient rounded-lg p-12">
@@ -271,12 +284,12 @@ export function MainDashboard({
           {/* Call Controls */}
           <CallControls
             t={t}
-            handleTakeOver={() => handleTakeOver(selectedCallId)}
+            handleTakeOver={isDemo ? handleTakeOver : () => handleTakeOver(selectedCallId)}
             isTakenOver={isTakenOver}
-            endTakeOver={() => endTakeOver(selectedCallId)}
+            endTakeOver={isDemo ? endTakeOver : () => endTakeOver(selectedCallId)}
             isMicMuted={isMicMuted}
-            toggleMicMute={() => toggleMicMute(selectedCallId)}
-            endCall={() => endCall(selectedCallId)}
+            toggleMicMute={isDemo ? toggleMicMute : () => toggleMicMute(selectedCallId)}
+            endCall={isDemo ? endCall : () => endCall(selectedCallId)}
           />
         </>
       )}
@@ -375,8 +388,8 @@ export function MainDashboard({
           error={error}
           audioEnabled={audioEnabled}
           isTakenOver={isTakenOver}
-          clearTranscript={() => clearTranscript(selectedCallId)}
-          clearOrder={() => clearOrder(selectedCallId)}
+          clearTranscript={isDemo ? clearTranscript : () => clearTranscript(selectedCallId)}
+          clearOrder={isDemo ? clearOrder : () => clearOrder(selectedCallId)}
           toggleAudio={toggleAudio}
           initAudioContext={initAudioContext}
           testAudio={testAudio}

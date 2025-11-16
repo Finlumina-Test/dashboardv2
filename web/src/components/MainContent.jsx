@@ -174,6 +174,10 @@ export function MainContent({
       manualSaveCall={manualSaveCall}
       isDemo={isDemo}
       callStatus={callStatus}
+      // 🔥 NEW: Pass demo props explicitly
+      transcript={transcript}
+      orderData={orderData}
+      callDuration={callDuration}
     />
   );
 }
