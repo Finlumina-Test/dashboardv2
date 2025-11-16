@@ -312,43 +312,19 @@ export const playAudioHQ = async (
       return;
     }
 
-    // 🔥 MATCH RECORDING QUALITY: Resample to higher rate like recordings do!
-    // Recordings resample to 16kHz - we'll resample directly to 48kHz for best quality
-    // (originalFloat32 already computed above for recording)
+    // 🔥 SIMPLE PLAYBACK: Backend now sends high-quality audio (pcm16 24kHz)
+    // Just play it as-is, let Web Audio API handle any resampling to 48kHz
 
-    // Resample to target rate (48kHz) using linear interpolation (same method as recordings)
-    let float32Data;
-    if (sourceRate === targetRate) {
-      // No resampling needed
-      float32Data = originalFloat32;
-    } else {
-      const ratio = targetRate / sourceRate;
-      const newLength = Math.floor(originalFloat32.length * ratio);
-      float32Data = new Float32Array(newLength);
+    const peak = Math.max(...originalFloat32.map(Math.abs));
+    console.log(`🎧 PLAYING AUDIO: Speaker=${speaker}, Peak=${peak.toFixed(4)}, Rate=${sourceRate}Hz, Samples=${originalFloat32.length}`);
 
-      for (let i = 0; i < newLength; i++) {
-        const srcPos = i / ratio;
-        const srcIndex = Math.floor(srcPos);
-        const frac = srcPos - srcIndex;
-
-        const s1 = originalFloat32[srcIndex] || 0;
-        const s2 = originalFloat32[Math.min(originalFloat32.length - 1, srcIndex + 1)] || 0;
-
-        // Linear interpolation (same as recording code)
-        float32Data[i] = s1 + (s2 - s1) * frac;
-      }
-    }
-
-    const peak = Math.max(...float32Data.map(Math.abs));
-    console.log(`🎧 RESAMPLED AUDIO: Speaker=${speaker}, Peak=${peak.toFixed(4)}, ${sourceRate}Hz→${targetRate}Hz, Samples=${float32Data.length}`);
-
-    // Create audio buffer at TARGET sample rate (48kHz) - no browser resampling needed!
+    // Create audio buffer at SOURCE sample rate - Web Audio API will handle resampling
     const buffer = audioCtxRef.current.createBuffer(
       1,
-      float32Data.length,
-      targetRate, // Use target rate - audio is already resampled!
+      originalFloat32.length,
+      sourceRate, // Use source rate - backend sends correct quality now!
     );
-    buffer.getChannelData(0).set(float32Data);
+    buffer.getChannelData(0).set(originalFloat32);
 
     const source = audioCtxRef.current.createBufferSource();
     source.buffer = buffer;
