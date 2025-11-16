@@ -1,142 +1,124 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { getAllRestaurants } from "@/utils/restaurantConfig";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
-export default function LoginPage() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+export default function HomePage() {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Check if already logged in
+    // Check if user is logged in
     const storedBackend = localStorage.getItem("restaurant_backend");
     if (storedBackend) {
-      window.location.href = `/dashboard/${storedBackend}`;
+      setIsLoggedIn(true);
+      // Redirect to dashboard if already logged in
+      navigate(`/dashboard/${storedBackend}`);
     }
-  }, []);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
-    // Get all restaurants from configuration
-    const restaurants = getAllRestaurants();
-
-    // Find matching restaurant
-    const restaurantEntry = Object.entries(restaurants).find(
-      ([key, config]) =>
-        config.username === username && config.password === password,
-    );
-
-    if (restaurantEntry) {
-      const [restaurantId, config] = restaurantEntry;
-
-      // Save only the restaurant backend identifier
-      localStorage.setItem("restaurant_backend", restaurantId);
-
-      // Redirect to dashboard
-      window.location.href = `/dashboard/${restaurantId}`;
-    } else {
-      setError("Invalid credentials");
-    }
-
-    setIsLoading(false);
-  };
+  }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center font-inter">
-      <div className="max-w-md w-full mx-4">
-        {/* Logo and Header */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 mx-auto mb-4">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      {/*
+        ========================================
+        HTML EMBED AREA
+        ========================================
+        Replace the content below with your HTML embeds.
+        You can add:
+        - iframe embeds
+        - Custom HTML
+        - Scripts
+        - Anything you need!
+      */}
+
+      <div className="container mx-auto px-4 py-12">
+        {/* Header */}
+        <header className="text-center mb-16">
+          <div className="w-24 h-24 mx-auto mb-6">
             <img
               src="https://ucarecdn.com/318a2f4a-0da5-416c-b58e-d4512d02da5e/-/format/auto/"
               alt="Vox Logo"
               className="w-full h-full object-contain rounded-lg"
             />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-wide mb-2">
-            VOX
+          <h1 className="text-5xl font-bold tracking-wide mb-4">
+            Welcome to VOX
           </h1>
-          <div className="text-sm text-gray-400 font-medium tracking-widest uppercase">
-            DASHBOARD LOGIN
-          </div>
-        </div>
+          <p className="text-xl text-gray-400">
+            AI-Powered Restaurant Call Management
+          </p>
+        </header>
 
-        {/* Login Form */}
-        <div className="bg-[#111111] border border-gray-800 rounded-lg p-8">
-          <h2 className="text-xl font-semibold text-white mb-6 text-center">
-            Restaurant Login
-          </h2>
+        {/* Main Content Area - ADD YOUR HTML EMBEDS HERE */}
+        <main className="max-w-6xl mx-auto">
+          {/* Example: You can add iframes, calendly embeds, etc. */}
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
-                Username
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all"
-                placeholder="Enter restaurant username"
-                required
+          {/* Placeholder content - replace with your embeds */}
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            <div className="bg-[#111111] border border-gray-800 rounded-lg p-8">
+              <h2 className="text-2xl font-semibold mb-4">Embed Section 1</h2>
+              <p className="text-gray-400 mb-4">
+                Add your first HTML embed here. This could be:
+              </p>
+              <ul className="text-gray-400 space-y-2 list-disc list-inside">
+                <li>Calendly booking widget</li>
+                <li>Contact form</li>
+                <li>Video embed</li>
+                <li>Custom HTML content</li>
+              </ul>
+
+              {/* Example iframe embed - uncomment and customize:
+              <iframe
+                src="https://your-embed-url.com"
+                width="100%"
+                height="500"
+                frameBorder="0"
+                className="rounded-lg mt-4"
               />
+              */}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-3 pr-12 text-white placeholder-gray-500 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all"
-                  placeholder="Enter password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
+            <div className="bg-[#111111] border border-gray-800 rounded-lg p-8">
+              <h2 className="text-2xl font-semibold mb-4">Embed Section 2</h2>
+              <p className="text-gray-400 mb-4">
+                Add your second HTML embed here.
+              </p>
+
+              {/* Add your second embed here */}
             </div>
+          </div>
 
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-                <p className="text-red-400 text-sm text-center">{error}</p>
-              </div>
-            )}
+          {/* Full-width embed section */}
+          <div className="bg-[#111111] border border-gray-800 rounded-lg p-8 mb-12">
+            <h2 className="text-2xl font-semibold mb-4">Full-Width Embed</h2>
+            <p className="text-gray-400 mb-4">
+              Perfect for wider content like calendars, forms, or presentations.
+            </p>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-white text-black font-semibold py-3 px-6 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#111111] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            {/* Add your full-width embed here */}
+          </div>
+
+          {/* CTA Section */}
+          <div className="text-center">
+            <a
+              href="/login"
+              className="inline-block bg-white text-black font-semibold py-4 px-8 rounded-lg hover:bg-gray-100 transition-all text-lg"
             >
-              {isLoading ? "Logging in..." : "Login"}
-            </button>
-          </form>
-        </div>
+              Restaurant Login →
+            </a>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="text-center mt-16 text-gray-500">
+          <p>&copy; 2024 VOX. All rights reserved.</p>
+        </footer>
       </div>
 
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        
-        .font-inter {
+
+        body {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
       `}</style>
