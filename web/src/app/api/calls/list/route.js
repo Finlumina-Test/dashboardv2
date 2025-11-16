@@ -1,7 +1,7 @@
 import { supabase, isSupabaseConfigured } from "@/utils/supabase";
 
-// React Router v7 uses 'loader' for GET requests
-export async function loader({ request }) {
+// Shared logic for listing calls
+async function listCalls(request) {
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
@@ -75,4 +75,14 @@ export async function loader({ request }) {
       { status: 500 },
     );
   }
+}
+
+// React Router v7 uses 'loader' for route loaders
+export async function loader({ request }) {
+  return listCalls(request);
+}
+
+// Also export GET for direct fetch calls (needed in production)
+export async function GET(request) {
+  return listCalls(request);
 }

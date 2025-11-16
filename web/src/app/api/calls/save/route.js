@@ -1,7 +1,7 @@
 import { supabase, isSupabaseConfigured } from "@/utils/supabase";
 
-// React Router v7 uses 'action' for POST requests
-export async function action({ request }) {
+// Shared logic for saving calls
+async function saveCall(request) {
   try {
     console.log("🔵 API /calls/save hit");
     const body = await request.json();
@@ -125,4 +125,14 @@ export async function action({ request }) {
       { status: 500 },
     );
   }
+}
+
+// React Router v7 uses 'action' for form submissions
+export async function action({ request }) {
+  return saveCall(request);
+}
+
+// Also export POST for direct fetch calls (needed in production)
+export async function POST(request) {
+  return saveCall(request);
 }
