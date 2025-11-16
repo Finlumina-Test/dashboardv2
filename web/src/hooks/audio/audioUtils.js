@@ -293,12 +293,7 @@ export const playAudioHQ = async (
 
     // 🔥 RECORD ONCE: Store original audio for recording (BEFORE any playback processing)
     if (callSessionActiveRef.current) {
-      // Convert to Float32 at ORIGINAL rate
-      const originalFloat32 = new Float32Array(pcm16Data.length);
-      for (let i = 0; i < pcm16Data.length; i++) {
-        originalFloat32[i] = Math.max(-1, Math.min(1, pcm16Data[i] / 32768.0));
-      }
-
+      // Reuse the originalFloat32 we already computed above for recording
       // Store with proper metadata
       audioChunksRef.current.push({
         id: uniqueId,
