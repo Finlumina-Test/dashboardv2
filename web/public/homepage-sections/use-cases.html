@@ -1,12 +1,468 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Use Cases Section</title>
-</head>
-<body>
-    <!-- PASTE YOUR USE CASES SECTION HTML HERE -->
-    <h1>Use Cases Section - Replace this file</h1>
-</body>
-</html>
+<!-- USE CASES - Enhanced Interactive Version -->
+<style>
+.vox-cases-section {
+  background: #1b1c1e;
+  padding: 100px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.vox-cases-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(253, 98, 98, 0.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.vox-cases-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.vox-cases-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 200;
+  font-size: clamp(40px, 6vw, 56px);
+  color: #FFFFFF;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.5px;
+}
+
+.vox-cases-header p {
+  font-family: 'Open Sans', sans-serif;
+  font-size: clamp(16px, 3vw, 18px);
+  color: #b0b0b0;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.vox-cases-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  gap: 32px;
+  align-items: stretch;
+  position: relative;
+  z-index: 1;
+}
+
+.vox-cases-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.vox-case {
+  background: #3a3d50;
+  border: 1px solid #4a4d60;
+  padding: 40px;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(30px);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.vox-case::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #FD6262 0%, #FEB0B0 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.vox-case:hover::before {
+  transform: scaleX(1);
+}
+
+.vox-case.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vox-case:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 25px 60px rgba(253, 98, 98, 0.25);
+  border-color: #FD6262;
+  background: rgba(253, 98, 98, 0.05);
+}
+
+.vox-case-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 24px;
+  transition: all 0.4s ease;
+  filter: drop-shadow(0 0 10px rgba(253, 98, 98, 0));
+}
+
+.vox-case:hover .vox-case-icon {
+  transform: scale(1.15) rotate(-5deg);
+  filter: drop-shadow(0 0 20px rgba(253, 98, 98, 0.7));
+}
+
+.vox-case h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 300;
+  color: #FFFFFF;
+  margin: 0 0 16px 0;
+  transition: color 0.3s ease;
+}
+
+.vox-case:hover h3 {
+  color: #FEB0B0;
+}
+
+.vox-case p {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+  color: #c0c0c0;
+  line-height: 1.7;
+  margin: 0 0 24px 0;
+  font-weight: 300;
+  transition: color 0.3s ease;
+}
+
+.vox-case:hover p {
+  color: #e0e0e0;
+}
+
+.vox-case-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+}
+
+.vox-case-list li {
+  color: #b0b0b0;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  padding: 8px 0 8px 24px;
+  position: relative;
+  font-weight: 300;
+  transition: all 0.3s ease;
+}
+
+.vox-case-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #FD6262;
+  font-weight: 800;
+  font-size: 16px;
+  transition: transform 0.3s ease;
+}
+
+.vox-case:hover .vox-case-list li::before {
+  transform: scale(1.3);
+}
+
+.vox-case:hover .vox-case-list li {
+  color: #d0d0d0;
+  padding-left: 28px;
+}
+
+.vox-case-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vox-case-stat {
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.vox-case:hover .vox-case-stat {
+  transform: scale(1.05);
+}
+
+.vox-case-stat-value {
+  display: block;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 200;
+  color: #FD6262;
+  margin-bottom: 4px;
+  text-shadow: 0 0 15px rgba(253, 98, 98, 0.3);
+}
+
+.vox-case-stat-label {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px;
+  color: #b0b0b0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 300;
+}
+
+.vox-more-card {
+  background: linear-gradient(135deg, rgba(253, 98, 98, 0.1) 0%, rgba(253, 98, 98, 0.05) 100%);
+  border: 2px dashed #FD6262;
+  padding: 40px 24px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: all 0.4s ease;
+  opacity: 0;
+  transform: translateY(30px);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  width: 180px;
+  flex-shrink: 0;
+}
+
+.vox-more-card::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(253, 98, 98, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.vox-more-card:hover::before {
+  width: 400px;
+  height: 400px;
+}
+
+.vox-more-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vox-more-card:hover {
+  transform: translateY(-12px);
+  border-color: #FEB0B0;
+  box-shadow: 0 25px 60px rgba(253, 98, 98, 0.25);
+}
+
+.vox-more-icon {
+  font-size: 48px;
+  color: #FD6262;
+  margin-bottom: 16px;
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.vox-more-card:hover .vox-more-icon {
+  transform: scale(1.2) rotate(90deg);
+  filter: drop-shadow(0 0 20px rgba(253, 98, 98, 0.7));
+}
+
+.vox-more-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 28px;
+  font-weight: 200;
+  color: #FFFFFF;
+  margin: 0 0 12px 0;
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.vox-more-card:hover .vox-more-title {
+  color: #FEB0B0;
+  transform: scale(1.05);
+}
+
+.vox-more-text {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px;
+  color: #b0b0b0;
+  font-weight: 300;
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s ease;
+}
+
+.vox-more-card:hover .vox-more-text {
+  color: #d0d0d0;
+}
+
+@media (max-width: 1200px) {
+  .vox-cases-container {
+    flex-direction: column;
+  }
+  
+  .vox-cases-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  .vox-more-card {
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+    padding: 32px 20px;
+  }
+  
+  .vox-more-title {
+    font-size: 24px;
+  }
+  
+  .vox-more-icon {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .vox-cases-section {
+    padding: 80px 16px;
+  }
+  
+  .vox-case {
+    padding: 32px 24px;
+  }
+  
+  .vox-more-card {
+    width: 100%;
+    max-width: 200px;
+    padding: 24px 16px;
+  }
+  
+  .vox-more-title {
+    font-size: 22px;
+  }
+  
+  .vox-more-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+  }
+  
+  .vox-more-text {
+    font-size: 12px;
+  }
+}
+</style>
+
+<div class="vox-cases-section">
+  <div class="vox-cases-header">
+    <h2>Built For Your Business</h2>
+    <p>Real results for real businesses</p>
+  </div>
+  
+  <div class="vox-cases-container">
+    <div class="vox-cases-grid">
+      <div class="vox-case">
+        <svg class="vox-case-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+        <h3>Medical & Dental</h3>
+        <p>Reduce no-shows and streamline patient communication with intelligent appointment management.</p>
+        <ul class="vox-case-list">
+          <li>Automated appointment scheduling</li>
+          <li>Insurance verification assistance</li>
+          <li>Prescription refill requests</li>
+          <li>Emergency call routing</li>
+        </ul>
+        <div class="vox-case-stats">
+          <div class="vox-case-stat">
+            <span class="vox-case-stat-value">60%</span>
+            <span class="vox-case-stat-label">Fewer No-Shows</span>
+          </div>
+          <div class="vox-case-stat">
+            <span class="vox-case-stat-value">95%</span>
+            <span class="vox-case-stat-label">Patient Satisfaction</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="vox-case">
+        <svg class="vox-case-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <h3>Restaurants</h3>
+        <p>Never miss an order again. Vox handles phone orders 24/7, even during rush hours.</p>
+        <ul class="vox-case-list">
+          <li>Take unlimited orders simultaneously</li>
+          <li>Accurate order extraction</li>
+          <li>Menu item recommendations</li>
+          <li>Delivery address confirmation</li>
+        </ul>
+        <div class="vox-case-stats">
+          <div class="vox-case-stat">
+            <span class="vox-case-stat-value">3x</span>
+            <span class="vox-case-stat-label">More Orders</span>
+          </div>
+          <div class="vox-case-stat">
+            <span class="vox-case-stat-value">$0</span>
+            <span class="vox-case-stat-label">Missed Calls</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="vox-case">
+        <svg class="vox-case-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+          <circle cx="12" cy="8" r="5"/><path d="M3 21v-2a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v2"/>
+        </svg>
+        <h3>Salons & Spas</h3>
+        <p>Focus on your clients while Vox manages bookings, cancellations, and service inquiries.</p>
+        <ul class="vox-case-list">
+          <li>Real-time appointment booking</li>
+          <li>Service recommendations</li>
+          <li>Stylist availability matching</li>
+          <li>Reminder and follow-up calls</li>
+        </ul>
+        <div class="vox-case-stats">
+          <div class="vox-case-stat">
+            <span class="vox-case-stat-value">40%</span>
+            <span class="vox-case-stat-label">More Bookings</span>
+          </div>
+          <div class="vox-case-stat">
+            <span class="vox-case-stat-value">15hrs</span>
+            <span class="vox-case-stat-label">Saved Weekly</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="vox-more-card">
+      <div class="vox-more-icon">+</div>
+      <h3 class="vox-more-title">Much More</h3>
+      <p class="vox-more-text">And many other industries</p>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<script>
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 150);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '-50px' });
+  
+  document.querySelectorAll('.vox-case, .vox-more-card').forEach(el => observer.observe(el));
+})();
+</script>
