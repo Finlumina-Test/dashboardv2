@@ -314,12 +314,7 @@ export const playAudioHQ = async (
 
     // 🔥 MATCH RECORDING QUALITY: Resample to higher rate like recordings do!
     // Recordings resample to 16kHz - we'll resample directly to 48kHz for best quality
-
-    // First convert PCM16 to Float32
-    const originalFloat32 = new Float32Array(pcm16Data.length);
-    for (let i = 0; i < pcm16Data.length; i++) {
-      originalFloat32[i] = Math.max(-1, Math.min(1, pcm16Data[i] / 32768.0));
-    }
+    // (originalFloat32 already computed above for recording)
 
     // Resample to target rate (48kHz) using linear interpolation (same method as recordings)
     let float32Data;
