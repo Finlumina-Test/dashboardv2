@@ -14,12 +14,19 @@
    - **Project URL** (looks like: `https://xxxxx.supabase.co`)
    - **anon/public key** (starts with `eyJ...`)
 
-3. Add to your `.env` file in `/home/user/dashboardv2/web/`:
+3. Add to your environment variables:
 
+**For local development** - Create `.env` file in `/home/user/dashboardv2/web/`:
 ```bash
-SUPABASE_URL=https://xxxxx.supabase.co
-SUPABASE_ANON_KEY=eyJhbGc...your-key-here
+VITE_SUPABASE_URL=https://xxxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGc...your-key-here
 ```
+
+**For Render deployment** - Add these in Render Dashboard → Environment:
+- `VITE_SUPABASE_URL` = `https://xxxxx.supabase.co`
+- `VITE_SUPABASE_ANON_KEY` = `eyJhbGc...your-key-here`
+
+**Important:** The `VITE_` prefix is required for Vite/React Router to expose these variables to the browser. This is safe because Supabase's anon key is designed to be public (it has Row Level Security policies protecting your data).
 
 ## Step 3: Create Database Table
 
