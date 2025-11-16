@@ -254,7 +254,7 @@ const enhanceCallerAudio = (float32Data) => {
   return processed;
 };
 
-// 🔥 GLOBAL: Separate Set to track played audio IDs (not tied to audioChunks array)
+// 🔥 GLOBAL: Separate Set to track played audio IDs (ONLY for playback, NOT recording)
 const playedAudioIds = new Set();
 const MAX_PLAYED_IDS = 1000; // Prevent memory leak - keep last 1000 IDs
 
@@ -275,10 +275,34 @@ export const playAudioHQ = async (
     const uniqueId =
       audioId || `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // 🔥 PREVENT DUPLICATES: Check if we've already played/recorded this audio
+    const pcm16Data = decodePcm16(base64Audio, sourceFormat);
+    const targetRate = audioCtxRef.current.sampleRate;
+
+    // 🔥 DEBUG: Log ORIGINAL decoded audio before ANY processing
+    const originalFloat32 = new Float32Array(pcm16Data.length);
+    for (let i = 0; i < pcm16Data.length; i++) {
+      originalFloat32[i] = Math.max(-1, Math.min(1, pcm16Data[i] / 32768.0));
+    }
+    const originalPeak = Math.max(...originalFloat32.map(Math.abs));
+    console.log(`📥 AUDIO CHUNK: Speaker=${speaker}, Format=${sourceFormat}, Peak=${originalPeak.toFixed(4)}, Samples=${pcm16Data.length}, ID=${uniqueId}`);
+
+    // 🔥 ALWAYS RECORD: Store ALL audio chunks for recording (even duplicates)
+    // Recording needs complete audio, only playback should deduplicate
+    if (callSessionActiveRef.current) {
+      audioChunksRef.current.push({
+        id: uniqueId,
+        data: originalFloat32,
+        sampleRate: sourceRate, // Original rate (8000 for mulaw, 24000 for pcm16)
+        speaker: speaker,
+        timestamp: Date.now(),
+      });
+      console.log(`💾 RECORDED chunk #${audioChunksRef.current.length}: ${uniqueId}`);
+    }
+
+    // 🔥 DEDUPLICATE PLAYBACK ONLY: Check if we've already played this audio
     if (playedAudioIds.has(uniqueId)) {
-      console.log(`⏭️ SKIPPING DUPLICATE AUDIO: ${uniqueId}`);
-      return; // Already played, skip silently
+      console.log(`⏭️ SKIPPING DUPLICATE PLAYBACK (already recorded): ${uniqueId}`);
+      return; // Already played, skip playback but we already recorded it above
     }
 
     // Add to played set (with size limit to prevent memory leak)
@@ -290,32 +314,9 @@ export const playAudioHQ = async (
       idsArray.slice(-MAX_PLAYED_IDS).forEach(id => playedAudioIds.add(id));
     }
 
-    const pcm16Data = decodePcm16(base64Audio, sourceFormat);
-    const targetRate = audioCtxRef.current.sampleRate;
-
-    // 🔥 DEBUG: Log ORIGINAL decoded audio before ANY processing
-    const originalFloat32 = new Float32Array(pcm16Data.length);
-    for (let i = 0; i < pcm16Data.length; i++) {
-      originalFloat32[i] = Math.max(-1, Math.min(1, pcm16Data[i] / 32768.0));
-    }
-    const originalPeak = Math.max(...originalFloat32.map(Math.abs));
-    console.log(`📥 ORIGINAL DECODED AUDIO: Speaker=${speaker}, Format=${sourceFormat}, Peak=${originalPeak.toFixed(4)}, Samples=${pcm16Data.length}`);
-
-    // 🔥 RECORD ONCE: Store original audio for recording (BEFORE any playback processing)
-    if (callSessionActiveRef.current) {
-      // Reuse the originalFloat32 we already computed above for recording
-      // Store with proper metadata
-      audioChunksRef.current.push({
-        id: uniqueId,
-        data: originalFloat32,
-        sampleRate: sourceRate, // Original rate (8000 for mulaw, 24000 for pcm16)
-        speaker: speaker,
-        timestamp: Date.now(),
-      });
-    }
-
     // 🔥 SKIP PLAYBACK: If muted, don't play audio
     if (isMuted) {
+      console.log(`🔇 MUTED - not playing: ${uniqueId}`);
       return;
     }
 

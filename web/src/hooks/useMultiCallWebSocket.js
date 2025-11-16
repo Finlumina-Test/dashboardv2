@@ -146,8 +146,18 @@ export function useMultiCallWebSocket(restaurantId) {
   const endCallSession = (callId) => {
     console.log(`📞 Ending call session: ${callId}`);
 
+    const call = callsRef.current[callId];
+
+    // 🔥 FIX: Capture final duration when call ends
+    const finalDuration = call?.startTime
+      ? Math.floor((Date.now() - call.startTime) / 1000)
+      : call?.duration || 0;
+
+    console.log(`⏱️ Final call duration: ${finalDuration} seconds`);
+
     updateCall(callId, {
       isCallEnded: true,
+      duration: finalDuration, // 🔥 FIX: Set final duration
       isTakenOver: false,
       isMicMuted: false,
     });
@@ -556,12 +566,16 @@ export function useMultiCallWebSocket(restaurantId) {
     ) {
       console.log(`💬 Transcript for ${callId}: [${data.speaker}] ${data.text.substring(0, 50)}...`);
 
-      // Start timer on first customer message
-      if (
-        !call.callTimerStarted &&
-        (data.speaker === "customer" || data.speaker === "Caller")
-      ) {
-        console.log(`⏱️ Starting call timer for ${callId}`);
+      // 🔥 FIX: Start timer on first customer/caller message (handle all variants)
+      const isCustomerSpeaker =
+        data.speaker === "customer" ||
+        data.speaker === "Caller" ||
+        data.speaker === "caller" ||
+        data.speaker === "user" ||
+        data.speaker === "User";
+
+      if (!call.callTimerStarted && isCustomerSpeaker) {
+        console.log(`⏱️ Starting call timer for ${callId} (speaker: ${data.speaker})`);
         updateCall(callId, {
           callTimerStarted: true,
           startTime: Date.now(),
@@ -718,9 +732,29 @@ export function useMultiCallWebSocket(restaurantId) {
     console.log(`📍 Current restaurant param: ${restaurantId}`);
 
     try {
+      // 🔥 FIX: Auto-save before ending call manually
+      const call = callsRef.current[callId];
+      if (call && !call.hasBeenSaved) {
+        console.log(`💾 Auto-saving before manual end...`);
+        await performAutoSave(callId, "MANUAL_END_CALL");
+      }
+
+      // Send end call request to backend
       await performEndCall({ current: callId }, restaurantId);
-      updateCall(callId, { isTakenOver: false, isMicMuted: false });
+
+      // Update call state
+      updateCall(callId, {
+        isTakenOver: false,
+        isMicMuted: false,
+        isCallEnded: true, // 🔥 FIX: Mark call as ended to stop timer
+      });
+
       console.log(`✅ End call request sent for ${callId}`);
+
+      // 🔥 FIX: End the call session after a brief delay to allow backend to process
+      setTimeout(() => {
+        endCallSession(callId);
+      }, 1000);
     } catch (error) {
       console.error(`❌ ===== END CALL FAILED =====`);
       console.error(`❌ Call ID: ${callId}`);
