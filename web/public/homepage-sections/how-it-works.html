@@ -7,6 +7,242 @@
 </head>
 <body>
     <!-- PASTE YOUR HOW IT WORKS SECTION HTML HERE -->
-    <h1>How It Works Section - Replace this file</h1>
+<!-- HOW IT WORKS - Enhanced Interactive Version -->
+<style>
+.vox-how-section {
+  background: #1b1c1e;
+  padding: 100px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle background effect */
+.vox-how-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 50%, rgba(253, 98, 98, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.vox-how-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.vox-how-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 200;
+  font-size: clamp(40px, 6vw, 56px);
+  color: #FFFFFF;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.5px;
+}
+
+.vox-how-header p {
+  font-family: 'Open Sans', sans-serif;
+  font-size: clamp(16px, 3vw, 18px);
+  color: #b0b0b0;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.vox-steps-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.vox-step {
+  text-align: center;
+  padding: 40px 20px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.5s ease;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.vox-step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #FD6262 0%, #FEB0B0 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.vox-step:hover::before {
+  transform: scaleX(1);
+}
+
+.vox-step.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vox-step:hover {
+  border-color: rgba(253, 98, 98, 0.3);
+  background: rgba(253, 98, 98, 0.05);
+  transform: translateY(-8px);
+  box-shadow: 0 15px 40px rgba(253, 98, 98, 0.15);
+}
+
+.vox-step-circle {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 32px;
+  border: 2px solid #FD6262;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: 32px;
+  font-weight: 200;
+  color: #FD6262;
+  transition: all 0.4s ease;
+  background: rgba(253, 98, 98, 0.05);
+  position: relative;
+}
+
+.vox-step-circle::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid #FD6262;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.4s ease;
+}
+
+.vox-step:hover .vox-step-circle {
+  transform: scale(1.15) rotate(5deg);
+  background: rgba(253, 98, 98, 0.15);
+  box-shadow: 0 10px 30px rgba(253, 98, 98, 0.3);
+}
+
+.vox-step:hover .vox-step-circle::after {
+  opacity: 0.5;
+  transform: scale(1.2);
+}
+
+.vox-step h3 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 300;
+  font-size: clamp(20px, 4vw, 24px);
+  color: #FFFFFF;
+  margin: 0 0 16px 0;
+  transition: color 0.3s ease;
+}
+
+.vox-step:hover h3 {
+  color: #FEB0B0;
+}
+
+.vox-step p {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 15px;
+  color: #b0b0b0;
+  line-height: 1.7;
+  font-weight: 300;
+  transition: color 0.3s ease;
+}
+
+.vox-step:hover p {
+  color: #d0d0d0;
+}
+
+/* Step connector lines (desktop only) */
+@media (min-width: 1024px) {
+  .vox-steps-container {
+    position: relative;
+  }
+  
+  .vox-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 32px;
+    color: rgba(253, 98, 98, 0.3);
+    z-index: -1;
+    transition: all 0.3s ease;
+  }
+  
+  .vox-step:hover::after {
+    color: #FD6262;
+    transform: translateY(-50%) scale(1.2);
+  }
+}
+
+@media (max-width: 768px) {
+  .vox-how-section {
+    padding: 80px 16px;
+  }
+}
+</style>
+
+<div class="vox-how-section" id="how-it-works">
+  <div class="vox-how-header">
+    <h2>How Vox Works</h2>
+    <p>Three steps to transform your phone operations</p>
+  </div>
+  
+  <div class="vox-steps-container">
+    <div class="vox-step">
+      <div class="vox-step-circle">1</div>
+      <h3>Get Local Number</h3>
+      <p>Choose from local numbers in Pakistan, US, UK, or 50+ countries. Customers call familiar local numbers—no international charges.</p>
+    </div>
+    
+    <div class="vox-step">
+      <div class="vox-step-circle">2</div>
+      <h3>AI Answers Instantly</h3>
+      <p>Natural conversation in real-time with <500ms latency. Takes orders, answers questions, schedules appointments—in multiple languages.</p>
+    </div>
+    
+    <div class="vox-step">
+      <div class="vox-step-circle">3</div>
+      <h3>You Stay In Control</h3>
+      <p>Monitor all calls live. Take over any conversation in <100ms. Review transcripts, extracted orders, and analytics anytime.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<script>
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 150);
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '-50px' });
+  
+  document.querySelectorAll('.vox-step').forEach(el => observer.observe(el));
+})();
+</script>
 </body>
 </html>
