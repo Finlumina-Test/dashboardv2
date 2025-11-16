@@ -1,12 +1,632 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voices Section</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vox Voice Showcase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;600&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- PASTE YOUR VOICE SHOWCASE HTML HERE -->
-    <h1>Voices Section - Replace this file</h1>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #141416;
+  min-height: 100vh;
+}
+
+/* Voice Showcase Section */
+.vox-voice-section {
+  background: #141416;
+  padding: 100px 20px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.vox-voice-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 80px;
+}
+
+.vox-voice-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 200;
+  font-size: clamp(40px, 6vw, 56px);
+  color: #FFFFFF;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.5px;
+}
+
+.vox-voice-header p {
+  font-family: 'Open Sans', sans-serif;
+  font-size: clamp(16px, 3vw, 18px);
+  color: #b0b0b0;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.vox-voice-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+
+.vox-voice-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(79, 79, 80, 0.3);
+  padding: 36px 28px;
+  transition: all 0.3s ease;
+  position: relative;
+  opacity: 0;
+  transform: translateY(30px);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.vox-voice-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vox-voice-card:hover {
+  border-color: #FD6262;
+  transform: translateY(-6px);
+  background: rgba(253, 98, 98, 0.05);
+  box-shadow: 0 15px 40px rgba(253, 98, 98, 0.2);
+}
+
+.vox-voice-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 24px;
+  border: 2px solid #FD6262;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(253, 98, 98, 0.05);
+  transition: all 0.3s ease;
+}
+
+.vox-voice-card:hover .vox-voice-icon-wrapper {
+  transform: scale(1.1) rotate(5deg);
+  background: rgba(253, 98, 98, 0.15);
+  box-shadow: 0 0 20px rgba(253, 98, 98, 0.4);
+}
+
+.vox-voice-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.vox-voice-card h3 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 300;
+  font-size: clamp(20px, 3vw, 24px);
+  color: #FFFFFF;
+  text-align: center;
+  margin: 0 0 8px 0;
+  transition: color 0.3s ease;
+}
+
+.vox-voice-card:hover h3 {
+  color: #FEB0B0;
+}
+
+.vox-voice-card .voice-subtitle {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px;
+  color: #FD6262;
+  text-align: center;
+  margin: 0 0 20px 0;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.vox-voice-card > p {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  color: #b0b0b0;
+  line-height: 1.6;
+  text-align: center;
+  margin: 0 0 24px 0;
+  font-weight: 300;
+  width: 100%;
+}
+
+/* Audio Player Styling */
+.vox-audio-player {
+  width: 100%;
+  max-width: 100%;
+  background: #3a3d50;
+  border: 1px solid rgba(253, 98, 98, 0.3);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.vox-audio-player:hover {
+  border-color: #FD6262;
+  background: #404357;
+}
+
+.vox-play-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  background: #FD6262;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.vox-play-btn:hover {
+  background: #FEB0B0;
+  transform: scale(1.1);
+}
+
+.vox-play-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: #FFFFFF;
+  margin-left: 2px;
+}
+
+.vox-play-btn.playing svg {
+  margin-left: 0;
+}
+
+.vox-audio-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.vox-audio-waveform {
+  height: 4px;
+  background: rgba(253, 98, 98, 0.2);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  width: 100%;
+}
+
+.vox-audio-progress {
+  height: 100%;
+  background: #FD6262;
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+.vox-audio-time {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px;
+  color: #b0b0b0;
+  font-weight: 300;
+  text-align: left;
+}
+
+/* Voice Features List */
+.vox-voice-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+  width: 100%;
+}
+
+.vox-voice-features li {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px;
+  color: #b0b0b0;
+  padding: 6px 0 6px 24px;
+  position: relative;
+  font-weight: 300;
+  text-align: left;
+  transition: all 0.3s ease;
+}
+
+.vox-voice-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #FD6262;
+  font-weight: 600;
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.vox-voice-card:hover .vox-voice-features li::before {
+  transform: scale(1.2);
+}
+
+.vox-voice-card:hover .vox-voice-features li {
+  color: #d0d0d0;
+  padding-left: 26px;
+}
+
+/* Custom Voice Card (Special Styling) */
+.vox-voice-card.custom {
+  border-color: #FD6262;
+  background: rgba(253, 98, 98, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.vox-voice-card.custom::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #FD6262 0%, #FEB0B0 100%);
+}
+
+.vox-voice-card.custom .vox-voice-icon-wrapper {
+  background: rgba(253, 98, 98, 0.15);
+  border-color: #FEB0B0;
+}
+
+/* Clone message box */
+.vox-clone-message {
+  width: 100%;
+  background: rgba(253, 98, 98, 0.1);
+  border: 1px dashed rgba(253, 98, 98, 0.4);
+  border-radius: 8px;
+  padding: 24px 16px;
+  margin-bottom: 20px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.vox-clone-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.vox-clone-text {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px;
+  color: #FEB0B0;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.vox-voice-btn {
+  width: 100%;
+  max-width: 100%;
+  background: transparent;
+  color: #FFFFFF;
+  padding: 14px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  border: 1px solid #4F4F50;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.vox-voice-btn:hover {
+  border-color: #FD6262;
+  color: #FD6262;
+  transform: translateY(-2px);
+}
+
+.vox-voice-card.custom .vox-voice-btn {
+  background: #FD6262;
+  border-color: #FD6262;
+}
+
+.vox-voice-card.custom .vox-voice-btn:hover {
+  background: #FEB0B0;
+  color: #FFFFFF;
+}
+
+/* Tablet: 2 columns */
+@media (max-width: 1024px) {
+  .vox-voice-grid {
+    gap: 28px;
+  }
+  
+  .vox-voice-card {
+    padding: 32px 24px;
+  }
+}
+
+/* Mobile: 1 column */
+@media (max-width: 768px) {
+  .vox-voice-section {
+    padding: 80px 16px;
+  }
+  
+  .vox-voice-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .vox-voice-card {
+    padding: 32px 24px;
+  }
+  
+  .vox-audio-player {
+    padding: 14px;
+  }
+  
+  .vox-play-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+  
+  .vox-play-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+</style>
+
+<div class="vox-voice-section">
+  <div class="vox-voice-header">
+    <h2>Hear The Difference</h2>
+    <p>Natural, human-quality voices in multiple languages. Choose from our library or clone your own.</p>
+  </div>
+  
+  <div class="vox-voice-grid">
+    <!-- Default English Voice -->
+    <div class="vox-voice-card">
+      <div class="vox-voice-icon-wrapper">
+        <svg class="vox-voice-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </div>
+      <h3>Professional English</h3>
+      <p class="voice-subtitle">Default Agent Voice</p>
+      <p>Clear, professional American English. Perfect for customer support and business calls.</p>
+      
+      <div class="vox-audio-player" data-audio="default">
+        <button class="vox-play-btn" onclick="toggleVoxAudio(this, 'default')">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
+        <div class="vox-audio-info">
+          <div class="vox-audio-waveform" onclick="seekVoxAudio(event, this)">
+            <div class="vox-audio-progress"></div>
+          </div>
+          <span class="vox-audio-time">0:00 / 0:06</span>
+        </div>
+        <audio src="https://cdn.openai.com/API/docs/audio/alloy.wav" preload="metadata" crossorigin="anonymous"></audio>
+      </div>
+      
+      <ul class="vox-voice-features">
+        <li>Neutral American accent</li>
+        <li>Professional & friendly tone</li>
+        <li>Clear pronunciation</li>
+        <li>Best for business calls</li>
+      </ul>
+      
+      <a href="https://finlumina.com/contact" target="_top" class="vox-voice-btn">Use This Voice</a>
+    </div>
+    
+    <!-- Urdu Voice -->
+    <div class="vox-voice-card">
+      <div class="vox-voice-icon-wrapper">
+        <svg class="vox-voice-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+      </div>
+      <h3>اردو / Urdu</h3>
+      <p class="voice-subtitle">Pakistani Voice</p>
+      <p>Fluent Urdu with natural Pakistani accent. Understands conversations even in noisy markets with poor phone quality.</p>
+      
+      <div class="vox-audio-player" data-audio="urdu">
+        <button class="vox-play-btn" onclick="toggleVoxAudio(this, 'urdu')">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
+        <div class="vox-audio-info">
+          <div class="vox-audio-waveform" onclick="seekVoxAudio(event, this)">
+            <div class="vox-audio-progress"></div>
+          </div>
+          <span class="vox-audio-time">0:00 / 0:15</span>
+        </div>
+        <audio src="https://raw.githubusercontent.com/Finlumina-Test/Voice-Urls/main/Finlumina%20Vox%20-%20Urdu%20Demo.mp3" preload="metadata" crossorigin="anonymous"></audio>
+      </div>
+      
+      <ul class="vox-voice-features">
+        <li>Native Urdu speaker quality</li>
+        <li>Works in noisy environments</li>
+        <li>Handles poor mic quality</li>
+        <li>Understands Roman Urdu</li>
+      </ul>
+      
+      <a href="https://finlumina.com/contact" target="_top" class="vox-voice-btn">Use This Voice</a>
+    </div>
+    
+    <!-- Spanish Voice -->
+    <div class="vox-voice-card">
+      <div class="vox-voice-icon-wrapper">
+        <svg class="vox-voice-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          <path d="M13 8H7"/>
+          <path d="M17 12H7"/>
+          <path d="M13 16H7"/>
+        </svg>
+      </div>
+      <h3>Español</h3>
+      <p class="voice-subtitle">Spanish Voice</p>
+      <p>Authentic Latin American Spanish. Warm, friendly, and perfect for Hispanic markets.</p>
+      
+      <div class="vox-audio-player" data-audio="spanish">
+        <button class="vox-play-btn" onclick="toggleVoxAudio(this, 'spanish')">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
+        <div class="vox-audio-info">
+          <div class="vox-audio-waveform" onclick="seekVoxAudio(event, this)">
+            <div class="vox-audio-progress"></div>
+          </div>
+          <span class="vox-audio-time">0:00 / 0:21</span>
+        </div>
+        <audio src="https://raw.githubusercontent.com/Finlumina-Test/Voice-Urls/main/Finlumina%20Vox%20-%20Spanish%20Demo.mp3" preload="metadata" crossorigin="anonymous"></audio>
+      </div>
+      
+      <ul class="vox-voice-features">
+        <li>Latin American accent</li>
+        <li>Warm & engaging tone</li>
+        <li>Natural conversational flow</li>
+        <li>50+ countries supported</li>
+      </ul>
+      
+      <a href="https://finlumina.com/contact" target="_top" class="vox-voice-btn">Use This Voice</a>
+    </div>
+    
+    <!-- Custom Voice Cloning -->
+    <div class="vox-voice-card custom">
+      <div class="vox-voice-icon-wrapper">
+        <svg class="vox-voice-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+          <path d="M16 11l2 2 4-4"/>
+        </svg>
+      </div>
+      <h3>Your Voice, Cloned</h3>
+      <p class="voice-subtitle">Custom Voice Cloning</p>
+      <p>Clone your own voice or create a unique brand voice. Maintain consistency across all customer interactions.</p>
+      
+      <div class="vox-clone-message">
+        <div class="vox-clone-icon">🎤</div>
+        <div class="vox-clone-text">
+          Send us 30 seconds of audio<br/>and we'll clone your voice perfectly
+        </div>
+      </div>
+      
+      <ul class="vox-voice-features">
+        <li>Your unique voice signature</li>
+        <li>Brand consistency</li>
+        <li>Any language supported</li>
+        <li>Ready in 24 hours</li>
+      </ul>
+      
+      <a href="https://finlumina.com/contact" target="_top" class="vox-voice-btn">Clone Your Voice</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// Audio player functionality
+let currentVoxAudio = null;
+let currentVoxButton = null;
+
+function toggleVoxAudio(button, audioId) {
+  const player = button.closest('.vox-audio-player');
+  const audio = player.querySelector('audio');
+  const progress = player.querySelector('.vox-audio-progress');
+  const timeDisplay = player.querySelector('.vox-audio-time');
+  
+  // Pause any currently playing audio
+  if (currentVoxAudio && currentVoxAudio !== audio) {
+    currentVoxAudio.pause();
+    currentVoxAudio.currentTime = 0;
+    currentVoxButton.classList.remove('playing');
+    currentVoxButton.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    const otherProgress = currentVoxAudio.closest('.vox-audio-player').querySelector('.vox-audio-progress');
+    otherProgress.style.width = '0%';
+  }
+  
+  if (audio.paused) {
+    audio.play();
+    button.classList.add('playing');
+    button.innerHTML = '<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+    currentVoxAudio = audio;
+    currentVoxButton = button;
+    
+    // Update progress
+    audio.ontimeupdate = function() {
+      const percent = (audio.currentTime / audio.duration) * 100;
+      progress.style.width = percent + '%';
+      
+      const currentMin = Math.floor(audio.currentTime / 60);
+      const currentSec = Math.floor(audio.currentTime % 60);
+      const durationMin = Math.floor(audio.duration / 60) || 0;
+      const durationSec = Math.floor(audio.duration % 60) || 0;
+      
+      timeDisplay.textContent = `${currentMin}:${currentSec.toString().padStart(2, '0')} / ${durationMin}:${durationSec.toString().padStart(2, '0')}`;
+    };
+    
+    // Reset on end
+    audio.onended = function() {
+      button.classList.remove('playing');
+      button.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+      progress.style.width = '0%';
+      currentVoxAudio = null;
+      currentVoxButton = null;
+    };
+  } else {
+    audio.pause();
+    button.classList.remove('playing');
+    button.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    currentVoxAudio = null;
+    currentVoxButton = null;
+  }
+}
+
+function seekVoxAudio(event, waveform) {
+  const player = waveform.closest('.vox-audio-player');
+  const audio = player.querySelector('audio');
+  
+  if (audio.duration) {
+    const rect = waveform.getBoundingClientRect();
+    const percent = (event.clientX - rect.left) / rect.width;
+    audio.currentTime = percent * audio.duration;
+  }
+}
+
+// Animate voice cards on scroll
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 150);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '-50px' });
+  
+  document.querySelectorAll('.vox-voice-card').forEach(el => observer.observe(el));
+})();
+</script>
+
 </body>
 </html>
