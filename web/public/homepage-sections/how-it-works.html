@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How It Works Section</title>
+    <title>How It Works</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
-<body>
-    <!-- PASTE YOUR HOW IT WORKS SECTION HTML HERE -->
+<body style="margin: 0; padding: 0; background: #1b1c1e;">
 <!-- HOW IT WORKS - Enhanced Interactive Version -->
 <style>
 .vox-how-section {
@@ -176,7 +176,7 @@
   .vox-steps-container {
     position: relative;
   }
-  
+
   .vox-step:not(:last-child)::after {
     content: '→';
     position: absolute;
@@ -188,7 +188,7 @@
     z-index: -1;
     transition: all 0.3s ease;
   }
-  
+
   .vox-step:hover::after {
     color: #FD6262;
     transform: translateY(-50%) scale(1.2);
@@ -207,20 +207,20 @@
     <h2>How Vox Works</h2>
     <p>Three steps to transform your phone operations</p>
   </div>
-  
+
   <div class="vox-steps-container">
     <div class="vox-step">
       <div class="vox-step-circle">1</div>
       <h3>Get Local Number</h3>
       <p>Choose from local numbers in Pakistan, US, UK, or 50+ countries. Customers call familiar local numbers—no international charges.</p>
     </div>
-    
+
     <div class="vox-step">
       <div class="vox-step-circle">2</div>
       <h3>AI Answers Instantly</h3>
       <p>Natural conversation in real-time with <500ms latency. Takes orders, answers questions, schedules appointments—in multiple languages.</p>
     </div>
-    
+
     <div class="vox-step">
       <div class="vox-step-circle">3</div>
       <h3>You Stay In Control</h3>
@@ -240,7 +240,7 @@
       }
     });
   }, { threshold: 0.2, rootMargin: '-50px' });
-  
+
   document.querySelectorAll('.vox-step').forEach(el => observer.observe(el));
 })();
 </script>
