@@ -39,16 +39,31 @@ export const saveCallToDatabase = async (
 
     // 🔥 NEW: Upload audio to Supabase if chunks are available
     let finalAudioUrl = audioUrl;
+    console.log("📤 ===== AUDIO UPLOAD SECTION =====");
+    console.log("📤 audioChunksRef exists:", !!audioChunksRef);
+    console.log("📤 audioChunksRef.current exists:", !!audioChunksRef?.current);
+    console.log("📤 audioChunks count:", audioChunksRef?.current?.length || 0);
+
     if (audioChunksRef?.current && audioChunksRef.current.length > 0) {
       console.log("📤 Uploading audio to Supabase Storage...");
       const uploadedUrl = await uploadCallAudioToSupabase(callId, audioChunksRef);
+      console.log("📤 Upload returned:", uploadedUrl);
+      console.log("📤 Upload returned type:", typeof uploadedUrl);
+
       if (uploadedUrl) {
         finalAudioUrl = uploadedUrl;
-        console.log("✅ Audio uploaded to Supabase:", finalAudioUrl);
+        console.log("✅ Audio uploaded to Supabase successfully!");
+        console.log("✅ Final audio URL set to:", finalAudioUrl);
       } else {
-        console.warn("⚠️ Audio upload to Supabase failed, proceeding without audio");
+        console.error("❌ Audio upload to Supabase returned null/undefined");
+        console.warn("⚠️ Proceeding without audio");
       }
+    } else {
+      console.warn("⚠️ No audio chunks available for upload");
     }
+
+    console.log("📤 finalAudioUrl for database:", finalAudioUrl);
+    console.log("📤 ===== END AUDIO UPLOAD SECTION =====");
 
     console.log("💾 Saving call to database...");
 

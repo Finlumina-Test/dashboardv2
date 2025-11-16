@@ -187,15 +187,20 @@ export const createWavBlob = (audioChunks) => {
 // Upload audio using Supabase Storage
 export const uploadCallAudioToSupabase = async (callId, audioChunksRef) => {
   try {
-    console.log("🎵 Starting audio upload to Supabase...");
+    console.log("🎵 ===== UPLOAD AUDIO TO SUPABASE DEBUG =====");
+    console.log("🎵 Call ID:", callId);
+    console.log("🎵 audioChunksRef exists:", !!audioChunksRef);
+    console.log("🎵 audioChunksRef.current exists:", !!audioChunksRef?.current);
 
     if (!audioChunksRef || !audioChunksRef.current) {
-      console.log("🔇 No audio chunks ref");
+      console.error("❌ UPLOAD FAILED: No audio chunks ref");
       return null;
     }
 
+    console.log("🎵 Audio chunks count:", audioChunksRef.current.length);
+
     if (audioChunksRef.current.length === 0) {
-      console.log("🔇 No audio chunks to upload");
+      console.error("❌ UPLOAD FAILED: No audio chunks to upload");
       return null;
     }
 
@@ -204,8 +209,13 @@ export const uploadCallAudioToSupabase = async (callId, audioChunksRef) => {
     );
     const wavBlob = createWavBlob(audioChunksRef.current);
 
+    console.log("🎵 WAV blob created:", !!wavBlob);
+    if (wavBlob) {
+      console.log("🎵 WAV blob size:", (wavBlob.size / 1024 / 1024).toFixed(2), "MB");
+    }
+
     if (!wavBlob) {
-      console.error("❌ Failed to create WAV blob");
+      console.error("❌ UPLOAD FAILED: Failed to create WAV blob");
       return null;
     }
 
@@ -214,23 +224,27 @@ export const uploadCallAudioToSupabase = async (callId, audioChunksRef) => {
     );
 
     // Upload to Supabase Storage
-    const { url, error } = await uploadAudioToSupabase(wavBlob, callId);
+    const uploadResult = await uploadAudioToSupabase(wavBlob, callId);
+    console.log("🎵 Upload result:", uploadResult);
 
-    if (error) {
-      console.error("❌ Supabase upload failed:", error);
+    if (uploadResult.error) {
+      console.error("❌ UPLOAD FAILED: Supabase upload error:", uploadResult.error);
       return null;
     }
 
-    if (!url) {
-      console.error("❌ Upload succeeded but no URL returned");
+    if (!uploadResult.url) {
+      console.error("❌ UPLOAD FAILED: Upload succeeded but no URL returned");
+      console.error("❌ Upload result object:", JSON.stringify(uploadResult));
       return null;
     }
 
-    console.log("✅ Audio uploaded successfully to Supabase:", url);
-    return url;
+    console.log("✅ Audio uploaded successfully to Supabase!");
+    console.log("✅ Final URL:", uploadResult.url);
+    console.log("🎵 ===== UPLOAD COMPLETE =====");
+    return uploadResult.url;
   } catch (error) {
-    console.error("❌ Audio upload failed:", error.message);
-    console.error("Stack:", error.stack);
+    console.error("❌ UPLOAD FAILED: Exception thrown:", error.message);
+    console.error("❌ Stack:", error.stack);
     return null;
   }
 };
