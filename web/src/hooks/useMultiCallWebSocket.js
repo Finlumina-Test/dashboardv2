@@ -491,37 +491,6 @@ export function useMultiCallWebSocket(restaurantId) {
         return;
       }
 
-      // 🔥 CRITICAL FIX: Only process and play audio for the currently selected call
-      const currentSelectedCallId = selectedCallIdRef.current;
-      const shouldPlayAudio = callId === currentSelectedCallId;
-
-      const audioReady =
-        audioCtxRef.current && audioCtxRef.current.state === "running";
-
-      // Always store audio chunks for all calls (for recording purposes)
-      const audioChunks = [...call.audioChunks];
-      updateCall(callId, { audioChunks });
-
-      // 🔥 CRITICAL: ONLY PLAY AUDIO FOR THE SELECTED CALL
-      if (!shouldPlayAudio) {
-        // Don't spam logs for non-selected calls
-        return;
-      }
-
-      if (!audioReady) {
-        if (!call.audioNotReadyWarned) {
-          console.warn(`⚠️ Audio context not ready - click "Enable Audio" button`);
-          updateCall(callId, { audioNotReadyWarned: true });
-        }
-        return;
-      }
-
-      // 🔥 FIXED: Check per-call mute state instead of global
-      if (call.isAudioMuted) {
-        console.log(`🔇 Call ${callId} is muted - skipping audio playback`);
-        return;
-      }
-
       const format = data.format || data.encoding || "mulaw";
       const sampleRate =
         data.sampleRate ||
@@ -533,19 +502,44 @@ export function useMultiCallWebSocket(restaurantId) {
         data.audioId ||
         `audio_${data.timestamp || Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      // 🔥 USE PROPER AUDIO PLAYBACK with full mulaw support
+      // 🔥 FIX: Create a mutable ref that playAudioHQ can update
+      const audioChunksRef = { current: [...call.audioChunks] };
+
+      // 🔥 CRITICAL FIX: Determine if we should PLAY audio (only for selected call)
+      const currentSelectedCallId = selectedCallIdRef.current;
+      const shouldPlayAudio = callId === currentSelectedCallId;
+
+      const audioReady =
+        audioCtxRef.current && audioCtxRef.current.state === "running";
+
+      // 🔥 NEW: Determine mute state for this specific call
+      const isMuted =
+        !shouldPlayAudio || // Mute if not selected call
+        !audioReady || // Mute if audio not ready
+        call.isAudioMuted || // Mute if call is muted
+        ((speaker === "AI" || speaker === "ai") && call.isTakenOver); // Mute AI if taken over
+
+      if (!audioReady && shouldPlayAudio && !call.audioNotReadyWarned) {
+        console.warn(`⚠️ Audio context not ready - click "Enable Audio" button`);
+        updateCall(callId, { audioNotReadyWarned: true });
+      }
+
+      // 🔥 FIX: ALWAYS record audio (even for non-selected calls), but only PLAY for selected call
       try {
         playAudioHQ(
           base64Audio,
           audioCtxRef,
-          { current: call.audioChunks },
-          { current: true }, // callSessionActive
+          audioChunksRef, // Pass mutable ref
+          { current: true }, // callSessionActive - always record
           format,
           sampleRate,
           speaker,
           audioId,
-          false // not muted (already checked above)
+          isMuted // Mute non-selected calls
         );
+
+        // 🔥 FIX: Update call state with new audio chunks AFTER recording
+        updateCall(callId, { audioChunks: audioChunksRef.current });
       } catch (audioError) {
         console.error("❌ Audio playback error:", audioError);
       }
