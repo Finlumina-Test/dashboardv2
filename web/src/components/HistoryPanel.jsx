@@ -149,11 +149,13 @@ function CallListView({
   if (calls.length === 0) {
     return (
       <div className="text-center py-12 animate-fadeInUp">
-        <Phone className="w-16 h-16 text-accent mx-auto mb-4 animate-pulse-soft" />
-        <h3 className="text-lg font-light text-[#b0b0b0] mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
+        <div className="w-24 h-24 bg-gradient-to-br from-[#FD6262]/20 to-[#FD6262]/5 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-[#FD6262]/20 shadow-2xl shadow-[#FD6262]/10">
+          <Phone className="w-12 h-12 text-[#FD6262]/60" />
+        </div>
+        <h3 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: 'var(--font-heading)' }}>
           {search ? "No calls found" : "No call history yet"}
         </h3>
-        <p className="text-[#666]" style={{ fontFamily: 'var(--font-body)' }}>
+        <p className="text-gray-400" style={{ fontFamily: 'var(--font-body)' }}>
           {search
             ? "Try adjusting your search terms"
             : "Call history will appear here after your first call"}
@@ -173,10 +175,10 @@ function CallListView({
           <div
             key={call.id}
             onClick={() => onSelectCall(call)}
-            className="card-gradient rounded-lg p-4 lg:p-6 hover:border-accent/50 transition-all cursor-pointer group hover-lift animate-fadeInUp"
+            className="bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-xl border border-white/10 hover:border-[#FD6262]/50 rounded-lg p-4 lg:p-6 transition-all cursor-pointer group hover-lift animate-fadeInUp shadow-lg hover:shadow-[#FD6262]/20"
           >
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-accent to-accent-light rounded-lg flex items-center justify-center text-white font-light text-sm lg:text-base shadow-lg flex-shrink-0" style={{ fontFamily: 'var(--font-heading)' }}>
+              <div className="w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-[#FD6262] to-[#ff8888] rounded-lg flex items-center justify-center text-white font-bold text-sm lg:text-base border border-[#FD6262]/50 shadow-lg flex-shrink-0" style={{ fontFamily: 'var(--font-heading)' }}>
                 {call.customer_name
                   ? call.customer_name
                       .split(" ")
@@ -187,7 +189,7 @@ function CallListView({
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="text-white text-base lg:text-lg truncate group-hover:text-accent transition-colors" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
+                <h3 className="text-white text-base lg:text-lg truncate group-hover:text-[#FEB0B0] transition-colors" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
                   {call.customer_name || "Unknown Customer"}
                 </h3>
                 <p className="text-[#b0b0b0] text-sm truncate flex items-center gap-2" style={{ fontFamily: 'var(--font-body)' }}>
@@ -197,7 +199,7 @@ function CallListView({
               </div>
 
               <div className="text-right flex-shrink-0">
-                <div className="text-accent font-light text-lg" style={{ fontFamily: 'var(--font-heading)' }}>
+                <div className="text-[#FD6262] font-light text-lg" style={{ fontFamily: 'var(--font-heading)' }}>
                   {call.total_price || "—"}
                 </div>
                 <div className="text-[#b0b0b0] text-sm flex items-center gap-1" style={{ fontFamily: 'var(--font-body)' }}>
@@ -207,7 +209,7 @@ function CallListView({
                 {/* 🎵 QUICK AUDIO ACCESS */}
                 {call.audio_url && (
                   <div className="mt-2">
-                    <div className="inline-flex items-center gap-1 px-2 py-1 bg-accent text-white text-xs rounded-full shadow-lg">
+                    <div className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-[#FD6262] to-[#ff8585] text-white text-xs rounded-full shadow-lg">
                       <Play className="w-3 h-3" />🎵 Audio
                     </div>
                   </div>
@@ -241,7 +243,7 @@ function CallListView({
 
               <div>
                 <span className="text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>Status:</span>
-                <span className="px-2 py-1 rounded text-xs bg-accent/20 text-accent shadow-lg" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
+                <span className="px-2 py-1 rounded text-xs bg-[#FD6262]/20 text-[#FD6262] shadow-lg" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
                   Completed
                 </span>
               </div>

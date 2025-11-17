@@ -263,9 +263,8 @@ export function MainDashboard({
                 <span className="text-xs font-medium">{isConnected ? 'Connected' : 'Disconnected'}</span>
               </div>
 
-              {/* Audio Waveform */}
-              <div className="flex items-center gap-2 px-4 py-2 bg-black/30 rounded-lg border border-white/5">
-                <Volume2 className="w-4 h-4 text-[#FD6262]" />
+              {/* Audio Waveform - Minimal */}
+              <div className="px-4 py-2 bg-black/30 rounded-lg border border-white/5">
                 <AudioWaveform audioActivity={currentAudioActivity} isActive={!isCallEnded} />
               </div>
             </div>
@@ -375,7 +374,7 @@ export function MainDashboard({
 
             {/* Transcript Card */}
             <div className="bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden shadow-2xl flex flex-col min-h-[400px]">
-              <div className="bg-gradient-to-r from-[#FD6262]/20 to-transparent px-6 py-4 border-b border-white/10 flex items-center justify-between">
+              <div className="bg-gradient-to-r from-[#FD6262]/20 to-transparent px-6 py-4 border-b border-white/10">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                   <PhoneCall className="w-5 h-5 text-[#FD6262]" />
                   Live Transcript
@@ -385,15 +384,6 @@ export function MainDashboard({
                     </span>
                   )}
                 </h3>
-                {transcript.length > 0 && (
-                  <button
-                    onClick={clearTranscript}
-                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg text-xs flex items-center gap-2 transition-all border border-white/10"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    Clear
-                  </button>
-                )}
               </div>
               <div className="flex-1 overflow-hidden">
                 <LiveTranscript transcript={transcript} t={t} />
@@ -403,7 +393,7 @@ export function MainDashboard({
         </div>
 
         {/* Right Side - Call Controls */}
-        <div className="w-96 border-l border-white/5 bg-black/20 backdrop-blur-xl flex flex-col">
+        <div className="w-96 border-l border-white/5 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-xl flex flex-col">
           <div className="p-6 space-y-4">
             {/* Call Controls Header */}
             <div>
@@ -416,7 +406,7 @@ export function MainDashboard({
                     // Take Over Button
                     <button
                       onClick={() => setShowTakeOverModal(true)}
-                      className="w-full px-6 py-4 bg-gradient-to-r from-[#FD6262] to-[#ff7272] hover:from-[#ff7272] hover:to-[#FD6262] text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg shadow-[#FD6262]/30 hover:shadow-[#FD6262]/50 hover:scale-105 border border-[#FD6262]/50"
+                      className="w-full px-6 py-4 bg-gradient-to-r from-[#FD6262] to-[#ff8585] hover:from-[#ff7272] hover:to-[#ff9595] text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg shadow-[#FD6262]/30 hover:shadow-[#FD6262]/50 hover:scale-105 border border-[#FD6262]/50"
                     >
                       <UserCheck className="w-5 h-5" />
                       Take Over Call
@@ -430,7 +420,7 @@ export function MainDashboard({
                         className={`w-full px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg border ${
                           isMicMuted
                             ? 'bg-red-600 hover:bg-red-700 text-white shadow-red-600/30 border-red-500'
-                            : 'bg-gradient-to-r from-[#FD6262] to-[#ff7272] hover:from-[#ff7272] hover:to-[#FD6262] text-white shadow-[#FD6262]/30 border-[#FD6262]/50'
+                            : 'bg-gradient-to-r from-[#FD6262] to-[#ff8585] hover:from-[#ff7272] hover:to-[#ff9595] text-white shadow-[#FD6262]/30 border-[#FD6262]/50'
                         }`}
                       >
                         {isMicMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
@@ -440,7 +430,7 @@ export function MainDashboard({
                       {/* End Takeover Button */}
                       <button
                         onClick={() => setShowEndTakeOverModal(true)}
-                        className="w-full px-6 py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg border border-gray-600"
+                        className="w-full px-6 py-4 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg border border-gray-600"
                       >
                         <RotateCcw className="w-5 h-5" />
                         Return to AI
@@ -478,7 +468,7 @@ export function MainDashboard({
                 disabled={!canSave}
                 className={`w-full px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg border ${
                   canSave
-                    ? 'bg-white hover:bg-gray-100 text-black shadow-white/20 border-white hover:scale-105'
+                    ? 'bg-gradient-to-r from-white to-gray-100 hover:from-gray-100 hover:to-white text-black shadow-white/20 border-white hover:scale-105'
                     : 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed'
                 }`}
               >
@@ -514,33 +504,6 @@ export function MainDashboard({
               )}
             </div>
 
-            {/* Audio Controls */}
-            <div className="pt-4 border-t border-white/10">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Audio</h3>
-
-              <div className="space-y-2">
-                <button
-                  onClick={toggleAudio}
-                  className={`w-full px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all border ${
-                    audioEnabled
-                      ? 'bg-[#FD6262]/20 text-[#FD6262] border-[#FD6262]/30 hover:bg-[#FD6262]/30'
-                      : 'bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700'
-                  }`}
-                >
-                  {audioEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-                  {audioEnabled ? 'Audio Enabled' : 'Audio Disabled'}
-                </button>
-
-                {!audioEnabled && (
-                  <button
-                    onClick={initAudioContext}
-                    className="w-full px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-all border border-gray-700 text-sm"
-                  >
-                    Enable Audio
-                  </button>
-                )}
-              </div>
-            </div>
           </div>
         </div>
       </div>

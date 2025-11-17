@@ -98,9 +98,10 @@ export function LeftSidebar({
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <img
-              src="https://ucarecdn.com/318a2f4a-0da5-416c-b58e-d4512d02da5e/-/format/auto/"
+              src="/vox-logo.svg"
               alt="Vox Logo"
-              className="w-14 h-14 object-contain rounded-xl hover:scale-110 transition-transform duration-300"
+              className="w-14 h-14 object-contain hover:scale-110 transition-transform duration-300"
+              style={{ filter: 'drop-shadow(0 0 15px rgba(253, 98, 98, 0.4))' }}
             />
             <div>
               <h1 className="text-2xl font-bold text-white tracking-tight">

@@ -380,7 +380,7 @@ export function Layout({ children }: { children: ReactNode }) {
           rel="stylesheet"
         />
         <script type="module" src="/src/__create/dev-error-overlay.js"></script>
-        <link rel="icon" href="/src/__create/favicon.png" />
+        <link rel="icon" type="image/svg+xml" href="/vox-logo.svg" />
         <LoadFonts />
       </head>
       <body>

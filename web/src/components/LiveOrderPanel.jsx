@@ -55,13 +55,15 @@ export function LiveOrderPanel({
   // If no active orders
   if (activeOrders.length === 0) {
     return (
-      <div className="flex-1 p-4 lg:p-8">
-        <div className="bg-[#111111] border border-gray-800 rounded-xl p-8 text-center">
-          <ShoppingCart className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-400 mb-2">
+      <div className="flex-1 p-4 lg:p-8 flex items-center justify-center">
+        <div className="text-center max-w-md animate-fadeInUp">
+          <div className="w-24 h-24 bg-gradient-to-br from-[#FD6262]/20 to-[#FD6262]/5 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-[#FD6262]/20 shadow-2xl shadow-[#FD6262]/10">
+            <ShoppingCart className="w-12 h-12 text-[#FD6262]/60" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-3">
             No Active Orders
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-400">
             Orders will appear here when customers place them
           </p>
         </div>
@@ -84,16 +86,16 @@ export function LiveOrderPanel({
           <div
             key={callId}
             onClick={() => handleOrderClick(callId)}
-            className={`bg-[#111111] border rounded-xl p-6 cursor-pointer transition-all ${
+            className={`bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-xl border rounded-xl p-6 cursor-pointer transition-all ${
               isSelected
-                ? "border-white shadow-lg shadow-white/10"
-                : "border-gray-800 hover:border-gray-700"
+                ? "border-[#FD6262]/50 shadow-lg shadow-[#FD6262]/20"
+                : "border-white/10 hover:border-[#FD6262]/30"
             }`}
           >
             {/* Order Header */}
             <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-800">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-gray-700 to-gray-800 text-white rounded-lg flex items-center justify-center font-bold border border-gray-700">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#FD6262] to-[#ff8888] text-white rounded-lg flex items-center justify-center font-bold border border-[#FD6262]/50 shadow-lg">
                   {orderData.customer_name
                     ? orderData.customer_name
                         .split(" ")
@@ -112,7 +114,8 @@ export function LiveOrderPanel({
                   </div>
                 </div>
               </div>
-              <div className="px-3 py-1 rounded-lg text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/30">
+              <div className="px-3 py-1.5 rounded-lg text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-1.5">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 LIVE
               </div>
             </div>

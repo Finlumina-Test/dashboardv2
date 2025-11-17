@@ -126,7 +126,7 @@ export function OrderPanel({
                 disabled={!canSave}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs transition-all shadow-lg ${
                   canSave
-                    ? "bg-accent text-white hover:bg-[#ff7272]"
+                    ? "bg-gradient-to-r from-[#FD6262] to-[#ff8585] text-white hover:from-[#ff7272] hover:to-[#ff9595]"
                     : "bg-[#2a2a2c] text-[#666] cursor-not-allowed"
                 }`}
                 style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
@@ -198,7 +198,7 @@ export function OrderPanel({
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center text-white font-bold text-xs lg:text-sm">
+                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-[#FD6262] to-[#ff8888] rounded-lg flex items-center justify-center text-white font-bold text-xs lg:text-sm border border-[#FD6262]/50 shadow-lg">
                   {orderData.customer_name
                     ? orderData.customer_name
                         .split(" ")
@@ -308,12 +308,14 @@ export function OrderPanel({
       <div className="w-full lg:w-1/2 bg-[#0a0a0a] min-h-0 flex-1">
         {!displayOrderData ? (
           <div className="flex items-center justify-center h-full py-12 lg:py-0">
-            <div className="text-center">
-              <ShoppingCart className="w-16 h-16 lg:w-20 lg:h-20 text-gray-800 mx-auto mb-4" />
-              <h3 className="text-lg lg:text-xl font-semibold text-gray-400 mb-2">
+            <div className="text-center max-w-md animate-fadeInUp">
+              <div className="w-24 h-24 bg-gradient-to-br from-[#FD6262]/20 to-[#FD6262]/5 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-[#FD6262]/20 shadow-2xl shadow-[#FD6262]/10">
+                <ShoppingCart className="w-12 h-12 text-[#FD6262]/60" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">
                 Select an order
               </h3>
-              <p className="text-gray-600 text-sm lg:text-base px-4">
+              <p className="text-gray-400">
                 Choose a call from history or wait for a live order
               </p>
             </div>
@@ -353,10 +355,10 @@ function OrderDetailsPanel({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+              className={`w-12 h-12 rounded-xl flex items-center justify-center border shadow-lg ${
                 isLive
-                  ? "bg-gradient-to-br from-green-600 to-green-700"
-                  : "bg-gradient-to-br from-blue-600 to-blue-700"
+                  ? "bg-gradient-to-br from-[#FD6262] to-[#ff8888] border-[#FD6262]/50"
+                  : "bg-gradient-to-br from-[#FD6262] to-[#ff8888] border-[#FD6262]/50"
               }`}
             >
               <Package className="w-6 h-6 text-white" />
@@ -401,7 +403,7 @@ function OrderDetailsPanel({
         </div>
 
         <div className="flex items-center gap-4 p-4 bg-[#1a1a1a] rounded-lg">
-          <div className="w-12 h-12 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg flex items-center justify-center text-white font-bold">
+          <div className="w-12 h-12 bg-gradient-to-br from-[#FD6262] to-[#ff8888] rounded-lg flex items-center justify-center text-white font-bold border border-[#FD6262]/50 shadow-lg">
             {orderData.customer_name
               ? orderData.customer_name
                   .split(" ")
