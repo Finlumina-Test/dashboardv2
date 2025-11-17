@@ -372,32 +372,37 @@ export const playAudioHQ = async (
     const queue = getAudioQueue(speaker);
     const currentTime = audioCtxRef.current.currentTime;
 
-    // 🔥 SMOOTH PLAYBACK: Add buffer to prevent choppy audio from network delays
-    // - Add small lookahead buffer (0.05s) to smooth out jitter
-    // - Only catch up if queue falls far behind (> 0.5s) to prevent unbounded latency
-    const LOOKAHEAD_BUFFER = 0.05; // 50ms buffer for smooth playback
+    // 🔥 SMART SCHEDULING: Balance smoothness with natural speech pauses
+    // - Add minimal buffer (20ms) only to prevent glitches
+    // - Preserve natural pauses by starting immediately if queue is current
+    // - Only catch up if queue falls far behind
+    const LOOKAHEAD_BUFFER = 0.02; // 20ms minimal buffer for glitch prevention
     const MAX_LATENCY = 0.5; // Maximum allowed latency before catching up
 
     let startTime;
     if (queue.nextStartTime === 0) {
-      // First chunk - start with small buffer
+      // First chunk - start with minimal buffer
       startTime = currentTime + LOOKAHEAD_BUFFER;
-    } else if (queue.nextStartTime < currentTime - MAX_LATENCY) {
-      // Queue fell too far behind - catch up but maintain small buffer
+    } else if (queue.nextStartTime < currentTime) {
+      // Queue is behind - start immediately to preserve natural timing
+      startTime = currentTime;
+      console.log(`⚡ Starting immediately to preserve natural pause`);
+    } else if (queue.nextStartTime > currentTime + MAX_LATENCY) {
+      // Queue too far ahead - catch up
       startTime = currentTime + LOOKAHEAD_BUFFER;
-      console.log(`⚠️ Queue behind by ${(currentTime - queue.nextStartTime).toFixed(3)}s, catching up`);
+      console.log(`⚠️ Queue ahead by ${(queue.nextStartTime - currentTime).toFixed(3)}s, catching up`);
     } else {
-      // Normal case - schedule at next available time (maintains smooth continuous playback)
+      // Normal case - schedule at next available time (smooth continuous playback)
       startTime = queue.nextStartTime;
     }
 
-    // 🔥 SMOOTH TRANSITIONS: Apply crossfade to eliminate clicks/pops between chunks
-    // Add 10ms fade-in and fade-out to smooth transitions
-    const FADE_SAMPLES = Math.floor(sourceRate * 0.01); // 10ms fade
+    // 🔥 MINIMAL CROSSFADE: Just enough to eliminate clicks, preserves natural pauses
+    // Reduced from 10ms to 2ms to keep natural speech rhythm
+    const FADE_SAMPLES = Math.floor(sourceRate * 0.002); // 2ms fade
     const smoothedAudio = new Float32Array(originalFloat32);
 
-    // Apply fade-in at the beginning (except for very first chunk)
-    if (queue.nextStartTime > 0) {
+    // Apply ultra-short fade-in at the beginning (just to prevent clicks)
+    if (queue.nextStartTime > 0 && FADE_SAMPLES > 0) {
       const fadeInSamples = Math.min(FADE_SAMPLES, smoothedAudio.length);
       for (let i = 0; i < fadeInSamples; i++) {
         const fadeGain = i / fadeInSamples; // Linear fade 0 -> 1
@@ -405,12 +410,14 @@ export const playAudioHQ = async (
       }
     }
 
-    // Apply fade-out at the end
-    const fadeOutSamples = Math.min(FADE_SAMPLES, smoothedAudio.length);
-    const fadeOutStart = smoothedAudio.length - fadeOutSamples;
-    for (let i = fadeOutStart; i < smoothedAudio.length; i++) {
-      const fadeGain = (smoothedAudio.length - i) / fadeOutSamples; // Linear fade 1 -> 0
-      smoothedAudio[i] *= fadeGain;
+    // Apply ultra-short fade-out at the end (just to prevent clicks)
+    if (FADE_SAMPLES > 0) {
+      const fadeOutSamples = Math.min(FADE_SAMPLES, smoothedAudio.length);
+      const fadeOutStart = smoothedAudio.length - fadeOutSamples;
+      for (let i = fadeOutStart; i < smoothedAudio.length; i++) {
+        const fadeGain = (smoothedAudio.length - i) / fadeOutSamples; // Linear fade 1 -> 0
+        smoothedAudio[i] *= fadeGain;
+      }
     }
 
     // Create audio buffer at SOURCE sample rate - Web Audio API will handle resampling
