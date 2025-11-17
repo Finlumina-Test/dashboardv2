@@ -18,6 +18,8 @@ import {
   VolumeX,
   Trash2,
   RotateCcw,
+  ShoppingCart,
+  Sparkles,
 } from "lucide-react";
 import { AudioWaveform } from "./AudioWaveform";
 import { CallControls } from "./CallControls";
@@ -112,18 +114,31 @@ export function MainDashboard({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // No call selected
+  // No call selected - 2025 Enhanced Empty State
   if (!selectedCallId && !isDemo) {
     return (
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center max-w-md">
-          <div className="w-24 h-24 bg-gradient-to-br from-[#FD6262]/20 to-[#FD6262]/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-[#FD6262]/20">
-            <PhoneCall className="w-12 h-12 text-[#FD6262]/60" />
+      <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-[#0a0a0a] via-[#141416] to-[#0a0a0a]">
+        <div className="text-center max-w-md animate-fadeInUp">
+          <div className="relative mb-8">
+            <div className="w-28 h-28 bg-gradient-to-br from-[#FD6262]/20 to-[#FD6262]/5 rounded-3xl flex items-center justify-center mx-auto border border-[#FD6262]/20 shadow-2xl shadow-[#FD6262]/10">
+              <PhoneCall className="w-14 h-14 text-[#FD6262]/60" />
+            </div>
+            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-[#FD6262] to-[#ff7272] rounded-full flex items-center justify-center animate-pulse">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
           </div>
-          <h3 className="text-2xl font-bold text-white mb-3">No Call Selected</h3>
-          <p className="text-gray-400">
-            Select a call from the sidebar to view details and controls
+          <h3 className="text-3xl font-bold text-white mb-3 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+            No Call Selected
+          </h3>
+          <p className="text-gray-400 mb-6 leading-relaxed">
+            Select a call from the sidebar to view live details, transcript, and controls
           </p>
+          <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span>Waiting for calls...</span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -131,6 +146,60 @@ export function MainDashboard({
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#0a0a0a] via-[#141416] to-[#0a0a0a]">
+      {/* Quick Stats Bar - 2025 Trend */}
+      {!isCallEnded && hasContent && (
+        <div className="border-b border-white/5 bg-gradient-to-r from-[#FD6262]/5 to-transparent px-6 py-3">
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-6">
+              {/* Transcript Count */}
+              {transcript.length > 0 && (
+                <div className="flex items-center gap-2 group cursor-help" title="Total messages in conversation">
+                  <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center group-hover:bg-white/10 transition-colors border border-white/10">
+                    <PhoneCall className="w-4 h-4 text-[#FD6262]" />
+                  </div>
+                  <div>
+                    <p className="text-white font-bold">{transcript.length}</p>
+                    <p className="text-gray-500 text-[10px] uppercase tracking-wide">Messages</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Order Items Count */}
+              {orderData?.order_items && orderData.order_items.length > 0 && (
+                <div className="flex items-center gap-2 group cursor-help" title="Items in current order">
+                  <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center group-hover:bg-white/10 transition-colors border border-white/10">
+                    <ShoppingCart className="w-4 h-4 text-[#FD6262]" />
+                  </div>
+                  <div>
+                    <p className="text-white font-bold">{orderData.order_items.length}</p>
+                    <p className="text-gray-500 text-[10px] uppercase tracking-wide">Items</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Total Price */}
+              {orderData?.total_price && (
+                <div className="flex items-center gap-2 group cursor-help" title="Total order value">
+                  <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center group-hover:bg-white/10 transition-colors border border-white/10">
+                    <span className="text-[#FD6262] font-bold text-sm">$</span>
+                  </div>
+                  <div>
+                    <p className="text-white font-bold">${orderData.total_price}</p>
+                    <p className="text-gray-500 text-[10px] uppercase tracking-wide">Total</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Live Indicator */}
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 rounded-lg border border-green-500/30">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-green-400 font-semibold text-[10px] uppercase tracking-wide">Live Call</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Bar - Call Status & Timer */}
       <div className="border-b border-white/5 bg-black/20 backdrop-blur-xl">
         <div className="px-6 py-4">
