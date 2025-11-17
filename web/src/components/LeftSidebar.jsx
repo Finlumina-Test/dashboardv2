@@ -1,7 +1,5 @@
 import {
-  BarChart3,
   Globe,
-  History,
   Search,
   Clock,
   PhoneCall,
@@ -9,6 +7,8 @@ import {
   LogOut,
   VolumeX,
   Volume2,
+  Zap,
+  TrendingUp,
 } from "lucide-react";
 import { useMemo } from "react";
 
@@ -22,9 +22,8 @@ export function LeftSidebar({
   setSearchQuery,
   selectedCall,
   setSelectedCall,
-  // 🔥 NEW: Multi-call props
-  calls, // Object of all calls { [callId]: callData }
-  activeCallIds, // Array of active call IDs
+  calls,
+  activeCallIds,
   selectedCallId,
   setSelectedCallId,
   isConnected,
@@ -33,7 +32,7 @@ export function LeftSidebar({
   isCallMuted,
   toggleCallMute,
 }) {
-  // 🔥 NEW: Create active calls array from multi-call state
+  // Create active calls array from multi-call state
   const activeCalls = useMemo(() => {
     if (!isConnected || !calls || activeCallIds.length === 0) return [];
 
@@ -45,11 +44,8 @@ export function LeftSidebar({
         const customerName = call.orderData?.customer_name || "Incoming Call";
         const phoneNumber = call.orderData?.phone_number || "Connecting...";
 
-        // 🔥 FIXED: Format duration - show timer even at 0:00
         const formatDuration = (seconds, timerStarted) => {
-          // If timer hasn't started yet, show "Live"
           if (!timerStarted) return "Live";
-          // If timer started, show the duration (even if 0)
           const mins = Math.floor(seconds / 60);
           const secs = seconds % 60;
           return `${mins}:${secs.toString().padStart(2, "0")}`;
@@ -67,10 +63,12 @@ export function LeftSidebar({
                   .join("")
                   .toUpperCase()
               : "??",
-          status: "in-progress",
+          status: call.isCallEnded ? "ended" : "in-progress",
           duration: formatDuration(call.duration, call.callTimerStarted),
           isSelected: callId === selectedCallId,
-          isAudioMuted: call.isAudioMuted || false, // 🔥 NEW: Per-call audio mute state
+          isAudioMuted: call.isAudioMuted || false,
+          isTakenOver: call.isTakenOver || false,
+          hasOrder: call.orderData && Object.keys(call.orderData).length > 0,
         };
       })
       .filter(Boolean);
@@ -86,203 +84,236 @@ export function LeftSidebar({
     );
   }, [activeCalls, searchQuery]);
 
-  // 🔥 NEW: Handle call selection
   const handleCallClick = (call) => {
     setSelectedCallId(call.id);
-    // For backward compatibility
     if (setSelectedCall) {
       setSelectedCall(call);
     }
   };
 
   return (
-    <div className="w-80 bg-[#1b1c1e] border-r border-[rgba(79,79,80,0.3)] flex flex-col h-screen">
-      <div className="card-gradient border-b border-[rgba(79,79,80,0.3)] p-6">
+    <div className="w-80 bg-black/40 border-r border-white/10 flex flex-col h-screen backdrop-blur-xl">
+      {/* Header */}
+      <div className="border-b border-white/10 bg-gradient-to-br from-[#FD6262]/10 to-transparent p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            {/* Vox logo image - increased size */}
             <img
               src="https://ucarecdn.com/318a2f4a-0da5-416c-b58e-d4512d02da5e/-/format/auto/"
               alt="Vox Logo"
-              className="w-16 h-16 object-contain rounded-lg hover-scale"
+              className="w-14 h-14 object-contain rounded-xl hover:scale-110 transition-transform duration-300"
             />
             <div>
-              <h1 className="text-xl font-light text-white tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>
+              <h1 className="text-2xl font-bold text-white tracking-tight">
                 VOX
               </h1>
-              <div className="text-xs text-[#b0b0b0] tracking-widest uppercase" style={{ fontFamily: 'var(--font-body)' }}>
-                {backendUrl
-                  ? `${backendUrl.toUpperCase()} DASHBOARD`
-                  : "DASHBOARD"}
+              <div className="text-[10px] text-gray-400 tracking-widest uppercase font-semibold">
+                {backendUrl ? `${backendUrl.toUpperCase()}` : "Dashboard"}
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={toggleLanguage}
-              className="p-2 bg-[#1b1c1e] hover:bg-[#2a2a2c] rounded transition-all border border-[rgba(79,79,80,0.3)] hover-scale"
+              className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/10 hover:border-[#FD6262]/50 group"
               title={
                 language === "english" ? "Switch to Urdu" : "Switch to English"
               }
             >
-              <Globe className="w-4 h-4 text-[#b0b0b0] hover:text-accent" />
+              <Globe className="w-4 h-4 text-gray-400 group-hover:text-[#FD6262] transition-colors" />
             </button>
             {onLogout && (
               <button
                 onClick={onLogout}
-                className="p-2 bg-red-600 hover:bg-red-700 rounded transition-all hover-scale"
+                className="p-2 bg-red-600/20 hover:bg-red-600 rounded-lg transition-all border border-red-500/30 hover:border-red-500 group"
                 title="Logout"
               >
-                <LogOut className="w-4 h-4 text-white" />
+                <LogOut className="w-4 h-4 text-red-400 group-hover:text-white transition-colors" />
               </button>
             )}
           </div>
         </div>
 
-        <div className="text-xs text-[#b0b0b0] mb-4 text-center" style={{ fontFamily: 'var(--font-body)' }}>
-          {language === "english" ? "English" : "Roman Urdu"}
+        {/* Connection Status */}
+        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
+          isConnected
+            ? 'bg-green-500/10 border-green-500/30'
+            : 'bg-red-500/10 border-red-500/30'
+        }`}>
+          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+          <span className={`text-xs font-semibold ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
+            {isConnected ? 'Connected' : 'Disconnected'}
+          </span>
         </div>
 
-        <div className="flex gap-2 mb-4">
+        {/* View Tabs */}
+        <div className="flex gap-2 mt-4">
           <button
             onClick={() => setCurrentView("dashboard")}
-            className={`flex-1 px-3 py-2 rounded text-sm transition-all ${
+            className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
               currentView === "dashboard"
-                ? "bg-accent text-white shadow-lg"
-                : "bg-[#1b1c1e] text-[#b0b0b0] hover:bg-[#2a2a2c] hover:text-white border border-[rgba(79,79,80,0.3)]"
+                ? "bg-gradient-to-r from-[#FD6262] to-[#ff7272] text-white shadow-lg shadow-[#FD6262]/30"
+                : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10"
             }`}
-            style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
           >
-            Dashboard
+            <Zap className="w-4 h-4" />
+            Live
           </button>
           <button
             onClick={() => setCurrentView("pos")}
-            className={`flex-1 px-3 py-2 rounded text-sm transition-all flex items-center gap-2 justify-center ${
+            className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
               currentView === "pos"
-                ? "bg-accent text-white shadow-lg"
-                : "bg-[#1b1c1e] text-[#b0b0b0] hover:bg-[#2a2a2c] hover:text-white border border-[rgba(79,79,80,0.3)]"
+                ? "bg-gradient-to-r from-[#FD6262] to-[#ff7272] text-white shadow-lg shadow-[#FD6262]/30"
+                : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10"
             }`}
-            style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
           >
-            <ShoppingCart className="w-4 h-4" />
-            POS & History
+            <TrendingUp className="w-4 h-4" />
+            History
           </button>
         </div>
 
+        {/* Search */}
         {currentView === "dashboard" && (
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#b0b0b0]" />
+          <div className="relative mt-4">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <input
               type="text"
-              placeholder={t.searchPlaceholder}
+              placeholder="Search calls..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#1b1c1e] border border-[rgba(79,79,80,0.3)] rounded pl-10 pr-4 py-3 text-sm text-white placeholder-[#666] focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
-              style={{ fontFamily: 'var(--font-body)' }}
+              className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FD6262]/50 focus:ring-2 focus:ring-[#FD6262]/20 transition-all"
             />
           </div>
         )}
       </div>
 
+      {/* Active Calls List */}
       {currentView === "dashboard" && (
-        <div className="p-6 flex-1 flex flex-col">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-sm text-[#b0b0b0] uppercase tracking-wider" style={{ fontFamily: 'var(--font-body)' }}>
-              {t.activeCalls}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="px-6 py-4 flex items-center justify-between border-b border-white/5">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+              <PhoneCall className="w-3.5 h-3.5" />
+              Active Calls
             </h3>
             <span
-              className={`text-xs px-3 py-1 rounded-full ${
+              className={`text-xs px-2.5 py-1 rounded-lg font-bold ${
                 filteredCalls.length > 0
-                  ? "bg-accent text-white animate-pulse-soft"
-                  : "bg-[#2a2a2c] text-[#666]"
+                  ? "bg-[#FD6262]/20 text-[#FD6262] border border-[#FD6262]/30"
+                  : "bg-white/5 text-gray-500 border border-white/5"
               }`}
-              style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
             >
               {filteredCalls.length}
             </span>
           </div>
 
-          {filteredCalls.length === 0 ? (
-            <div className="text-center py-12 flex-1 flex flex-col justify-center animate-fadeInUp">
-              <PhoneCall className="w-12 h-12 text-accent mx-auto mb-3 animate-pulse-soft" />
-              <p className="text-sm text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>
-                {isConnected
-                  ? "Waiting for calls..."
-                  : "Connecting to server..."}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3 flex-1 overflow-y-auto">
-              {filteredCalls.map((call) => (
-                <div
-                  key={call.id}
-                  onClick={() => handleCallClick(call)}
-                  className={`p-4 rounded border cursor-pointer transition-all duration-200 ${
-                    call.isSelected
-                      ? "card-gradient border-accent shadow-lg shadow-accent/20"
-                      : "bg-[#1b1c1e] border-[rgba(79,79,80,0.3)] hover:border-accent/50 hover:bg-[#2a2a2c]"
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-accent to-accent-light text-white rounded flex items-center justify-center text-sm font-light shadow-lg" style={{ fontFamily: 'var(--font-heading)' }}>
-                      {call.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm text-white truncate" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
-                        {call.callerName}
-                      </div>
-                      <div className="text-xs text-[#b0b0b0] truncate" style={{ fontFamily: 'var(--font-body)' }}>
-                        {call.phoneNumber}
-                      </div>
-                    </div>
-                    <div className="w-3 h-3 rounded-full bg-accent shadow-lg animate-pulse-soft"></div>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs mb-3">
-                    <span className="flex items-center gap-1 text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>
-                      <Clock className="w-3 h-3" />
-                      {call.duration}
-                    </span>
-                    <span className="text-xs px-2 py-1 rounded bg-accent/20 text-accent" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
-                      LIVE
-                    </span>
-                  </div>
-
-                  {/* 🔥 FIXED: Mute button for individual call - only show for selected call */}
-                  {call.isSelected && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevent call selection
-                        if (toggleCallMute) toggleCallMute();
-                      }}
-                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                        call.isAudioMuted
-                          ? "bg-red-600 hover:bg-red-700 text-white border border-red-500"
-                          : "bg-green-600 hover:bg-green-700 text-white border border-green-500"
-                      }`}
-                      title={
-                        call.isAudioMuted ? "Unmute this call's audio" : "Mute this call's audio"
-                      }
-                    >
-                      {call.isAudioMuted ? (
-                        <>
-                          <VolumeX className="w-3 h-3" />
-                          Call Muted
-                        </>
-                      ) : (
-                        <>
-                          <Volume2 className="w-3 h-3" />
-                          Call Audio On
-                        </>
-                      )}
-                    </button>
-                  )}
+          {/* Calls List */}
+          <div className="flex-1 overflow-y-auto px-4 py-4">
+            {filteredCalls.length === 0 ? (
+              <div className="text-center py-12 flex flex-col items-center justify-center h-full">
+                <div className="w-20 h-20 bg-gradient-to-br from-[#FD6262]/20 to-[#FD6262]/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#FD6262]/20">
+                  <PhoneCall className="w-10 h-10 text-[#FD6262]/60 animate-pulse" />
                 </div>
-              ))}
-            </div>
-          )}
+                <p className="text-sm text-gray-400 font-medium">
+                  {isConnected ? "Waiting for calls..." : "Connecting..."}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredCalls.map((call) => (
+                  <div
+                    key={call.id}
+                    onClick={() => handleCallClick(call)}
+                    className={`p-4 rounded-xl cursor-pointer transition-all duration-200 border ${
+                      call.isSelected
+                        ? "bg-gradient-to-br from-[#FD6262]/20 to-[#FD6262]/5 border-[#FD6262]/50 shadow-lg shadow-[#FD6262]/20"
+                        : "bg-white/5 border-white/10 hover:border-[#FD6262]/30 hover:bg-white/10"
+                    } ${call.status === 'ended' ? 'opacity-60' : ''}`}
+                  >
+                    {/* Call Header */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold shadow-lg relative ${
+                        call.status === 'ended'
+                          ? 'bg-gradient-to-br from-gray-700 to-gray-800 text-gray-400'
+                          : 'bg-gradient-to-br from-[#FD6262] to-[#ff8888] text-white'
+                      }`}>
+                        {call.avatar}
+                        {call.status !== 'ended' && (
+                          <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-black animate-pulse" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-bold text-white truncate flex items-center gap-2">
+                          {call.callerName}
+                          {call.isTakenOver && (
+                            <span className="px-1.5 py-0.5 bg-[#FD6262]/30 text-[#FD6262] text-[10px] rounded border border-[#FD6262]/50 font-bold">
+                              LIVE
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-400 truncate">
+                          {call.phoneNumber}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Call Info */}
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1.5 text-gray-400">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span className="font-medium">{call.duration}</span>
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {call.hasOrder && (
+                          <div className="w-1.5 h-1.5 rounded-full bg-green-500" title="Has order data" />
+                        )}
+                        <span className={`px-2 py-1 rounded-md font-bold text-[10px] ${
+                          call.status === 'ended'
+                            ? 'bg-gray-700/50 text-gray-400 border border-gray-600'
+                            : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                        }`}>
+                          {call.status === 'ended' ? 'ENDED' : 'LIVE'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Quick Info Bar */}
+                    {call.isSelected && call.status !== 'ended' && (
+                      <div className="mt-3 pt-3 border-t border-white/10">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-400">Quick Actions</span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleCallMute(call.id);
+                            }}
+                            className={`p-1.5 rounded-lg transition-all ${
+                              call.isAudioMuted
+                                ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                : 'bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10'
+                            }`}
+                          >
+                            {call.isAudioMuted ? (
+                              <VolumeX className="w-3.5 h-3.5" />
+                            ) : (
+                              <Volume2 className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
+
+      {/* Footer */}
+      <div className="border-t border-white/10 bg-black/30 px-6 py-4">
+        <div className="text-[10px] text-gray-500 text-center">
+          Powered by <span className="text-[#FD6262] font-bold">Vox AI</span>
+        </div>
+      </div>
     </div>
   );
 }

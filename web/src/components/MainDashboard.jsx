@@ -8,22 +8,34 @@ import {
   Loader,
   Clock,
   MapPin,
+  Phone,
+  User,
+  Mic,
+  MicOff,
+  UserCheck,
+  PhoneOff,
+  Volume2,
+  VolumeX,
+  Trash2,
+  RotateCcw,
 } from "lucide-react";
 import { AudioWaveform } from "./AudioWaveform";
 import { CallControls } from "./CallControls";
 import { LiveTranscript } from "./LiveTranscript";
 import { formatDuration, getStatusBadge } from "@/utils/dashboardUtils";
+import { useState } from "react";
+import { ConfirmationModal } from "./ConfirmationModal";
 
 export function MainDashboard({
   t,
   currentView,
-  selectedCall, // 🔥 NEW: Now contains full call data from multi-call state
-  selectedCallId, // 🔥 NEW: ID of selected call
-  audioActivity, // 🔥 NEW: Object with activity per call
+  selectedCall,
+  selectedCallId,
+  audioActivity,
   handleTakeOver,
-  isTakenOver, // 🔥 FIXED: Use prop instead of extracting from selectedCall
+  isTakenOver,
   endTakeOver,
-  isMicMuted, // 🔥 FIXED: Use prop instead of extracting from selectedCall
+  isMicMuted,
   toggleMicMute,
   endCall,
   isConnected,
@@ -34,30 +46,34 @@ export function MainDashboard({
   toggleAudio,
   initAudioContext,
   testAudio,
-  isSaving, // 🔥 FIXED: Use prop instead of extracting from selectedCall
-  lastSaveStatus, // 🔥 FIXED: Use prop instead of extracting from selectedCall
-  manualSaveCall, // 🔥 NEW: Takes callId parameter
-  isDemo, // 🔥 NEW: Demo mode flag
-  callStatus, // 🔥 NEW: Call status for demo
-  // 🔥 NEW: Demo props (when not using selectedCall)
+  isSaving,
+  lastSaveStatus,
+  manualSaveCall,
+  isDemo,
+  callStatus,
   transcript: transcriptProp,
   orderData: orderDataProp,
   callDuration: callDurationProp,
 }) {
+  const [showTakeOverModal, setShowTakeOverModal] = useState(false);
+  const [showEndCallModal, setShowEndCallModal] = useState(false);
+  const [showEndTakeOverModal, setShowEndTakeOverModal] = useState(false);
+
   // Only show for dashboard and live views
   if (currentView !== "dashboard" && currentView !== "live") {
     return null;
   }
 
-  // 🔥 FIXED: Get data from selected call object OR demo props
+  // Get data from selected call object OR demo props
   const callDuration = callDurationProp ?? selectedCall?.duration ?? 0;
   const orderData = orderDataProp ?? selectedCall?.orderData ?? null;
   const transcript = transcriptProp ?? selectedCall?.transcript ?? [];
+  const isCallEnded = selectedCall?.isCallEnded || false;
   const currentAudioActivity = selectedCallId
     ? (typeof audioActivity === 'object' ? audioActivity[selectedCallId] : audioActivity) || 0
-    : (typeof audioActivity === 'number' ? audioActivity : 0); // 🔥 FIXED: Support both object (multi-call) and number (demo) modes
+    : (typeof audioActivity === 'number' ? audioActivity : 0);
 
-  // ✅ IMPROVED: Save button logic with better validation and feedback
+  // Save button logic
   const hasTranscript = transcript && transcript.length > 0;
   const hasOrderData =
     orderData &&
@@ -67,381 +83,438 @@ export function MainDashboard({
       orderData.total_price ||
       (orderData.order_items && orderData.order_items.length > 0));
   const hasContent = hasTranscript || hasOrderData;
-  const canSave = hasContent && !isSaving && (selectedCallId || isDemo); // 🔥 FIXED: Allow saving in demo mode without selectedCallId
+  const canSave = hasContent && !isSaving && (selectedCallId || isDemo);
 
-  // ✅ IMPROVED: Dynamic button text based on actual content
   const getButtonText = () => {
     if (isSaving) return "Saving...";
     if (!selectedCallId && !isDemo) return "No Call Selected";
     if (!hasContent) return "No Content to Save";
-    if (hasTranscript && hasOrderData) {
-      const itemCount = orderData.order_items?.length || 0;
-      const transcriptCount = transcript.length;
-      return `Save Call (${itemCount} items, ${transcriptCount} messages)`;
-    }
-    if (hasTranscript) return `Save Transcript (${transcript.length} messages)`;
-    if (hasOrderData) {
-      const itemCount = orderData.order_items?.length || 0;
-      return `Save Order (${itemCount} items)`;
-    }
     return "Save Call";
   };
 
-  const getButtonTitle = () => {
-    if (isSaving) return "Saving call data...";
-    if (!selectedCallId && !isDemo) return "Please select a call first";
-    if (!hasContent) return "No transcript or order data available to save";
-
-    let details = [];
-    if (hasOrderData) {
-      if (orderData.customer_name)
-        details.push(`Customer: ${orderData.customer_name}`);
-      if (orderData.phone_number)
-        details.push(`Phone: ${orderData.phone_number}`);
-      if (orderData.order_items?.length)
-        details.push(`${orderData.order_items.length} order items`);
-      if (orderData.total_price)
-        details.push(`Total: ${orderData.total_price}`);
-    }
-    if (hasTranscript) {
-      details.push(`${transcript.length} conversation messages`);
-    }
-
-    return details.length > 0
-      ? `Save call with: ${details.join(", ")}`
-      : "Save current call data";
-  };
-
-  // 🔥 FIXED: Handle save call button click (demo vs multi-call)
   const handleSaveClick = () => {
     if (canSave) {
-      // In demo mode, manualSaveCall doesn't need a parameter
-      // In multi-call mode, it needs the callId
       if (isDemo) {
-        manualSaveCall();
-      } else if (selectedCallId) {
+        // Demo mode save
+        console.log("Demo save clicked");
+      } else {
+        // Real save
         manualSaveCall(selectedCallId);
       }
     }
   };
 
-  // Customer display data
-  const displayName =
-    orderData?.customer_name ||
-    (isConnected ? (
-      <span className="text-gray-600 italic">Extracting customer name...</span>
-    ) : (
-      "Waiting for call..."
-    ));
-  const displayPhone =
-    orderData?.phone_number ||
-    (isConnected ? (
-      <span className="text-gray-600 italic">Extracting phone number...</span>
-    ) : (
-      "..."
-    ));
+  // Format duration
+  const formatTime = (seconds) => {
+    if (!seconds || seconds === 0) return "00:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
-  // 🔥 FIXED: Skip waiting states in demo mode (demo handles its own waiting state)
-  // If not connected and no selected call, show waiting state
-  if (!isDemo && !isConnected && !selectedCall) {
+  // No call selected
+  if (!selectedCallId && !isDemo) {
     return (
-      <div className="flex-1 flex items-center justify-center h-full animate-fadeInUp">
-        <div className="text-center card-gradient rounded-lg p-12">
-          <PhoneCall className="w-20 h-20 text-accent mx-auto mb-4 animate-pulse-soft" />
-          <h3 className="text-xl font-light text-white mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
-            Waiting for active call...
-          </h3>
-          <p className="text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>
-            Call details will appear when a customer connects
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="text-center max-w-md">
+          <div className="w-24 h-24 bg-gradient-to-br from-[#FD6262]/20 to-[#FD6262]/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-[#FD6262]/20">
+            <PhoneCall className="w-12 h-12 text-[#FD6262]/60" />
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-3">No Call Selected</h3>
+          <p className="text-gray-400">
+            Select a call from the sidebar to view details and controls
           </p>
         </div>
       </div>
     );
   }
 
-  // If connected but no call selected
-  if (!isDemo && isConnected && !selectedCall && !selectedCallId) {
-    return (
-      <div className="flex-1 flex items-center justify-center h-full animate-fadeInUp">
-        <div className="text-center card-gradient rounded-lg p-12">
-          <PhoneCall className="w-20 h-20 text-accent mx-auto mb-4" />
-          <h3 className="text-xl font-light text-white mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
-            Select a call from the sidebar
-          </h3>
-          <p className="text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>Click on a call to view its details</p>
-        </div>
-      </div>
-    );
-  }
-
-  const isLiveView = currentView === "live";
-
   return (
-    <div
-      className={`${
-        isLiveView ? "flex flex-col flex-1 min-h-0" : ""
-      } p-4 lg:p-8 space-y-4 lg:space-y-6 animate-fadeInUp`}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between flex-shrink-0">
-        <h2 className="text-xl lg:text-2xl font-light text-white" style={{ fontFamily: 'var(--font-heading)' }}>
-          {isLiveView ? t.liveConversation : "Live Dashboard"}
-        </h2>
-
-        {/* Save Controls - Desktop */}
-        <div className="hidden lg:flex items-center gap-3">
-          {/* Save Status Indicator */}
-          {lastSaveStatus && (
-            <div className="flex items-center gap-2 text-sm">
-              {lastSaveStatus.success ? (
-                <>
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span className="text-green-400">
-                    Saved {lastSaveStatus.timestamp.toLocaleTimeString()}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="w-4 h-4 text-red-500" />
-                  <span className="text-red-400">Save failed</span>
-                </>
-              )}
-            </div>
-          )}
-
-          {/* Manual Save Button */}
-          <button
-            onClick={handleSaveClick}
-            disabled={!canSave}
-            className={`flex items-center gap-2 px-6 py-3 rounded transition-all ${
-              canSave
-                ? "bg-accent hover:bg-[#ff7272] text-white hover-lift shadow-lg"
-                : "bg-[#2a2a2c] text-[#666] cursor-not-allowed"
-            }`}
-            style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
-            title={getButtonTitle()}
-          >
-            {isSaving ? (
-              <>
-                <Loader className="w-4 h-4 animate-spin" />
-                {getButtonText()}
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                {getButtonText()}
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Dashboard View - Show Call Header, Waveform, and Controls */}
-      {!isLiveView && (
-        <>
-          {/* Call Header */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between pb-4 lg:pb-6 border-b border-[rgba(79,79,80,0.3)] gap-4 lg:gap-0">
-            <div className="flex items-center gap-3 lg:gap-6">
-              <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-accent to-accent-light text-white rounded-lg flex items-center justify-center font-light text-sm lg:text-lg shadow-lg flex-shrink-0 hover-scale" style={{ fontFamily: 'var(--font-heading)' }}>
-                {orderData?.customer_name
-                  ? orderData.customer_name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .toUpperCase()
-                  : "??"}
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#0a0a0a] via-[#141416] to-[#0a0a0a]">
+      {/* Top Bar - Call Status & Timer */}
+      <div className="border-b border-white/5 bg-black/20 backdrop-blur-xl">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Call Info */}
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center border ${
+                  isCallEnded
+                    ? 'from-gray-700 to-gray-800 border-gray-700'
+                    : 'from-[#FD6262] to-[#ff8888] border-[#FD6262]/50 animate-pulse-slow'
+                }`}>
+                  {orderData?.customer_name ? (
+                    <span className="text-xl font-bold text-white">
+                      {orderData.customer_name.split(" ").map(n => n[0]).join("").toUpperCase()}
+                    </span>
+                  ) : (
+                    <Phone className="w-6 h-6 text-white" />
+                  )}
+                </div>
+                {!isCallEnded && (
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-black animate-pulse" />
+                )}
               </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-lg lg:text-2xl font-light text-white mb-1 truncate" style={{ fontFamily: 'var(--font-heading)' }}>
-                  {displayName}
+              <div>
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  {orderData?.customer_name || "Incoming Call"}
+                  {isCallEnded && (
+                    <span className="px-2 py-0.5 bg-gray-700/50 text-gray-300 text-xs rounded-md border border-gray-600">
+                      ENDED
+                    </span>
+                  )}
+                  {!isCallEnded && isTakenOver && (
+                    <span className="px-2 py-0.5 bg-[#FD6262]/20 text-[#FD6262] text-xs rounded-md border border-[#FD6262]/30 animate-pulse">
+                      YOU'RE LIVE
+                    </span>
+                  )}
                 </h2>
-                <p className="text-[#b0b0b0] text-sm lg:text-base truncate" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
-                  {displayPhone}
+                <p className="text-sm text-gray-400 flex items-center gap-2 mt-1">
+                  <Clock className="w-3.5 h-3.5" />
+                  {formatTime(callDuration)}
+                  {selectedCallId && (
+                    <>
+                      <span className="text-gray-600">•</span>
+                      <span className="text-xs text-gray-500">ID: {selectedCallId.substring(0, 8)}</span>
+                    </>
+                  )}
                 </p>
               </div>
-              <div
-                className="px-3 py-1 lg:px-4 lg:py-2 rounded text-xs lg:text-sm font-medium border border-accent bg-accent/10 text-accent flex-shrink-0 animate-pulse-soft"
-                style={{ fontFamily: 'var(--font-body)' }}
-              >
-                IN-PROGRESS
-              </div>
             </div>
-            <div className="flex items-center justify-end lg:gap-8">
-              <div className="text-center">
-                <div className="text-xs lg:text-sm text-[#b0b0b0] mb-1 uppercase tracking-wide" style={{ fontFamily: 'var(--font-body)' }}>
-                  {t.duration}
-                </div>
-                <div className="text-lg lg:text-xl font-light font-mono text-accent" style={{ fontFamily: 'var(--font-heading)' }}>
-                  {formatDuration(callDuration)}
-                </div>
+
+            {/* Audio Status */}
+            <div className="flex items-center gap-3">
+              {/* Connection Status */}
+              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
+                isConnected
+                  ? 'bg-green-500/10 border-green-500/30 text-green-400'
+                  : 'bg-red-500/10 border-red-500/30 text-red-400'
+              }`}>
+                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'} ${isConnected && 'animate-pulse'}`} />
+                <span className="text-xs font-medium">{isConnected ? 'Connected' : 'Disconnected'}</span>
+              </div>
+
+              {/* Audio Waveform */}
+              <div className="flex items-center gap-2 px-4 py-2 bg-black/30 rounded-lg border border-white/5">
+                <Volume2 className="w-4 h-4 text-[#FD6262]" />
+                <AudioWaveform audioActivity={currentAudioActivity} isActive={!isCallEnded} />
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Audio Waveform */}
-          <AudioWaveform t={t} audioActivity={currentAudioActivity} />
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-hidden flex">
+        {/* Left Side - Transcript & Order */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* Order Data Card */}
+            {hasOrderData && (
+              <div className="bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+                <div className="bg-gradient-to-r from-[#FD6262]/20 to-transparent px-6 py-4 border-b border-white/10">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <User className="w-5 h-5 text-[#FD6262]" />
+                    Customer Information
+                  </h3>
+                </div>
+                <div className="p-6 space-y-4">
+                  {/* Customer Details */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {orderData.customer_name && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-gray-400 uppercase tracking-wide">Name</p>
+                        <p className="text-white font-medium">{orderData.customer_name}</p>
+                      </div>
+                    )}
+                    {orderData.phone_number && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-gray-400 uppercase tracking-wide">Phone</p>
+                        <p className="text-white font-medium flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-[#FD6262]" />
+                          {orderData.phone_number}
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
-          {/* Call Controls */}
-          <CallControls
-            t={t}
-            handleTakeOver={isDemo ? handleTakeOver : () => handleTakeOver(selectedCallId)}
-            isTakenOver={isTakenOver}
-            endTakeOver={isDemo ? endTakeOver : () => endTakeOver(selectedCallId)}
-            isMicMuted={isMicMuted}
-            toggleMicMute={isDemo ? toggleMicMute : () => toggleMicMute(selectedCallId)}
-            endCall={isDemo ? endCall : () => endCall(selectedCallId)}
-          />
-        </>
-      )}
-
-      {/* Order Summary Card - Show only for dashboard view when there's order data */}
-      {!isLiveView && orderData && (
-        <div className="card-gradient rounded-lg p-4 lg:p-6 hover-lift">
-          <h3 className="text-base lg:text-lg font-light text-white mb-4 flex items-center gap-2" style={{ fontFamily: 'var(--font-heading)' }}>
-            <div className="w-2 h-2 bg-accent rounded-full animate-pulse-soft"></div>
-            Current Order
-          </h3>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Order Items */}
-            <div>
-              <h4 className="text-sm text-[#b0b0b0] mb-2 uppercase tracking-wide" style={{ fontFamily: 'var(--font-body)' }}>Items</h4>
-              {orderData.order_items && orderData.order_items.length > 0 ? (
-                <div className="space-y-2">
-                  {orderData.order_items.slice(0, 3).map((item, idx) => (
-                    <div key={idx} className="text-sm text-white" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
-                      {item.quantity || 1}x {item.item}
+                  {orderData.delivery_address && (
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Delivery Address</p>
+                      <p className="text-white font-medium flex items-start gap-2">
+                        <MapPin className="w-4 h-4 text-[#FD6262] mt-0.5 flex-shrink-0" />
+                        <span>{orderData.delivery_address}</span>
+                      </p>
                     </div>
-                  ))}
-                  {orderData.order_items.length > 3 && (
-                    <div className="text-xs text-[#c0c0c0]" style={{ fontFamily: 'var(--font-body)' }}>
-                      +{orderData.order_items.length - 3} more items
+                  )}
+
+                  {/* Order Items */}
+                  {orderData.order_items && orderData.order_items.length > 0 && (
+                    <div className="space-y-3 pt-4 border-t border-white/10">
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Order Items</p>
+                      <div className="space-y-2">
+                        {orderData.order_items.map((item, idx) => (
+                          <div key={idx} className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/5 hover:border-[#FD6262]/30 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-[#FD6262]/20 rounded-lg flex items-center justify-center border border-[#FD6262]/30">
+                                <span className="text-[#FD6262] font-bold text-sm">{item.quantity || 1}</span>
+                              </div>
+                              <span className="text-white font-medium">{item.item}</span>
+                            </div>
+                            {item.price && (
+                              <span className="text-[#FD6262] font-bold">${item.price}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Total */}
+                  {orderData.total_price && (
+                    <div className="flex justify-between items-center pt-4 border-t border-white/10">
+                      <span className="text-lg font-bold text-white">Total</span>
+                      <span className="text-2xl font-bold text-[#FD6262]">${orderData.total_price}</span>
+                    </div>
+                  )}
+
+                  {/* Additional Info */}
+                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
+                    {orderData.delivery_time && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-gray-400 uppercase tracking-wide">Delivery Time</p>
+                        <p className="text-white font-medium">{orderData.delivery_time}</p>
+                      </div>
+                    )}
+                    {orderData.payment_method && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-gray-400 uppercase tracking-wide">Payment</p>
+                        <p className="text-white font-medium">{orderData.payment_method}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {orderData.special_instructions && (
+                    <div className="space-y-1 pt-4 border-t border-white/10">
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Special Instructions</p>
+                      <p className="text-white italic">{orderData.special_instructions}</p>
                     </div>
                   )}
                 </div>
-              ) : (
-                <div className="text-sm text-[#c0c0c0] italic" style={{ fontFamily: 'var(--font-body)' }}>
-                  Extracting items...
-                </div>
-              )}
-            </div>
-
-            {/* Delivery Info */}
-            <div>
-              <h4 className="text-sm text-[#b0b0b0] mb-2 uppercase tracking-wide flex items-center gap-1" style={{ fontFamily: 'var(--font-body)' }}>
-                <MapPin className="w-3 h-3" />
-                Delivery
-              </h4>
-              <div className="text-sm text-white" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
-                {orderData.delivery_address || (
-                  <span className="text-[#c0c0c0] italic">
-                    Extracting address...
-                  </span>
-                )}
               </div>
-              {orderData.delivery_time && (
-                <div className="text-xs text-[#c0c0c0] mt-1 flex items-center gap-1" style={{ fontFamily: 'var(--font-body)' }}>
-                  <Clock className="w-3 h-3" />
-                  {orderData.delivery_time}
-                </div>
-              )}
-            </div>
-
-            {/* Total */}
-            <div>
-              <h4 className="text-sm text-[#b0b0b0] mb-2 uppercase tracking-wide" style={{ fontFamily: 'var(--font-body)' }}>Total</h4>
-              <div className="text-xl font-light text-accent" style={{ fontFamily: 'var(--font-heading)' }}>
-                {orderData.total_price || (
-                  <span className="text-[#c0c0c0] italic text-base">
-                    Calculating...
-                  </span>
-                )}
-              </div>
-              {orderData.payment_method && (
-                <div className="text-xs text-[#c0c0c0] mt-1 capitalize" style={{ fontFamily: 'var(--font-body)' }}>
-                  {orderData.payment_method}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {orderData.special_instructions && (
-            <div className="mt-4 p-3 bg-accent/10 border border-accent/30 rounded">
-              <h4 className="text-accent font-medium text-sm mb-1" style={{ fontFamily: 'var(--font-body)' }}>
-                Special Instructions
-              </h4>
-              <p className="text-white text-sm" style={{ fontFamily: 'var(--font-body)', fontWeight: 300 }}>
-                {orderData.special_instructions}
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Live Transcript */}
-      <div className={isLiveView ? "flex-1 min-h-0" : ""}>
-        <LiveTranscript
-          t={t}
-          transcript={transcript}
-          orderData={orderData}
-          isConnected={isConnected}
-          error={error}
-          audioEnabled={audioEnabled}
-          isTakenOver={isTakenOver}
-          clearTranscript={isDemo ? clearTranscript : () => clearTranscript(selectedCallId)}
-          clearOrder={isDemo ? clearOrder : () => clearOrder(selectedCallId)}
-          toggleAudio={toggleAudio}
-          initAudioContext={initAudioContext}
-          testAudio={testAudio}
-          isSaving={isSaving}
-          lastSaveStatus={lastSaveStatus}
-        />
-      </div>
-
-      {/* Mobile Save Button */}
-      <div className="lg:hidden flex items-center justify-center gap-3 pt-4 border-t border-[rgba(79,79,80,0.3)]">
-        {lastSaveStatus && (
-          <div className="flex items-center gap-2 text-sm">
-            {lastSaveStatus.success ? (
-              <>
-                <CheckCircle className="w-4 h-4 text-accent" />
-                <span className="text-accent text-xs" style={{ fontFamily: 'var(--font-body)' }}>
-                  Saved {lastSaveStatus.timestamp.toLocaleTimeString()}
-                </span>
-              </>
-            ) : (
-              <>
-                <AlertCircle className="w-4 h-4 text-red-500" />
-                <span className="text-red-400 text-xs" style={{ fontFamily: 'var(--font-body)' }}>Save failed</span>
-              </>
             )}
-          </div>
-        )}
 
-        <button
-          onClick={handleSaveClick}
-          disabled={!canSave}
-          className={`flex items-center gap-2 px-6 py-3 rounded text-sm transition-all ${
-            canSave
-              ? "bg-accent hover:bg-[#ff7272] text-white shadow-lg"
-              : "bg-[#2a2a2c] text-[#666] cursor-not-allowed"
-          }`}
-          style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
-          title={getButtonTitle()}
-        >
-          {isSaving ? (
-            <>
-              <Loader className="w-4 h-4 animate-spin" />
-              {getButtonText()}
-            </>
-          ) : (
-            <>
-              <Save className="w-4 h-4" />
-              {getButtonText()}
-            </>
-          )}
-        </button>
+            {/* Transcript Card */}
+            <div className="bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden shadow-2xl flex flex-col min-h-[400px]">
+              <div className="bg-gradient-to-r from-[#FD6262]/20 to-transparent px-6 py-4 border-b border-white/10 flex items-center justify-between">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <PhoneCall className="w-5 h-5 text-[#FD6262]" />
+                  Live Transcript
+                  {transcript.length > 0 && (
+                    <span className="px-2 py-0.5 bg-[#FD6262]/20 text-[#FD6262] text-xs rounded-md border border-[#FD6262]/30">
+                      {transcript.length}
+                    </span>
+                  )}
+                </h3>
+                {transcript.length > 0 && (
+                  <button
+                    onClick={clearTranscript}
+                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg text-xs flex items-center gap-2 transition-all border border-white/10"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <LiveTranscript transcript={transcript} t={t} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side - Call Controls */}
+        <div className="w-96 border-l border-white/5 bg-black/20 backdrop-blur-xl flex flex-col">
+          <div className="p-6 space-y-4">
+            {/* Call Controls Header */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Call Controls</h3>
+
+              {/* Main Control Buttons */}
+              {!isCallEnded && (
+                <div className="space-y-3">
+                  {!isTakenOver ? (
+                    // Take Over Button
+                    <button
+                      onClick={() => setShowTakeOverModal(true)}
+                      className="w-full px-6 py-4 bg-gradient-to-r from-[#FD6262] to-[#ff7272] hover:from-[#ff7272] hover:to-[#FD6262] text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg shadow-[#FD6262]/30 hover:shadow-[#FD6262]/50 hover:scale-105 border border-[#FD6262]/50"
+                    >
+                      <UserCheck className="w-5 h-5" />
+                      Take Over Call
+                    </button>
+                  ) : (
+                    // Active Controls
+                    <div className="space-y-3">
+                      {/* Mic Control */}
+                      <button
+                        onClick={toggleMicMute}
+                        className={`w-full px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg border ${
+                          isMicMuted
+                            ? 'bg-red-600 hover:bg-red-700 text-white shadow-red-600/30 border-red-500'
+                            : 'bg-gradient-to-r from-[#FD6262] to-[#ff7272] hover:from-[#ff7272] hover:to-[#FD6262] text-white shadow-[#FD6262]/30 border-[#FD6262]/50'
+                        }`}
+                      >
+                        {isMicMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                        {isMicMuted ? 'Unmute Mic' : 'Mute Mic'}
+                      </button>
+
+                      {/* End Takeover Button */}
+                      <button
+                        onClick={() => setShowEndTakeOverModal(true)}
+                        className="w-full px-6 py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg border border-gray-600"
+                      >
+                        <RotateCcw className="w-5 h-5" />
+                        Return to AI
+                      </button>
+                    </div>
+                  )}
+
+                  {/* End Call Button */}
+                  <button
+                    onClick={() => setShowEndCallModal(true)}
+                    className="w-full px-6 py-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg shadow-red-600/30 hover:shadow-red-600/50 border border-red-500"
+                  >
+                    <PhoneOff className="w-5 h-5" />
+                    End Call
+                  </button>
+                </div>
+              )}
+
+              {isCallEnded && (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <PhoneOff className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-400">Call has ended</p>
+                </div>
+              )}
+            </div>
+
+            {/* Save Section */}
+            <div className="pt-4 border-t border-white/10">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Actions</h3>
+
+              <button
+                onClick={handleSaveClick}
+                disabled={!canSave}
+                className={`w-full px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg border ${
+                  canSave
+                    ? 'bg-white hover:bg-gray-100 text-black shadow-white/20 border-white hover:scale-105'
+                    : 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed'
+                }`}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader className="w-5 h-5 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-5 h-5" />
+                    {getButtonText()}
+                  </>
+                )}
+              </button>
+
+              {/* Save Status */}
+              {lastSaveStatus && (
+                <div className={`mt-3 p-3 rounded-lg text-sm flex items-center gap-2 ${
+                  lastSaveStatus.success
+                    ? 'bg-green-500/10 text-green-400 border border-green-500/30'
+                    : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                }`}>
+                  {lastSaveStatus.success ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4" />
+                  )}
+                  <span>
+                    {lastSaveStatus.success ? 'Saved successfully!' : `Failed: ${lastSaveStatus.error}`}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Audio Controls */}
+            <div className="pt-4 border-t border-white/10">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Audio</h3>
+
+              <div className="space-y-2">
+                <button
+                  onClick={toggleAudio}
+                  className={`w-full px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all border ${
+                    audioEnabled
+                      ? 'bg-[#FD6262]/20 text-[#FD6262] border-[#FD6262]/30 hover:bg-[#FD6262]/30'
+                      : 'bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700'
+                  }`}
+                >
+                  {audioEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                  {audioEnabled ? 'Audio Enabled' : 'Audio Disabled'}
+                </button>
+
+                {!audioEnabled && (
+                  <button
+                    onClick={initAudioContext}
+                    className="w-full px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-all border border-gray-700 text-sm"
+                  >
+                    Enable Audio
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Modals */}
+      <ConfirmationModal
+        isOpen={showTakeOverModal}
+        onClose={() => setShowTakeOverModal(false)}
+        onConfirm={() => {
+          handleTakeOver();
+          setShowTakeOverModal(false);
+        }}
+        title="Take Over Call"
+        message="Are you sure you want to take over this call? The AI will be paused and you'll be connected directly to the customer."
+        confirmText="Take Over"
+        confirmStyle="bg-[#FD6262] hover:bg-[#ff7272]"
+      />
+
+      <ConfirmationModal
+        isOpen={showEndTakeOverModal}
+        onClose={() => setShowEndTakeOverModal(false)}
+        onConfirm={() => {
+          endTakeOver();
+          setShowEndTakeOverModal(false);
+        }}
+        title="Return to AI"
+        message="Are you sure you want to return control to the AI? You'll be disconnected from the call."
+        confirmText="Return to AI"
+        confirmStyle="bg-gray-700 hover:bg-gray-600"
+      />
+
+      <ConfirmationModal
+        isOpen={showEndCallModal}
+        onClose={() => setShowEndCallModal(false)}
+        onConfirm={() => {
+          endCall();
+          setShowEndCallModal(false);
+        }}
+        title="End Call"
+        message="Are you sure you want to end this call? This action cannot be undone."
+        confirmText="End Call"
+        confirmStyle="bg-red-600 hover:bg-red-700"
+      />
     </div>
   );
 }
