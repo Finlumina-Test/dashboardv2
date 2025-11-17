@@ -290,7 +290,11 @@ export const playAudioHQ = async (
       audioId || `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const pcm16Data = decodePcm16(base64Audio, sourceFormat);
-    const targetRate = audioCtxRef.current.sampleRate;
+
+    // 🔥 CRITICAL FIX: Check if audioCtxRef exists before accessing sampleRate
+    // If not, we can still record but must skip playback
+    const audioCtxExists = audioCtxRef && audioCtxRef.current;
+    const targetRate = audioCtxExists ? audioCtxRef.current.sampleRate : 48000; // Fallback rate for recording
 
     // 🔥 DEBUG: Log ORIGINAL decoded audio before ANY processing
     const originalFloat32 = new Float32Array(pcm16Data.length);
@@ -311,6 +315,12 @@ export const playAudioHQ = async (
         timestamp: Date.now(),
       });
       console.log(`💾 RECORDED chunk #${audioChunksRef.current.length}: ${uniqueId}`);
+    }
+
+    // 🔥 SKIP PLAYBACK if audio context not initialized
+    if (!audioCtxExists) {
+      console.log(`⏭️ Audio context not initialized - recorded but not playing: ${uniqueId}`);
+      return;
     }
 
     // 🔥 DEDUPLICATE PLAYBACK ONLY: Check if we've already played this audio

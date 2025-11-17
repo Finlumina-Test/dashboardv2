@@ -80,7 +80,7 @@ export default function HomePage() {
               color: 'white',
               fontFamily: "'Open Sans', sans-serif",
               letterSpacing: '0.5px'
-            }}>VOX</span>
+            }}>Vox</span>
           </div>
 
           {/* Login Button */}
@@ -291,7 +291,7 @@ export default function HomePage() {
                   fontWeight: 'bold',
                   color: 'white',
                   fontFamily: "'Open Sans', sans-serif"
-                }}>VOX</span>
+                }}>Vox</span>
               </div>
               <p style={{
                 color: '#888',
@@ -313,9 +313,8 @@ export default function HomePage() {
                 fontFamily: "'Open Sans', sans-serif"
               }}>Quick Links</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <a href="#features" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>Features</a>
-                <a href="#how-it-works" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>How It Works</a>
-                <a href="#use-cases" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>Use Cases</a>
+                <a href="https://finlumina.com" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>Finlumina</a>
+                <a href="https://finlumina.com/about" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>About</a>
                 <a href="/login" style={{ color: '#FD6262', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif", fontWeight: '600' }}>Dashboard Login</a>
               </div>
             </div>
@@ -330,7 +329,7 @@ export default function HomePage() {
                 fontFamily: "'Open Sans', sans-serif"
               }}>Contact</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <a href="mailto:hello@vox.ai" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>hello@vox.ai</a>
+                <a href="mailto:sales@vox.finlumina.com" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>sales@vox.finlumina.com</a>
                 <p style={{ color: '#888', fontSize: '14px', margin: 0, fontFamily: "'Open Sans', sans-serif" }}>Available 24/7</p>
               </div>
             </div>
@@ -352,7 +351,7 @@ export default function HomePage() {
               margin: 0,
               fontFamily: "'Open Sans', sans-serif"
             }}>
-              © 2025 VOX. All rights reserved.
+              © 2025 Vox. All rights reserved.
             </p>
             <div style={{ display: 'flex', gap: '24px' }}>
               <a href="#" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>Privacy Policy</a>

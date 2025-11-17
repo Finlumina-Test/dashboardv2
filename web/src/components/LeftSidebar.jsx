@@ -312,7 +312,7 @@ export function LeftSidebar({
       {/* Footer */}
       <div className="border-t border-white/10 bg-black/30 px-6 py-4">
         <div className="text-[10px] text-gray-500 text-center">
-          Powered by <span className="text-[#FD6262] font-bold">Vox AI</span>
+          Powered by <span className="text-[#FD6262] font-bold">Finlumina</span>
         </div>
       </div>
     </div>
