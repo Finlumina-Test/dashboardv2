@@ -446,18 +446,29 @@ export function useWebSocketDemo(sessionId) {
   };
 
   const toggleAudio = async () => {
+    console.log(`🔊 toggleAudio called - current audioEnabled: ${audioEnabled}`);
+
     if (!audioEnabled) {
+      console.log("🔊 Attempting to enable audio...");
       const success = await initAudioContext(
         audioCtxRef,
         setAudioEnabled,
         setError,
       );
       if (!success) {
-        setError("Failed to enable audio");
+        console.error("❌ Failed to enable audio");
+        setError("Failed to enable audio - check browser permissions and ensure you've interacted with the page");
+      } else {
+        console.log("✅ Audio enabled successfully");
       }
     } else {
+      console.log("🔇 Disabling audio...");
       if (audioCtxRef.current) {
         await audioCtxRef.current.suspend();
+        setAudioEnabled(false);
+        console.log("✅ Audio disabled");
+      } else {
+        console.warn("⚠️ No audio context to suspend");
         setAudioEnabled(false);
       }
     }

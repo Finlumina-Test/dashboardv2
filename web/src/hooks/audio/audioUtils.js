@@ -352,10 +352,24 @@ export const playAudioHQ = async (
     const queue = getAudioQueue(speaker);
     const currentTime = audioCtxRef.current.currentTime;
 
-    // Calculate when this chunk should start
-    // If queue is ahead of current time, use queue time
-    // Otherwise, start immediately (catches up to real-time)
-    let startTime = Math.max(currentTime, queue.nextStartTime);
+    // 🔥 SMOOTH PLAYBACK: Add buffer to prevent choppy audio from network delays
+    // - Add small lookahead buffer (0.05s) to smooth out jitter
+    // - Only catch up if queue falls far behind (> 0.5s) to prevent unbounded latency
+    const LOOKAHEAD_BUFFER = 0.05; // 50ms buffer for smooth playback
+    const MAX_LATENCY = 0.5; // Maximum allowed latency before catching up
+
+    let startTime;
+    if (queue.nextStartTime === 0) {
+      // First chunk - start with small buffer
+      startTime = currentTime + LOOKAHEAD_BUFFER;
+    } else if (queue.nextStartTime < currentTime - MAX_LATENCY) {
+      // Queue fell too far behind - catch up but maintain small buffer
+      startTime = currentTime + LOOKAHEAD_BUFFER;
+      console.log(`⚠️ Queue behind by ${(currentTime - queue.nextStartTime).toFixed(3)}s, catching up`);
+    } else {
+      // Normal case - schedule at next available time (maintains smooth continuous playback)
+      startTime = queue.nextStartTime;
+    }
 
     // Create audio buffer at SOURCE sample rate - Web Audio API will handle resampling
     const buffer = audioCtxRef.current.createBuffer(
@@ -412,29 +426,54 @@ export const initAudioContext = async (
     console.log("🔊 Initializing audio context...");
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 
+    if (!AudioContextClass) {
+      console.error("❌ Web Audio API not supported in this browser");
+      setError("Web Audio API not supported in this browser");
+      return false;
+    }
+
     if (!audioCtxRef.current) {
+      console.log("🔊 Creating new audio context...");
       audioCtxRef.current = new AudioContextClass({
         sampleRate: 48000,
         latencyHint: "interactive",
       });
-      console.log(`🔊 Audio context created (sample rate: ${audioCtxRef.current.sampleRate}Hz)`);
+      console.log(`🔊 Audio context created (sample rate: ${audioCtxRef.current.sampleRate}Hz, state: ${audioCtxRef.current.state})`);
+    } else {
+      console.log(`🔊 Audio context already exists (state: ${audioCtxRef.current.state})`);
     }
 
     if (audioCtxRef.current.state === "suspended") {
       console.log("🔊 Resuming suspended audio context...");
       await audioCtxRef.current.resume();
+      console.log(`🔊 Audio context resumed (state: ${audioCtxRef.current.state})`);
+    }
+
+    if (audioCtxRef.current.state !== "running") {
+      console.warn(`⚠️ Audio context state is "${audioCtxRef.current.state}" (expected "running")`);
+      console.log("⚠️ This may be due to browser autoplay policy - user interaction required");
     }
 
     console.log(`✅ Audio context ready! State: ${audioCtxRef.current.state}`);
     setAudioEnabled(true);
 
     // Play a short beep to confirm audio is working
-    playTestBeep(audioCtxRef);
+    try {
+      playTestBeep(audioCtxRef);
+      console.log("🔔 Test beep played successfully");
+    } catch (beepError) {
+      console.warn("⚠️ Failed to play test beep:", beepError);
+    }
 
     return true;
   } catch (error) {
     console.error("❌ Failed to initialize audio context:", error);
-    setError("Audio initialization failed - check browser permissions");
+    console.error("Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    });
+    setError(`Audio initialization failed: ${error.message}`);
     return false;
   }
 };
