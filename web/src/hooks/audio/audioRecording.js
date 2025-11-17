@@ -99,15 +99,53 @@ export const createWavBlob = (audioChunks) => {
       }
     }
 
-    resampledChunks.push(resampledData);
+    resampledChunks.push({ data: resampledData, speaker: chunk.speaker });
   }
-  // Calculate total length from resampled chunks
-  let totalLength = 0;
+
+  // 🔥 SPEAKER-SPECIFIC CROSSFADE: Apply crossfade to eliminate gaps in recordings
+  // AI: 10ms crossfade (smooth robotic TTS)
+  // Caller: 2ms crossfade (preserve natural speech)
+  const crossfadedChunks = [];
   for (let i = 0; i < resampledChunks.length; i++) {
-    totalLength += resampledChunks[i].length;
+    const chunk = resampledChunks[i];
+    const isAI = chunk.speaker === 'ai' || chunk.speaker === 'AI' || chunk.speaker === 'assistant';
+
+    // Determine crossfade duration based on speaker
+    const fadeDuration = isAI ? 0.01 : 0.002; // 10ms for AI, 2ms for caller
+    const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
+
+    const smoothedData = new Float32Array(chunk.data);
+
+    // Apply fade-in (except for first chunk)
+    if (i > 0 && fadeSamples > 0) {
+      const fadeInSamples = Math.min(fadeSamples, smoothedData.length);
+      for (let j = 0; j < fadeInSamples; j++) {
+        const fadeGain = j / fadeInSamples;
+        smoothedData[j] *= fadeGain;
+      }
+    }
+
+    // Apply fade-out (except for last chunk)
+    if (i < resampledChunks.length - 1 && fadeSamples > 0) {
+      const fadeOutSamples = Math.min(fadeSamples, smoothedData.length);
+      const fadeOutStart = smoothedData.length - fadeOutSamples;
+      for (let j = fadeOutStart; j < smoothedData.length; j++) {
+        const fadeGain = (smoothedData.length - j) / fadeOutSamples;
+        smoothedData[j] *= fadeGain;
+      }
+    }
+
+    crossfadedChunks.push(smoothedData);
+    console.log(`🎚️ Recording: ${isAI ? 'AI' : 'Caller'} chunk ${i} - ${(fadeDuration * 1000).toFixed(0)}ms crossfade applied`);
+  }
+
+  // Calculate total length from crossfaded chunks
+  let totalLength = 0;
+  for (let i = 0; i < crossfadedChunks.length; i++) {
+    totalLength += crossfadedChunks[i].length;
   }
   console.log(
-    `📏 Total length after resampling: ${totalLength} samples at ${targetSampleRate}Hz`,
+    `📏 Total length after crossfade: ${totalLength} samples at ${targetSampleRate}Hz`,
   );
   if (!isFinite(totalLength) || totalLength <= 0 || totalLength > 100000000) {
     console.error(`❌ Invalid total length: ${totalLength}`);
@@ -122,10 +160,10 @@ export const createWavBlob = (audioChunks) => {
     console.error("❌ Failed to create combined audio array:", error.message);
     return null;
   }
-  // Concatenate all resampled chunks
+  // Concatenate all crossfaded chunks
   let offset = 0;
-  for (let i = 0; i < resampledChunks.length; i++) {
-    const data = resampledChunks[i];
+  for (let i = 0; i < crossfadedChunks.length; i++) {
+    const data = crossfadedChunks[i];
 
     if (offset + data.length > combinedAudio.length) {
       console.error(`❌ Not enough space for chunk ${i}`);
