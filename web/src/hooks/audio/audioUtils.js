@@ -293,7 +293,27 @@ export const playAudioHQ = async (
 
     // 🔥 CRITICAL FIX: Check if audioCtxRef exists before accessing sampleRate
     // If not, we can still record but must skip playback
-    const audioCtxExists = audioCtxRef && audioCtxRef.current;
+    let audioCtxExists = audioCtxRef && audioCtxRef.current;
+
+    // 🔥 AUTO-INITIALIZE: Try to initialize audio context if it doesn't exist yet
+    // This allows audio to work without user having to click "Audio ON" button
+    if (!audioCtxExists && typeof window !== 'undefined') {
+      try {
+        console.log("🔊 Auto-initializing audio context on first chunk...");
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass && audioCtxRef) {
+          audioCtxRef.current = new AudioContextClass({
+            sampleRate: 48000,
+            latencyHint: "interactive",
+          });
+          audioCtxExists = true;
+          console.log(`✅ Audio context auto-created (state: ${audioCtxRef.current.state})`);
+        }
+      } catch (e) {
+        console.warn("⚠️ Could not auto-initialize audio context:", e.message);
+      }
+    }
+
     const targetRate = audioCtxExists ? audioCtxRef.current.sampleRate : 48000; // Fallback rate for recording
 
     // 🔥 DEBUG: Log ORIGINAL decoded audio before ANY processing
@@ -371,13 +391,35 @@ export const playAudioHQ = async (
       startTime = queue.nextStartTime;
     }
 
+    // 🔥 SMOOTH TRANSITIONS: Apply crossfade to eliminate clicks/pops between chunks
+    // Add 10ms fade-in and fade-out to smooth transitions
+    const FADE_SAMPLES = Math.floor(sourceRate * 0.01); // 10ms fade
+    const smoothedAudio = new Float32Array(originalFloat32);
+
+    // Apply fade-in at the beginning (except for very first chunk)
+    if (queue.nextStartTime > 0) {
+      const fadeInSamples = Math.min(FADE_SAMPLES, smoothedAudio.length);
+      for (let i = 0; i < fadeInSamples; i++) {
+        const fadeGain = i / fadeInSamples; // Linear fade 0 -> 1
+        smoothedAudio[i] *= fadeGain;
+      }
+    }
+
+    // Apply fade-out at the end
+    const fadeOutSamples = Math.min(FADE_SAMPLES, smoothedAudio.length);
+    const fadeOutStart = smoothedAudio.length - fadeOutSamples;
+    for (let i = fadeOutStart; i < smoothedAudio.length; i++) {
+      const fadeGain = (smoothedAudio.length - i) / fadeOutSamples; // Linear fade 1 -> 0
+      smoothedAudio[i] *= fadeGain;
+    }
+
     // Create audio buffer at SOURCE sample rate - Web Audio API will handle resampling
     const buffer = audioCtxRef.current.createBuffer(
       1,
-      originalFloat32.length,
+      smoothedAudio.length,
       sourceRate, // Use source rate - backend sends correct quality now!
     );
-    buffer.getChannelData(0).set(originalFloat32);
+    buffer.getChannelData(0).set(smoothedAudio);
 
     // Calculate duration
     const duration = buffer.duration;
@@ -424,6 +466,9 @@ export const initAudioContext = async (
 ) => {
   try {
     console.log("🔊 Initializing audio context...");
+    console.log("🔊 audioCtxRef:", audioCtxRef);
+    console.log("🔊 audioCtxRef.current:", audioCtxRef?.current);
+
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 
     if (!AudioContextClass) {
@@ -449,9 +494,23 @@ export const initAudioContext = async (
       console.log(`🔊 Audio context resumed (state: ${audioCtxRef.current.state})`);
     }
 
+    // 🔥 FORCE RESUME: Try to resume even if state shows "running" (helps with some browsers)
+    if (audioCtxRef.current.state === "running") {
+      console.log("✅ Audio context already running");
+    } else {
+      console.log(`🔊 Attempting to start audio context (current state: ${audioCtxRef.current.state})...`);
+      try {
+        await audioCtxRef.current.resume();
+        console.log(`🔊 Resume attempted, new state: ${audioCtxRef.current.state}`);
+      } catch (resumeError) {
+        console.warn("⚠️ Failed to resume audio context:", resumeError);
+      }
+    }
+
     if (audioCtxRef.current.state !== "running") {
       console.warn(`⚠️ Audio context state is "${audioCtxRef.current.state}" (expected "running")`);
       console.log("⚠️ This may be due to browser autoplay policy - user interaction required");
+      console.log("⚠️ Audio context will remain in suspended state until user interacts with page");
     }
 
     console.log(`✅ Audio context ready! State: ${audioCtxRef.current.state}`);
