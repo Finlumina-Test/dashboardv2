@@ -265,7 +265,7 @@ export function MainDashboard({
 
               {/* Audio Waveform - Minimal */}
               <div className="px-4 py-2 bg-black/30 rounded-lg border border-white/5">
-                <AudioWaveform audioActivity={currentAudioActivity} isActive={!isCallEnded} />
+                <AudioWaveform audioActivity={currentAudioActivity} minimal={true} />
               </div>
             </div>
           </div>

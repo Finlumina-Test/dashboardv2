@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Volume2, Mic } from "lucide-react";
 
-export function AudioWaveform({ t, audioActivity = 0 }) {
+export function AudioWaveform({ t, audioActivity = 0, minimal = false }) {
   const [waveformBars, setWaveformBars] = useState([]);
 
   // Generate dynamic waveform based on audio activity
   useEffect(() => {
     const generateWaveform = () => {
-      const numBars = 60; // More bars for smoother look
+      const numBars = minimal ? 40 : 60; // Fewer bars for minimal mode
       const newBars = [];
 
       for (let i = 0; i < numBars; i++) {
@@ -21,7 +21,7 @@ export function AudioWaveform({ t, audioActivity = 0 }) {
           ); // Center emphasis
           const height = Math.max(
             4,
-            Math.min(80, Math.abs(wave) + audioInfluence + centerBoost * 20),
+            Math.min(minimal ? 40 : 80, Math.abs(wave) + audioInfluence + centerBoost * 20),
           );
           newBars.push(height);
         } else {
@@ -43,8 +43,49 @@ export function AudioWaveform({ t, audioActivity = 0 }) {
     );
 
     return () => clearInterval(interval);
-  }, [audioActivity]);
+  }, [audioActivity, minimal]);
 
+  // Minimal mode - just the waveform
+  if (minimal) {
+    return (
+      <div className="relative h-8 flex items-end justify-center gap-0.5 overflow-hidden">
+        {waveformBars.map((height, i) => {
+          const normalizedIndex = i / waveformBars.length;
+          const isCenter = Math.abs(normalizedIndex - 0.5) < 0.3;
+
+          return (
+            <div
+              key={i}
+              className={`rounded-full transition-all duration-200 ease-out ${
+                audioActivity > 0 ? "opacity-90" : "opacity-40"
+              }`}
+              style={{
+                height: `${height * 0.5}px`,
+                width: "2px",
+                background: isCenter
+                  ? `linear-gradient(to top,
+                      ${audioActivity > 20 ? "#FD6262" : "#FEB0B0"} 0%,
+                      ${audioActivity > 20 ? "#ff7272" : "#FD6262"} 50%,
+                      ${audioActivity > 20 ? "#ff8989" : "#ff7272"} 100%)`
+                  : `linear-gradient(to top,
+                      #3a3d50 0%,
+                      #4a4d60 50%,
+                      #5a5d70 100%)`,
+                boxShadow:
+                  isCenter && audioActivity > 10
+                    ? `0 0 6px ${audioActivity > 20 ? "#FD6262" : "#FEB0B0"}40`
+                    : "none",
+                transform:
+                  audioActivity > 0 && isCenter ? "scaleY(1.1)" : "scaleY(1)",
+              }}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Full mode with all decorations
   return (
     <div className="card-gradient rounded-lg p-4 lg:p-8 mb-4 lg:mb-8 shadow-lg hover-lift">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 lg:mb-6 gap-3 lg:gap-0">

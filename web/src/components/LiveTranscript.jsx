@@ -46,50 +46,18 @@ export function LiveTranscript({
             </span>
           </div>
 
-          {/* Audio Controls - Made More Prominent */}
-          <div className="flex items-center gap-3 bg-[#1b1c1e] rounded p-2 border border-[rgba(79,79,80,0.3)]">
-            <button
-              onClick={toggleAudio}
-              className={`px-3 lg:px-4 py-2 border rounded font-medium transition-all text-sm ${
-                audioEnabled
-                  ? "bg-accent border-accent text-white hover:bg-[#ff7272] shadow-lg"
-                  : "border-[rgba(79,79,80,0.3)] text-[#b0b0b0] hover:border-accent/50 hover:bg-[#2a2a2c] bg-[#1b1c1e]"
-              }`}
-              style={{ fontFamily: 'var(--font-body)' }}
-            >
-              {audioEnabled ? "🔊 Audio ON" : "🔇 Audio OFF"}
-            </button>
-
-            {!audioEnabled && (
-              <button
-                onClick={initAudioContext}
-                className="px-3 py-2 border border-accent/50 text-accent-light bg-accent/10 rounded hover:border-accent hover:bg-accent/20 transition-all text-sm font-medium"
-                style={{ fontFamily: 'var(--font-body)' }}
-              >
-                🎵 Enable Audio
-              </button>
-            )}
-
-            {audioEnabled && (
-              <button
-                onClick={testAudio}
-                className="px-3 py-2 border border-accent/50 text-accent-light bg-accent/10 rounded hover:border-accent hover:bg-accent/20 transition-all text-sm font-medium"
-                style={{ fontFamily: 'var(--font-body)' }}
-              >
-                🔔 Test Sound
-              </button>
-            )}
-
-            {transcript.length > 0 && !isTakenOver && (
-              <button
-                onClick={handleClearAll}
-                className="text-xs text-[#b0b0b0] hover:text-white px-2 py-1 border border-[rgba(79,79,80,0.3)] rounded hover:border-accent/50 transition-all"
-                style={{ fontFamily: 'var(--font-body)' }}
-              >
-                Clear
-              </button>
-            )}
-          </div>
+          {/* Audio Controls - Simplified */}
+          <button
+            onClick={toggleAudio}
+            className={`px-4 py-2.5 border rounded-lg font-medium transition-all text-sm shadow-lg ${
+              audioEnabled
+                ? "bg-gradient-to-r from-[#FD6262] to-[#ff8585] border-[#FD6262]/50 text-white hover:from-[#ff7272] hover:to-[#ff9595]"
+                : "border-white/10 text-gray-400 hover:border-[#FD6262]/50 hover:bg-black/40 bg-black/20"
+            }`}
+            style={{ fontFamily: 'var(--font-body)' }}
+          >
+            {audioEnabled ? "🔊 Audio ON" : "🔇 Audio OFF"}
+          </button>
         </div>
       </div>
 

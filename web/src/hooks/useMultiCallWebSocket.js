@@ -123,13 +123,21 @@ export function useMultiCallWebSocket(restaurantId) {
 
   // 🔥 NEW: Update specific call data
   const updateCall = (callId, updates) => {
-    setCalls((prev) => ({
-      ...prev,
-      [callId]: {
-        ...prev[callId],
-        ...updates,
-      },
-    }));
+    setCalls((prev) => {
+      const prevCall = prev[callId];
+      if (!prevCall) return prev;
+
+      // Handle functional updates
+      const newData = typeof updates === 'function' ? updates(prevCall) : updates;
+
+      return {
+        ...prev,
+        [callId]: {
+          ...prevCall,
+          ...newData,
+        },
+      };
+    });
   };
 
   // 🔥 NEW: Add transcript message to specific call
