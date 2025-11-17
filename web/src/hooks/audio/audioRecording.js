@@ -102,55 +102,35 @@ export const createWavBlob = (audioChunks) => {
     resampledChunks.push({ data: resampledData, speaker: chunk.speaker });
   }
 
-  // 🔥 SPEAKER-SPECIFIC CROSSFADE: Apply crossfade to eliminate gaps in recordings
-  // AI: 10ms crossfade (smooth robotic TTS)
-  // Caller: 2ms crossfade (preserve natural speech)
-  const crossfadedChunks = [];
+  // 🔥 SPEAKER-SPECIFIC CROSSFADE WITH OVERLAP: Blend chunks like real-time audio
+  // AI: 10ms crossfade (smooth robotic TTS) - same as real-time
+  // Caller: 2ms crossfade (preserve natural speech) - same as real-time
+
+  // Calculate total length accounting for overlaps
+  let totalLength = 0;
+  const overlapSamples = [];
   for (let i = 0; i < resampledChunks.length; i++) {
     const chunk = resampledChunks[i];
     const isAI = chunk.speaker === 'ai' || chunk.speaker === 'AI' || chunk.speaker === 'assistant';
-
-    // Determine crossfade duration based on speaker
     const fadeDuration = isAI ? 0.01 : 0.002; // 10ms for AI, 2ms for caller
     const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
 
-    const smoothedData = new Float32Array(chunk.data);
+    overlapSamples.push(fadeSamples);
+    totalLength += chunk.data.length;
 
-    // Apply fade-in (except for first chunk)
-    if (i > 0 && fadeSamples > 0) {
-      const fadeInSamples = Math.min(fadeSamples, smoothedData.length);
-      for (let j = 0; j < fadeInSamples; j++) {
-        const fadeGain = j / fadeInSamples;
-        smoothedData[j] *= fadeGain;
-      }
+    // Subtract overlap for all chunks except the first
+    if (i > 0) {
+      totalLength -= fadeSamples;
     }
-
-    // Apply fade-out (except for last chunk)
-    if (i < resampledChunks.length - 1 && fadeSamples > 0) {
-      const fadeOutSamples = Math.min(fadeSamples, smoothedData.length);
-      const fadeOutStart = smoothedData.length - fadeOutSamples;
-      for (let j = fadeOutStart; j < smoothedData.length; j++) {
-        const fadeGain = (smoothedData.length - j) / fadeOutSamples;
-        smoothedData[j] *= fadeGain;
-      }
-    }
-
-    crossfadedChunks.push(smoothedData);
-    console.log(`🎚️ Recording: ${isAI ? 'AI' : 'Caller'} chunk ${i} - ${(fadeDuration * 1000).toFixed(0)}ms crossfade applied`);
   }
 
-  // Calculate total length from crossfaded chunks
-  let totalLength = 0;
-  for (let i = 0; i < crossfadedChunks.length; i++) {
-    totalLength += crossfadedChunks[i].length;
-  }
-  console.log(
-    `📏 Total length after crossfade: ${totalLength} samples at ${targetSampleRate}Hz`,
-  );
+  console.log(`📏 Total length with overlaps: ${totalLength} samples at ${targetSampleRate}Hz`);
+
   if (!isFinite(totalLength) || totalLength <= 0 || totalLength > 100000000) {
     console.error(`❌ Invalid total length: ${totalLength}`);
     return null;
   }
+
   // Create combined array
   let combinedAudio;
   try {
@@ -160,22 +140,47 @@ export const createWavBlob = (audioChunks) => {
     console.error("❌ Failed to create combined audio array:", error.message);
     return null;
   }
-  // Concatenate all crossfaded chunks
+
+  // Blend chunks with crossfade overlap
   let offset = 0;
-  for (let i = 0; i < crossfadedChunks.length; i++) {
-    const data = crossfadedChunks[i];
+  for (let i = 0; i < resampledChunks.length; i++) {
+    const chunk = resampledChunks[i];
+    const data = chunk.data;
+    const isAI = chunk.speaker === 'ai' || chunk.speaker === 'AI' || chunk.speaker === 'assistant';
+    const fadeDuration = isAI ? 0.01 : 0.002;
+    const fadeSamples = overlapSamples[i];
 
-    if (offset + data.length > combinedAudio.length) {
-      console.error(`❌ Not enough space for chunk ${i}`);
-      break;
-    }
+    console.log(`🎚️ Recording: ${isAI ? 'AI' : 'Caller'} chunk ${i} - ${(fadeDuration * 1000).toFixed(0)}ms crossfade`);
 
-    try {
+    // For first chunk, just copy
+    if (i === 0) {
       combinedAudio.set(data, offset);
-      offset += data.length;
-    } catch (error) {
-      console.error(`❌ Error setting chunk ${i}:`, error.message);
-      return null;
+      offset += data.length - fadeSamples; // Position for next chunk overlap
+    } else {
+      // Crossfade with previous chunk
+      const overlapStart = offset;
+      const overlapLength = Math.min(fadeSamples, data.length);
+
+      // Blend the overlapping region
+      for (let j = 0; j < overlapLength; j++) {
+        const fadeOut = 1.0 - (j / overlapLength); // Previous chunk fades out
+        const fadeIn = j / overlapLength; // Current chunk fades in
+
+        // Mix the two chunks
+        combinedAudio[overlapStart + j] =
+          combinedAudio[overlapStart + j] * fadeOut + data[j] * fadeIn;
+      }
+
+      // Copy the rest of the current chunk (after overlap)
+      if (data.length > overlapLength) {
+        combinedAudio.set(
+          data.subarray(overlapLength),
+          overlapStart + overlapLength
+        );
+      }
+
+      // Position for next chunk
+      offset = overlapStart + data.length - fadeSamples;
     }
   }
   // Convert to 16-bit PCM
