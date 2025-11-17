@@ -204,19 +204,6 @@ export const handleWebSocketMessage = (
         return;
       }
 
-      const audioReady =
-        audioCtxRef.current && audioCtxRef.current.state === "running";
-
-      if (!audioReady) {
-        // Log audio context issues (throttled to avoid spam)
-        if (!audioCtxRef.current) {
-          console.warn("⚠️ Audio context not initialized - click 'Enable Audio' button");
-        } else if (audioCtxRef.current.state !== "running") {
-          console.warn(`⚠️ Audio context state: ${audioCtxRef.current.state} - user interaction required`);
-        }
-        return;
-      }
-
       const format = data.format || data.encoding || "mulaw";
       const sampleRate =
         data.sampleRate ||
@@ -235,7 +222,17 @@ export const handleWebSocketMessage = (
         data.audioId ||
         `audio_${timestamp}_${speaker}_${audioLength}`;
 
-      // 🔥 NEW: Pass mute state to audio playback
+      // 🔥 FIXED: Check audio ready state ONLY for playback decision
+      // Audio chunks should ALWAYS be recorded, even when audio is disabled!
+      const audioReady =
+        audioCtxRef.current && audioCtxRef.current.state === "running";
+
+      // 🔥 CRITICAL: Determine if audio should be MUTED
+      // Mute = don't play, but STILL record the chunks
+      const shouldMute = !audioReady || isCallMutedRef.current;
+
+      // 🔥 NEW: Always call playAudioHQ to record chunks
+      // The mute flag will prevent playback but allow recording
       playAudioHQ(
         base64Audio,
         audioCtxRef,
@@ -245,7 +242,7 @@ export const handleWebSocketMessage = (
         sampleRate,
         speaker,
         audioId, // 🔥 Pass stable ID
-        isCallMutedRef.current, // 🔥 NEW: Pass mute state
+        shouldMute, // 🔥 FIXED: Mute when audio not ready or explicitly muted
       );
       return;
     }

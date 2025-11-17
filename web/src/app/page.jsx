@@ -50,6 +50,81 @@ export default function HomePage() {
 
   return (
     <div style={{ width: '100%', minHeight: '100vh', background: '#141416' }}>
+      {/* Header */}
+      <header style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        background: 'rgba(10, 10, 10, 0.95)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(253, 98, 98, 0.1)',
+        padding: '16px 24px'
+      }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <img
+              src="/vox-logo.svg"
+              alt="Vox Logo"
+              style={{
+                width: '40px',
+                height: '40px',
+                filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))'
+              }}
+            />
+            <span style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: 'white',
+              fontFamily: "'Open Sans', sans-serif",
+              letterSpacing: '0.5px'
+            }}>VOX</span>
+          </div>
+
+          {/* Login Button */}
+          <a
+            href="/login"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'linear-gradient(135deg, #FD6262 0%, #ff8585 100%)',
+              color: 'white',
+              padding: '10px 24px',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontFamily: "'Open Sans', sans-serif",
+              fontWeight: '600',
+              fontSize: '14px',
+              transition: 'all 0.3s ease',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #ff7272 0%, #ff9595 100%)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(253, 98, 98, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #FD6262 0%, #ff8585 100%)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Login
+          </a>
+        </div>
+      </header>
+
+      {/* Add spacing for fixed header */}
+      <div style={{ height: '72px' }} />
+
       {/* Hero Section */}
       <iframe
         ref={(el) => (iframeRefs.current[0] = el)}
@@ -185,25 +260,107 @@ export default function HomePage() {
         scrolling="no"
       />
 
-      {/* Restaurant Login Link */}
-      <div style={{ textAlign: 'center', padding: '40px 20px', background: '#0a0a0a' }}>
-        <a
-          href="/login"
-          style={{
-            display: 'inline-block',
-            background: 'white',
-            color: 'black',
-            padding: '16px 32px',
-            borderRadius: '8px',
-            textDecoration: 'none',
-            fontFamily: "'Open Sans', sans-serif",
-            fontWeight: '600',
-            fontSize: '18px'
-          }}
-        >
-          Restaurant Login →
-        </a>
-      </div>
+      {/* Footer */}
+      <footer style={{
+        background: 'linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%)',
+        borderTop: '1px solid rgba(253, 98, 98, 0.1)',
+        padding: '60px 24px 30px'
+      }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          {/* Footer Content */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '40px',
+            marginBottom: '40px'
+          }}>
+            {/* Brand Column */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <img
+                  src="/vox-logo.svg"
+                  alt="Vox Logo"
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))'
+                  }}
+                />
+                <span style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  fontFamily: "'Open Sans', sans-serif"
+                }}>VOX</span>
+              </div>
+              <p style={{
+                color: '#888',
+                fontSize: '14px',
+                lineHeight: '1.6',
+                fontFamily: "'Open Sans', sans-serif"
+              }}>
+                AI-powered voice assistant for restaurants. Handle orders, answer questions, and delight customers 24/7.
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 style={{
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '16px',
+                fontFamily: "'Open Sans', sans-serif"
+              }}>Quick Links</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <a href="#features" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>Features</a>
+                <a href="#how-it-works" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>How It Works</a>
+                <a href="#use-cases" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>Use Cases</a>
+                <a href="/login" style={{ color: '#FD6262', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif", fontWeight: '600' }}>Dashboard Login</a>
+              </div>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h4 style={{
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '16px',
+                fontFamily: "'Open Sans', sans-serif"
+              }}>Contact</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <a href="mailto:hello@vox.ai" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>hello@vox.ai</a>
+                <p style={{ color: '#888', fontSize: '14px', margin: 0, fontFamily: "'Open Sans', sans-serif" }}>Available 24/7</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Bottom */}
+          <div style={{
+            borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+            paddingTop: '24px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}>
+            <p style={{
+              color: '#666',
+              fontSize: '14px',
+              margin: 0,
+              fontFamily: "'Open Sans', sans-serif"
+            }}>
+              © 2025 VOX. All rights reserved.
+            </p>
+            <div style={{ display: 'flex', gap: '24px' }}>
+              <a href="#" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>Privacy Policy</a>
+              <a href="#" style={{ color: '#888', textDecoration: 'none', fontSize: '14px', fontFamily: "'Open Sans', sans-serif" }}>Terms of Service</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
