@@ -314,6 +314,20 @@ export const playAudioHQ = async (
       }
     }
 
+    // 🔥 AUTO-RESUME: Resume audio context if it's suspended (browser autoplay policy)
+    if (audioCtxExists && audioCtxRef.current.state === 'suspended') {
+      try {
+        console.log("🔊 Attempting to resume suspended audio context...");
+        audioCtxRef.current.resume().then(() => {
+          console.log(`✅ Audio context resumed (state: ${audioCtxRef.current.state})`);
+        }).catch(err => {
+          console.warn("⚠️ Could not resume audio context:", err.message);
+        });
+      } catch (e) {
+        console.warn("⚠️ Resume failed:", e.message);
+      }
+    }
+
     const targetRate = audioCtxExists ? audioCtxRef.current.sampleRate : 48000; // Fallback rate for recording
 
     // 🔥 DEBUG: Log ORIGINAL decoded audio before ANY processing
@@ -372,36 +386,41 @@ export const playAudioHQ = async (
     const queue = getAudioQueue(speaker);
     const currentTime = audioCtxRef.current.currentTime;
 
-    // 🔥 SMART SCHEDULING: Balance smoothness with natural speech pauses
-    // - Add minimal buffer (20ms) only to prevent glitches
-    // - Preserve natural pauses by starting immediately if queue is current
-    // - Only catch up if queue falls far behind
-    const LOOKAHEAD_BUFFER = 0.02; // 20ms minimal buffer for glitch prevention
-    const MAX_LATENCY = 0.5; // Maximum allowed latency before catching up
+    // 🔥 SPEAKER-SPECIFIC SCHEDULING: Different strategies for AI vs Caller
+    // AI: Smooth continuous playback (TTS needs blending)
+    // Caller: Preserve natural pauses (real human speech)
+    const isAI = speaker === 'ai' || speaker === 'AI' || speaker === 'assistant';
+
+    const LOOKAHEAD_BUFFER = isAI ? 0.05 : 0.02; // AI: 50ms buffer, Caller: 20ms
+    const MAX_LATENCY = 0.5;
 
     let startTime;
     if (queue.nextStartTime === 0) {
-      // First chunk - start with minimal buffer
+      // First chunk - start with buffer
       startTime = currentTime + LOOKAHEAD_BUFFER;
-    } else if (queue.nextStartTime < currentTime) {
-      // Queue is behind - start immediately to preserve natural timing
+    } else if (queue.nextStartTime < currentTime && !isAI) {
+      // Queue is behind - start immediately ONLY for caller (preserve natural pauses)
       startTime = currentTime;
-      console.log(`⚡ Starting immediately to preserve natural pause`);
-    } else if (queue.nextStartTime > currentTime + MAX_LATENCY) {
-      // Queue too far ahead - catch up
+      console.log(`⚡ Caller: Starting immediately to preserve natural pause`);
+    } else if (queue.nextStartTime < currentTime - MAX_LATENCY) {
+      // Queue fell way behind - catch up
       startTime = currentTime + LOOKAHEAD_BUFFER;
-      console.log(`⚠️ Queue ahead by ${(queue.nextStartTime - currentTime).toFixed(3)}s, catching up`);
+      console.log(`⚠️ Queue behind by ${(currentTime - queue.nextStartTime).toFixed(3)}s, catching up`);
     } else {
-      // Normal case - schedule at next available time (smooth continuous playback)
-      startTime = queue.nextStartTime;
+      // Normal case - schedule at next available time
+      startTime = Math.max(currentTime, queue.nextStartTime);
     }
 
-    // 🔥 MINIMAL CROSSFADE: Just enough to eliminate clicks, preserves natural pauses
-    // Reduced from 10ms to 2ms to keep natural speech rhythm
-    const FADE_SAMPLES = Math.floor(sourceRate * 0.002); // 2ms fade
+    // 🔥 SPEAKER-SPECIFIC CROSSFADE: Smooth AI, natural Caller
+    // AI: 10ms crossfade (eliminates TTS chunk boundaries)
+    // Caller: 2ms crossfade (just removes clicks, preserves speech)
+    const FADE_DURATION = isAI ? 0.01 : 0.002; // 10ms for AI, 2ms for caller
+    const FADE_SAMPLES = Math.floor(sourceRate * FADE_DURATION);
     const smoothedAudio = new Float32Array(originalFloat32);
 
-    // Apply ultra-short fade-in at the beginning (just to prevent clicks)
+    console.log(`🎚️ ${isAI ? 'AI' : 'Caller'}: Applying ${(FADE_DURATION * 1000).toFixed(0)}ms crossfade`);
+
+    // Apply fade-in at the beginning
     if (queue.nextStartTime > 0 && FADE_SAMPLES > 0) {
       const fadeInSamples = Math.min(FADE_SAMPLES, smoothedAudio.length);
       for (let i = 0; i < fadeInSamples; i++) {
@@ -410,7 +429,7 @@ export const playAudioHQ = async (
       }
     }
 
-    // Apply ultra-short fade-out at the end (just to prevent clicks)
+    // Apply fade-out at the end
     if (FADE_SAMPLES > 0) {
       const fadeOutSamples = Math.min(FADE_SAMPLES, smoothedAudio.length);
       const fadeOutStart = smoothedAudio.length - fadeOutSamples;

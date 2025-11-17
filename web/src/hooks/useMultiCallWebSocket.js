@@ -74,6 +74,33 @@ export function useMultiCallWebSocket(restaurantId) {
     selectedCallIdRef.current = selectedCallId;
   }, [selectedCallId]);
 
+  // 🔥 AUTO-RESUME: Resume audio context on first user interaction
+  useEffect(() => {
+    const handleUserInteraction = async () => {
+      if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+        try {
+          console.log("🔊 User interaction detected - resuming audio context...");
+          await audioCtxRef.current.resume();
+          console.log(`✅ Audio context resumed (state: ${audioCtxRef.current.state})`);
+          if (audioCtxRef.current.state === 'running') {
+            setAudioEnabled(true);
+          }
+        } catch (err) {
+          console.warn("⚠️ Could not resume audio context:", err);
+        }
+      }
+    };
+
+    // Listen for first user interaction
+    document.addEventListener('click', handleUserInteraction, { once: true });
+    document.addEventListener('keydown', handleUserInteraction, { once: true });
+
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, []);
+
   // 🔥 NEW: Initialize a new call
   const initializeCall = (callId) => {
     console.log(`📞 ===== NEW CALL STARTED =====`);
