@@ -103,10 +103,10 @@ export default function HomePage() {
               src="/vox-logo.svg"
               alt="Vox Logo"
               style={{
-                width: '48px',
-                height: '48px',
+                width: '36px',
+                height: '36px',
                 filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))',
-                transform: 'translateY(18px)' // LOWERED MUCH MORE + BIGGER SIZE
+                transform: 'translateY(2px)' // SAME AS FOOTER - PERFECT POSITION
               }}
             />
             <span style={{
