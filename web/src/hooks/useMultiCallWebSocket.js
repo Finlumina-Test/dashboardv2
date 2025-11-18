@@ -14,9 +14,12 @@ import { getBaseUrl } from "@/utils/restaurantConfig";
 import useUpload from "@/utils/useUpload";
 
 // 🔥 NEW: Check call status from backend
-const checkCallStatus = async (callId) => {
+const checkCallStatus = async (callId, restaurantId) => {
   try {
-    const baseUrl = getBaseUrl();
+    const baseUrl = getBaseUrl(restaurantId);
+    if (!baseUrl) {
+      throw new Error(`No base URL configured for restaurant: ${restaurantId}`);
+    }
     const response = await fetch(`${baseUrl}/call-status?callSid=${callId}`);
 
     if (!response.ok) {
@@ -514,7 +517,7 @@ export function useMultiCallWebSocket(restaurantId) {
       console.log(`📞 Call ${callId} ended`);
 
       // 🔥 NEW: Check call-status endpoint to verify call state
-      checkCallStatus(callId).then((status) => {
+      checkCallStatus(callId, restaurantId).then((status) => {
         if (status) {
           console.log(`✅ Call status verified:`, status);
         }

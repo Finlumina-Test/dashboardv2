@@ -160,7 +160,7 @@ export default function FinluminaVoxDashboard({ params }) {
               <img
                 src="/vox-logo.svg"
                 alt="Vox Logo"
-                className="w-10 h-10"
+                className="w-14 h-14"
                 style={{
                   filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))'
                 }}
