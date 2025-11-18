@@ -26,9 +26,12 @@ export default function DemoLanding() {
         {/* Logo and Title */}
         <div className="text-center space-y-4">
           <img
-            src="https://ucarecdn.com/318a2f4a-0da5-416c-b58e-d4512d02da5e/-/format/auto/"
+            src="/vox-logo.svg"
             alt="Vox Logo"
-            className="w-20 h-20 object-contain rounded-lg mx-auto"
+            className="w-20 h-20 mx-auto"
+            style={{
+              filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))'
+            }}
           />
           <div>
             <h1 className="text-3xl font-bold text-white tracking-wide">

@@ -158,9 +158,12 @@ export default function FinluminaVoxDashboard({ params }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
-                src="https://ucarecdn.com/318a2f4a-0da5-416c-b58e-d4512d02da5e/-/format/auto/"
+                src="/vox-logo.svg"
                 alt="Vox Logo"
-                className="w-14 h-14 object-contain rounded-lg"
+                className="w-10 h-10"
+                style={{
+                  filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))'
+                }}
               />
               <div>
                 <h1 className="text-lg font-bold text-white tracking-wide">
