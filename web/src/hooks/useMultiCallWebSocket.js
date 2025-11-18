@@ -711,28 +711,32 @@ export function useMultiCallWebSocket(restaurantId) {
     }
   };
 
-  const toggleCallMute = () => {
-    // 🔥 FIXED: Toggle mute for SELECTED call only, not all calls
-    if (!selectedCallId) {
+  const toggleCallMute = (callId) => {
+    // 🔥 FIXED: Accept callId parameter or use selected call
+    const targetCallId = callId || selectedCallId;
+
+    if (!targetCallId) {
       console.warn("⚠️ No call selected to mute");
       return;
     }
 
-    const call = callsRef.current[selectedCallId];
+    const call = callsRef.current[targetCallId];
     if (!call) {
-      console.warn(`⚠️ Call ${selectedCallId} not found`);
+      console.warn(`⚠️ Call ${targetCallId} not found`);
       return;
     }
 
     const newMuteState = !call.isAudioMuted;
-    console.log(`🔇 ${newMuteState ? 'Muting' : 'Unmuting'} call ${selectedCallId}`);
+    console.log(`🔇 ${newMuteState ? 'Muting' : 'Unmuting'} call ${targetCallId}`);
 
-    updateCall(selectedCallId, {
+    updateCall(targetCallId, {
       isAudioMuted: newMuteState,
     });
 
-    // 🔥 Also update global state for backward compatibility
-    setIsCallMuted(newMuteState);
+    // 🔥 Also update global state if it's the selected call
+    if (targetCallId === selectedCallId) {
+      setIsCallMuted(newMuteState);
+    }
   };
 
   const toggleAudio = async () => {
