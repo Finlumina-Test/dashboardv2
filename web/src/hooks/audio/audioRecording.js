@@ -117,8 +117,8 @@ export const createWavBlob = (audioChunks) => {
     if (nextChunk) {
       const nextIsAI = nextChunk.speaker === 'ai' || nextChunk.speaker === 'AI' || nextChunk.speaker === 'assistant';
       if (isAI === nextIsAI) {
-        // 🔥 FIX: Increase AI crossfade to 30ms for recordings (was 10ms) - eliminates choppiness
-        const fadeDuration = isAI ? 0.03 : 0.002;
+        // 🔥 FIX: Increase AI crossfade to 100ms for recordings - completely eliminates choppiness
+        const fadeDuration = isAI ? 0.1 : 0.002;
         const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
         totalLength -= fadeSamples; // Subtract overlap
       }
@@ -150,8 +150,8 @@ export const createWavBlob = (audioChunks) => {
 
     if (sameSpeakerPrev) {
       // Same speaker - blend with crossfade
-      // 🔥 FIX: Increase AI crossfade to 30ms for recordings (was 10ms) - eliminates choppiness
-      const fadeDuration = isAI ? 0.03 : 0.002;
+      // 🔥 FIX: Increase AI crossfade to 100ms for recordings - completely eliminates choppiness
+      const fadeDuration = isAI ? 0.1 : 0.002;
       const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
       const overlapLength = Math.min(fadeSamples, data.length);
 
@@ -186,8 +186,8 @@ export const createWavBlob = (audioChunks) => {
       const nextIsAI = nextChunk.speaker === 'ai' || nextChunk.speaker === 'AI' || nextChunk.speaker === 'assistant';
       if (isAI === nextIsAI) {
         // Next chunk is same speaker - back up writePos for overlap
-        // 🔥 FIX: Increase AI crossfade to 30ms for recordings (was 10ms) - eliminates choppiness
-        const fadeDuration = isAI ? 0.03 : 0.002;
+        // 🔥 FIX: Increase AI crossfade to 100ms for recordings - completely eliminates choppiness
+        const fadeDuration = isAI ? 0.1 : 0.002;
         const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
         writePos -= fadeSamples; // CRITICAL: Back up for overlap
         console.log(`  ↩️ Backing up ${fadeSamples} samples for next chunk overlap`);

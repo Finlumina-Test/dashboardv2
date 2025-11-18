@@ -106,7 +106,7 @@ export default function HomePage() {
                 width: '40px',
                 height: '40px',
                 filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))',
-                transform: 'translateY(6px)' // Center logo with Vox text - increased for better alignment
+                transform: 'translateY(10px)' // Center logo with Vox text - lowered further
               }}
             />
             <span style={{
@@ -512,7 +512,7 @@ export default function HomePage() {
                     width: '36px',
                     height: '36px',
                     filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))',
-                    transform: 'translateY(5px)' // Center logo with Vox text - aligned with header
+                    transform: 'translateY(9px)' // Center logo with Vox text - aligned with header
                   }}
                 />
                 <span style={{
