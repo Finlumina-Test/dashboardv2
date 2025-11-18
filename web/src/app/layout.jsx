@@ -25,6 +25,7 @@ export default function RootLayout({ children }) {
           name="description"
           content="AI-powered call management dashboard"
         />
+        <link rel="icon" href="/vox-logo.svg" type="image/svg+xml" />
       </head>
       <body>
         <QueryClientProvider client={queryClient}>

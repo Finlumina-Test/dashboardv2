@@ -105,7 +105,7 @@ export function LeftSidebar({
             />
             <div>
               <h1 className="text-2xl font-bold text-white tracking-tight">
-                VOX
+                Vox
               </h1>
               <div className="text-[10px] text-gray-400 tracking-widest uppercase font-semibold">
                 {backendUrl ? `${backendUrl.toUpperCase()}` : "Dashboard"}

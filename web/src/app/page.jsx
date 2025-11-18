@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Head from "next/head";
 
 export default function HomePage() {
   const iframeRefs = useRef([]);
@@ -49,9 +50,14 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div style={{ width: '100%', minHeight: '100vh', background: '#141416' }}>
-      {/* Header */}
-      <header style={{
+    <>
+      <Head>
+        <title>Vox | Finlumina</title>
+        <meta name="description" content="Vox - AI-powered voice assistant for restaurants by Finlumina" />
+      </Head>
+      <div style={{ width: '100%', minHeight: '100vh', background: '#141416' }}>
+        {/* Header */}
+        <header style={{
         position: 'fixed',
         top: 0,
         left: 0,
@@ -72,7 +78,7 @@ export default function HomePage() {
                 width: '40px',
                 height: '40px',
                 filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))',
-                transform: 'translateY(-1px)' // Fine-tune vertical alignment
+                transform: 'translateY(2px)' // Center logo with Vox text
               }}
             />
             <span style={{
@@ -285,7 +291,7 @@ export default function HomePage() {
                     width: '36px',
                     height: '36px',
                     filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))',
-                    transform: 'translateY(-1px)' // Fine-tune vertical alignment
+                    transform: 'translateY(2px)' // Center logo with Vox text
                   }}
                 />
                 <span style={{
@@ -363,5 +369,6 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
+    </>
   );
 }
