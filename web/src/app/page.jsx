@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Head from "next/head";
 
 export default function HomePage() {
   const iframeRefs = useRef([]);
+
+  // Set page title for homepage
+  useEffect(() => {
+    document.title = "Vox | Finlumina";
+  }, []);
 
   // Auto-resize iframes to match their content height
   useEffect(() => {
@@ -50,11 +54,6 @@ export default function HomePage() {
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>Vox | Finlumina</title>
-        <meta name="description" content="Vox - AI-powered voice assistant for restaurants by Finlumina" />
-      </Head>
       <div style={{ width: '100%', minHeight: '100vh', background: '#141416' }}>
         {/* Header */}
         <header style={{
@@ -369,6 +368,5 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
-    </>
   );
 }
