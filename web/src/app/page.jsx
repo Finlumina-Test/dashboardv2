@@ -103,10 +103,10 @@ export default function HomePage() {
               src="/vox-logo.svg"
               alt="Vox Logo"
               style={{
-                width: '40px',
-                height: '40px',
+                width: '48px',
+                height: '48px',
                 filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))',
-                transform: 'translateY(10px)' // Center logo with Vox text - lowered further
+                transform: 'translateY(18px)' // LOWERED MUCH MORE + BIGGER SIZE
               }}
             />
             <span style={{
@@ -512,7 +512,7 @@ export default function HomePage() {
                     width: '36px',
                     height: '36px',
                     filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))',
-                    transform: 'translateY(9px)' // Center logo with Vox text - aligned with header
+                    transform: 'translateY(2px)' // Original position - DON'T TOUCH
                   }}
                 />
                 <span style={{

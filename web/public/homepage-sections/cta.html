@@ -781,6 +781,21 @@ function closeModalOnOverlay(event) {
   }
 }
 
+// Handle phone number click - copy on desktop, call on mobile
+document.querySelector('.vox-phone-box').addEventListener('click', function(e) {
+  // On desktop (screen width > 768px), prevent default and copy number
+  if (window.innerWidth > 768) {
+    e.preventDefault();
+    const phoneNumber = '+17275132412';
+    navigator.clipboard.writeText(phoneNumber).then(function() {
+      alert('📋 Phone number copied to clipboard!\n\n+1 (727) 513-2412\n\nDial this number from your phone.');
+    }).catch(function() {
+      alert('📞 Call this number:\n\n+1 (727) 513-2412');
+    });
+  }
+  // On mobile, tel: link works automatically (don't prevent default)
+});
+
 // Close on ESC key
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Escape') {
