@@ -262,4 +262,23 @@
     color: var(--color-text-secondary);
     font-weight: 500;
   }
+
+  /* Mobile Menu - Show hamburger on small screens, desktop nav on large screens */
+  .desktop-nav {
+    display: none;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  @media (min-width: 768px) {
+    .desktop-nav {
+      display: flex !important;
+    }
+
+    .mobile-menu-btn {
+      display: none !important;
+    }
+  }
 }

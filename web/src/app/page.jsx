@@ -1,13 +1,40 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function HomePage() {
   const iframeRefs = useRef([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   // Set page title for homepage
   useEffect(() => {
     document.title = "Vox | Finlumina";
+  }, []);
+
+  // Smart header scroll behavior - hide on down, show on up
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < 10) {
+        // Always show header at top
+        setHeaderVisible(true);
+      } else if (currentScrollY > lastScrollY.current) {
+        // Scrolling down - hide header
+        setHeaderVisible(false);
+        setMobileMenuOpen(false); // Close mobile menu when hiding
+      } else {
+        // Scrolling up - show header
+        setHeaderVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Auto-resize iframes to match their content height
@@ -65,7 +92,9 @@ export default function HomePage() {
         background: 'rgba(10, 10, 10, 0.95)',
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(253, 98, 98, 0.1)',
-        padding: '16px 24px'
+        padding: '16px 24px',
+        transform: headerVisible ? 'translateY(0)' : 'translateY(-100%)',
+        transition: 'transform 0.3s ease-in-out'
       }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           {/* Logo */}
@@ -77,7 +106,7 @@ export default function HomePage() {
                 width: '40px',
                 height: '40px',
                 filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))',
-                transform: 'translateY(2px)' // Center logo with Vox text
+                transform: 'translateY(6px)' // Center logo with Vox text - increased for better alignment
               }}
             />
             <span style={{
@@ -89,35 +118,228 @@ export default function HomePage() {
             }}>Vox</span>
           </div>
 
-          {/* Login Button */}
+          {/* Desktop Navigation */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            {/* Desktop Links - Hidden on mobile */}
+            <div style={{
+              display: 'none',
+              gap: '12px',
+              '@media (min-width: 768px)': {
+                display: 'flex'
+              }
+            }} className="desktop-nav">
+              <a
+                href="https://finlumina.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: '#b0b0b0',
+                  textDecoration: 'none',
+                  fontFamily: "'Open Sans', sans-serif",
+                  fontWeight: '500',
+                  fontSize: '14px',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.color = 'white';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.color = '#b0b0b0';
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                Finlumina
+              </a>
+              <a
+                href="https://finlumina.com/about"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: '#b0b0b0',
+                  textDecoration: 'none',
+                  fontFamily: "'Open Sans', sans-serif",
+                  fontWeight: '500',
+                  fontSize: '14px',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.color = 'white';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.color = '#b0b0b0';
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                About
+              </a>
+              <a
+                href="/login"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'linear-gradient(135deg, #FD6262 0%, #ff8585 100%)',
+                  color: 'white',
+                  padding: '10px 24px',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  fontFamily: "'Open Sans', sans-serif",
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  transition: 'all 0.3s ease',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #ff7272 0%, #ff9595 100%)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(253, 98, 98, 0.4)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #FD6262 0%, #ff8585 100%)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Login
+              </a>
+            </div>
+
+            {/* Mobile Hamburger Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-around',
+                width: '28px',
+                height: '24px',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 0,
+                zIndex: 10
+              }}
+              className="mobile-menu-btn"
+              aria-label="Menu"
+            >
+              <span style={{
+                width: '100%',
+                height: '3px',
+                background: 'white',
+                borderRadius: '10px',
+                transition: 'all 0.3s ease',
+                transform: mobileMenuOpen ? 'rotate(45deg) translateY(10px)' : 'rotate(0)',
+              }}></span>
+              <span style={{
+                width: '100%',
+                height: '3px',
+                background: 'white',
+                borderRadius: '10px',
+                transition: 'all 0.3s ease',
+                opacity: mobileMenuOpen ? 0 : 1,
+              }}></span>
+              <span style={{
+                width: '100%',
+                height: '3px',
+                background: 'white',
+                borderRadius: '10px',
+                transition: 'all 0.3s ease',
+                transform: mobileMenuOpen ? 'rotate(-45deg) translateY(-10px)' : 'rotate(0)',
+              }}></span>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu Dropdown */}
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          right: 0,
+          background: 'rgba(10, 10, 10, 0.98)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(253, 98, 98, 0.1)',
+          padding: mobileMenuOpen ? '16px 24px' : '0 24px',
+          maxHeight: mobileMenuOpen ? '300px' : '0',
+          overflow: 'hidden',
+          transition: 'all 0.3s ease',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px'
+        }}>
+          <a
+            href="https://finlumina.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: '#b0b0b0',
+              textDecoration: 'none',
+              fontFamily: "'Open Sans', sans-serif",
+              fontWeight: '500',
+              fontSize: '16px',
+              padding: '12px',
+              borderRadius: '8px',
+              transition: 'all 0.3s ease',
+              background: 'transparent'
+            }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Finlumina
+          </a>
+          <a
+            href="https://finlumina.com/about"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: '#b0b0b0',
+              textDecoration: 'none',
+              fontFamily: "'Open Sans', sans-serif",
+              fontWeight: '500',
+              fontSize: '16px',
+              padding: '12px',
+              borderRadius: '8px',
+              transition: 'all 0.3s ease',
+              background: 'transparent'
+            }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            About
+          </a>
           <a
             href="/login"
             style={{
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '8px',
               background: 'linear-gradient(135deg, #FD6262 0%, #ff8585 100%)',
               color: 'white',
-              padding: '10px 24px',
+              padding: '12px 24px',
               borderRadius: '8px',
               textDecoration: 'none',
               fontFamily: "'Open Sans', sans-serif",
               fontWeight: '600',
-              fontSize: '14px',
+              fontSize: '16px',
               transition: 'all 0.3s ease',
               border: 'none',
               cursor: 'pointer'
             }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #ff7272 0%, #ff9595 100%)';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(253, 98, 98, 0.4)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #FD6262 0%, #ff8585 100%)';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
+            onClick={() => setMobileMenuOpen(false)}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -290,7 +512,7 @@ export default function HomePage() {
                     width: '36px',
                     height: '36px',
                     filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))',
-                    transform: 'translateY(2px)' // Center logo with Vox text
+                    transform: 'translateY(5px)' // Center logo with Vox text - aligned with header
                   }}
                 />
                 <span style={{
