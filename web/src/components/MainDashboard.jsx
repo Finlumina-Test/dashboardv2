@@ -386,7 +386,20 @@ export function MainDashboard({
                 </h3>
               </div>
               <div className="flex-1 overflow-hidden">
-                <LiveTranscript transcript={transcript} t={t} />
+                <LiveTranscript
+                  t={t}
+                  transcript={transcript}
+                  orderData={orderData}
+                  isConnected={isConnected}
+                  error={error}
+                  audioEnabled={audioEnabled}
+                  isTakenOver={isTakenOver}
+                  clearTranscript={clearTranscript}
+                  clearOrder={clearOrder}
+                  toggleAudio={toggleAudio}
+                  initAudioContext={initAudioContext}
+                  testAudio={testAudio}
+                />
               </div>
             </div>
           </div>
