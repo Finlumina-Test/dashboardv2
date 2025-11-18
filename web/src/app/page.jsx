@@ -98,7 +98,7 @@ export default function HomePage() {
       }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img
               src="/vox-logo.svg"
               alt="Vox Logo"
@@ -106,7 +106,7 @@ export default function HomePage() {
                 width: '40px',
                 height: '40px',
                 filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))',
-                transform: 'translateY(0px)' // Centered with Vox text
+                transform: 'translateY(-4px)' // Align middle bar with Vox text
               }}
             />
             <span style={{
@@ -504,7 +504,7 @@ export default function HomePage() {
           }}>
             {/* Brand Column */}
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                 <img
                   src="/vox-logo.svg"
                   alt="Vox Logo"
@@ -512,7 +512,7 @@ export default function HomePage() {
                     width: '36px',
                     height: '36px',
                     filter: 'drop-shadow(0 0 10px rgba(253, 98, 98, 0.3))',
-                    transform: 'translateY(0px)' // Centered with Vox text
+                    transform: 'translateY(-4px)' // Align middle bar with Vox text
                   }}
                 />
                 <span style={{
