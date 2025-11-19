@@ -84,12 +84,12 @@ export const createWavBlob = (audioChunks) => {
     console.log(`  [${idx}] ${c.speaker}: ${c.sampleRate}Hz, ${c.data?.length} samples`);
   });
 
-  // 🔥 Use 16kHz for recording - original working version
+  // 🔥 Use 16kHz for recording - caller defaults to 24kHz for proper downsample
   const targetSampleRate = 16000;
   const resampledChunks = [];
   for (let i = 0; i < validChunks.length; i++) {
     const chunk = validChunks[i];
-    const chunkRate = chunk.sampleRate || 16000; // Default if missing - ORIGINAL
+    const chunkRate = chunk.sampleRate || 24000; // Default 24kHz - from working branch
 
     let resampledData;
 
