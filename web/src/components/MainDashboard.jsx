@@ -401,6 +401,9 @@ export function MainDashboard({
                   selectedCallId={selectedCallId}
                   isCallMuted={isCallMuted}
                   toggleCallMute={toggleCallMute}
+                  audioEnabled={audioEnabled}
+                  toggleAudio={toggleAudio}
+                  isDemo={isDemo}
                 />
               </div>
             </div>
@@ -482,7 +485,7 @@ export function MainDashboard({
                 <button
                   onClick={handleSaveClick}
                   disabled={!canSave}
-                  className={`w-full px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg border ${
+                  className={`w-full px-3 py-2.5 lg:px-6 lg:py-4 rounded-xl font-bold flex items-center justify-center gap-2 lg:gap-3 transition-all duration-300 shadow-lg border text-sm lg:text-base ${
                     canSave
                       ? 'bg-gradient-to-r from-white to-gray-100 hover:from-gray-100 hover:to-white text-black shadow-white/20 border-white hover:scale-105'
                       : 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed'
@@ -490,12 +493,12 @@ export function MainDashboard({
                 >
                   {isSaving ? (
                     <>
-                      <Loader className="w-5 h-5 animate-spin" />
+                      <Loader className="w-4 h-4 lg:w-5 lg:h-5 animate-spin" />
                       Saving...
                     </>
                   ) : (
                     <>
-                      <Save className="w-5 h-5" />
+                      <Save className="w-4 h-4 lg:w-5 lg:h-5" />
                       {getButtonText()}
                     </>
                   )}

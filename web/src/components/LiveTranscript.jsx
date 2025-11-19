@@ -12,6 +12,9 @@ export function LiveTranscript({
   selectedCallId,
   isCallMuted,
   toggleCallMute,
+  audioEnabled,
+  toggleAudio,
+  isDemo,
 }) {
   const transcriptEndRef = useRef(null);
 
@@ -45,19 +48,19 @@ export function LiveTranscript({
             </span>
           </div>
 
-          {/* Audio Controls - Per-call mute (like quick actions) */}
+          {/* Audio Controls - Per-call mute OR global audio (demo) */}
           <button
-            onClick={() => selectedCallId && toggleCallMute(selectedCallId)}
-            disabled={!selectedCallId}
+            onClick={() => isDemo ? toggleAudio() : (selectedCallId && toggleCallMute(selectedCallId))}
+            disabled={!isDemo && !selectedCallId}
             className={`px-1.5 py-1 lg:px-3 lg:py-2 border rounded-lg font-medium transition-all text-[10px] lg:text-sm shadow-lg ${
-              isCallMuted
+              (isDemo ? !audioEnabled : isCallMuted)
                 ? "border-white/10 text-gray-400 hover:border-[#FD6262]/50 hover:bg-black/40 bg-black/20"
                 : "bg-gradient-to-r from-[#FD6262] to-[#ff8585] border-[#FD6262]/50 text-white hover:from-[#ff7272] hover:to-[#ff9595]"
-            } ${!selectedCallId ? 'opacity-50 cursor-not-allowed' : ''}`}
+            } ${(!isDemo && !selectedCallId) ? 'opacity-50 cursor-not-allowed' : ''}`}
             style={{ fontFamily: 'var(--font-body)' }}
           >
-            <span className="hidden lg:inline">{isCallMuted ? "🔇 Audio OFF" : "🔊 Audio ON"}</span>
-            <span className="lg:hidden text-sm">{isCallMuted ? "🔇" : "🔊"}</span>
+            <span className="hidden lg:inline">{(isDemo ? !audioEnabled : isCallMuted) ? "🔇 Audio OFF" : "🔊 Audio ON"}</span>
+            <span className="lg:hidden text-sm">{(isDemo ? !audioEnabled : isCallMuted) ? "🔇" : "🔊"}</span>
           </button>
         </div>
       </div>
