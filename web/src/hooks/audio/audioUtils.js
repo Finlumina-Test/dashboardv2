@@ -447,6 +447,11 @@ export const playAudioHQ = async (
     );
     buffer.getChannelData(0).set(smoothedAudio);
 
+    // 🔍 DEBUG: Log caller playback details
+    if (speaker === "caller" || speaker === "customer" || speaker === "Caller") {
+      console.log(`🔍 CALLER LIVE PLAYBACK: SourceRate=${sourceRate}Hz, Samples=${smoothedAudio.length}, Duration=${buffer.duration.toFixed(3)}s, AudioCtx=${audioCtxRef.current.sampleRate}Hz`);
+    }
+
     // Calculate duration
     const duration = buffer.duration;
 
