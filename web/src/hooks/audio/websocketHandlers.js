@@ -205,10 +205,22 @@ export const handleWebSocketMessage = (
       }
 
       const format = data.format || data.encoding || "mulaw";
-      const sampleRate =
-        data.sampleRate ||
-        data.sample_rate ||
-        (format === "pcm16" ? 24000 : 8000);
+
+      // 🔥 FIX: Determine sample rate based on speaker AND format (same as main hook)
+      let sampleRate = data.sampleRate || data.sample_rate;
+      if (!sampleRate) {
+        if (format === "pcm16") {
+          sampleRate = 24000;
+        } else if (speaker === "caller" || speaker === "customer" || speaker === "Caller") {
+          sampleRate = 8000; // Caller is always 8kHz mulaw
+        } else if (speaker === "AI" || speaker === "ai" || speaker === "assistant") {
+          sampleRate = format === "mulaw" ? 8000 : 24000;
+        } else {
+          sampleRate = 8000;
+        }
+      }
+
+      console.log(`🎵 [WS Handler] Sample Rate: Speaker=${speaker}, Format=${format}, Rate=${sampleRate}Hz`);
 
       // 🔥 CRITICAL FIX: Create STABLE ID based on content hash, not random!
       // This prevents duplicate audio chunks from being played multiple times

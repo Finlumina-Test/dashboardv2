@@ -352,6 +352,7 @@ export function useWebSocketDemo(sessionId) {
           isTakenOverRef,
           restaurantId: "demo",
           callTimerStartedRef,
+          isCallMutedRef: { current: false }, // 🔥 FIX: Enable audio playback in demo
           onOrderComplete: (orderData) => {
             console.log("🎯 ===== DEMO ORDER COMPLETE CALLBACK =====");
             console.log("📦 Order Data:", orderData);

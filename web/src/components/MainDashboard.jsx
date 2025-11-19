@@ -474,50 +474,52 @@ export function MainDashboard({
               )}
             </div>
 
-            {/* Save Section */}
-            <div className="pt-4 border-t border-white/10">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Actions</h3>
+            {/* Save Section - Hidden in demo mode */}
+            {!isDemo && (
+              <div className="pt-4 border-t border-white/10">
+                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Actions</h3>
 
-              <button
-                onClick={handleSaveClick}
-                disabled={!canSave}
-                className={`w-full px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg border ${
-                  canSave
-                    ? 'bg-gradient-to-r from-white to-gray-100 hover:from-gray-100 hover:to-white text-black shadow-white/20 border-white hover:scale-105'
-                    : 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed'
-                }`}
-              >
-                {isSaving ? (
-                  <>
-                    <Loader className="w-5 h-5 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-5 h-5" />
-                    {getButtonText()}
-                  </>
-                )}
-              </button>
-
-              {/* Save Status */}
-              {lastSaveStatus && (
-                <div className={`mt-3 p-3 rounded-lg text-sm flex items-center gap-2 ${
-                  lastSaveStatus.success
-                    ? 'bg-green-500/10 text-green-400 border border-green-500/30'
-                    : 'bg-red-500/10 text-red-400 border border-red-500/30'
-                }`}>
-                  {lastSaveStatus.success ? (
-                    <CheckCircle className="w-4 h-4" />
+                <button
+                  onClick={handleSaveClick}
+                  disabled={!canSave}
+                  className={`w-full px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg border ${
+                    canSave
+                      ? 'bg-gradient-to-r from-white to-gray-100 hover:from-gray-100 hover:to-white text-black shadow-white/20 border-white hover:scale-105'
+                      : 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed'
+                  }`}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader className="w-5 h-5 animate-spin" />
+                      Saving...
+                    </>
                   ) : (
-                    <AlertCircle className="w-4 h-4" />
+                    <>
+                      <Save className="w-5 h-5" />
+                      {getButtonText()}
+                    </>
                   )}
-                  <span>
-                    {lastSaveStatus.success ? 'Saved successfully!' : `Failed: ${lastSaveStatus.error}`}
-                  </span>
-                </div>
-              )}
-            </div>
+                </button>
+
+                {/* Save Status */}
+                {lastSaveStatus && (
+                  <div className={`mt-3 p-3 rounded-lg text-sm flex items-center gap-2 ${
+                    lastSaveStatus.success
+                      ? 'bg-green-500/10 text-green-400 border border-green-500/30'
+                      : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                  }`}>
+                    {lastSaveStatus.success ? (
+                      <CheckCircle className="w-4 h-4" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4" />
+                    )}
+                    <span>
+                      {lastSaveStatus.success ? 'Saved successfully!' : `Failed: ${lastSaveStatus.error}`}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
 
           </div>
         </div>
