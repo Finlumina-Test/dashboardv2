@@ -78,9 +78,16 @@ export const createWavBlob = (audioChunks) => {
   });
   console.log('📊 Sample Rate Distribution:', sampleRateStats);
 
+  // 🔥 DEBUG: Show first 10 chunks to see what we ACTUALLY have
+  console.log('🔍 ===== FIRST 10 CHUNKS =====');
+  validChunks.slice(0, 10).forEach((c, idx) => {
+    console.log(`  [${idx}] ${c.speaker}: ${c.sampleRate}Hz, ${c.data?.length} samples`);
+  });
+
   // 🔥 FORCE SLOW DOWN CALLER IN RECORDING ONLY (NOT realtime)
   // Use 16kHz for recording WAV - this forces caller to play slower
   const targetSampleRate = 16000;
+  console.log(`🎯 WAV TARGET: ${targetSampleRate}Hz`);
   const resampledChunks = [];
   for (let i = 0; i < validChunks.length; i++) {
     const chunk = validChunks[i];
