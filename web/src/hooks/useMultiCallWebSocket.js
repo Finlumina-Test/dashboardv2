@@ -317,8 +317,19 @@ export function useMultiCallWebSocket(restaurantId) {
 
   // 🔥 NEW: Auto-save for specific call
   const performAutoSave = async (callId, triggerReason) => {
+    console.log(`🔍 ===== AUTO-SAVE CHECK (${triggerReason}) =====`);
+    console.log(`🔍 Call ID: ${callId}`);
+
     const call = callsRef.current[callId];
-    if (!call || call.hasBeenSaved) return;
+    if (!call) {
+      console.log(`❌ AUTO-SAVE SKIPPED: Call not found`);
+      return;
+    }
+
+    if (call.hasBeenSaved) {
+      console.log(`⏭️ AUTO-SAVE SKIPPED: Call already saved`);
+      return;
+    }
 
     const hasOrderData =
       call.orderData &&
@@ -328,7 +339,22 @@ export function useMultiCallWebSocket(restaurantId) {
         call.orderData.total_price ||
         (call.orderData.order_items && call.orderData.order_items.length > 0));
 
-    if (!hasOrderData) return;
+    console.log(`🔍 Order data exists: ${!!call.orderData}`);
+    console.log(`🔍 Has valid order data: ${hasOrderData}`);
+    if (call.orderData && !hasOrderData) {
+      console.log(`🔍 Order data present but invalid:`, {
+        customer_name: call.orderData.customer_name,
+        phone_number: call.orderData.phone_number,
+        delivery_address: call.orderData.delivery_address,
+        total_price: call.orderData.total_price,
+        order_items_count: call.orderData.order_items?.length || 0,
+      });
+    }
+
+    if (!hasOrderData) {
+      console.log(`❌ AUTO-SAVE SKIPPED: No valid order data to save`);
+      return;
+    }
 
     console.log(`💾 ===== AUTO-SAVING CALL ${callId} (${triggerReason}) =====`);
     console.log(`💾 Audio chunks available: ${call.audioChunks?.length || 0}`);
@@ -515,7 +541,9 @@ export function useMultiCallWebSocket(restaurantId) {
 
     // Handle call ended
     if (data.messageType === "callEnded") {
-      console.log(`📞 Call ${callId} ended`);
+      console.log(`📞 ===== CALL ENDED MESSAGE RECEIVED =====`);
+      console.log(`📞 Call ID: ${callId}`);
+      console.log(`📞 Backend sent: callEnded message`);
 
       // 🔥 NEW: Check call-status endpoint to verify call state
       checkCallStatus(callId, restaurantId).then((status) => {
@@ -526,7 +554,9 @@ export function useMultiCallWebSocket(restaurantId) {
         console.warn(`⚠️ Call status check failed:`, err.message);
       });
 
+      console.log(`📞 Triggering auto-save...`);
       performAutoSave(callId, "CALL_ENDED").finally(() => {
+        console.log(`📞 Auto-save complete, ending call session...`);
         endCallSession(callId);
       });
       return;
