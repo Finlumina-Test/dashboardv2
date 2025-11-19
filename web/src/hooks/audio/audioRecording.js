@@ -118,8 +118,8 @@ export const createWavBlob = (audioChunks) => {
     if (nextChunk) {
       const nextIsAI = nextChunk.speaker === 'ai' || nextChunk.speaker === 'AI' || nextChunk.speaker === 'assistant';
       if (isAI === nextIsAI) {
-        // 🔥 FIX: Use 10ms crossfade for AI (same as playback) - prevents choppy artifacts
-        const fadeDuration = isAI ? 0.01 : 0.002;
+        // 🔥 FIX: Use 50ms crossfade for AI (smooth out gaps) - prevents choppy artifacts
+        const fadeDuration = isAI ? 0.05 : 0.002;
         const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
         totalLength -= fadeSamples; // Subtract overlap
       }
@@ -151,8 +151,8 @@ export const createWavBlob = (audioChunks) => {
 
     if (sameSpeakerPrev) {
       // Same speaker - blend with crossfade
-      // 🔥 FIX: Use 10ms crossfade for AI (same as playback) - prevents choppy artifacts
-      const fadeDuration = isAI ? 0.01 : 0.002;
+      // 🔥 FIX: Use 50ms crossfade for AI (smooth out gaps) - prevents choppy artifacts
+      const fadeDuration = isAI ? 0.05 : 0.002;
       const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
       const overlapLength = Math.min(fadeSamples, data.length);
 
@@ -186,7 +186,7 @@ export const createWavBlob = (audioChunks) => {
     if (nextChunk) {
       const nextIsAI = nextChunk.speaker === 'ai' || nextChunk.speaker === 'AI' || nextChunk.speaker === 'assistant';
       if (isAI === nextIsAI) {
-        const fadeDuration = isAI ? 0.01 : 0.002;
+        const fadeDuration = isAI ? 0.05 : 0.002;
         const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
         console.log(`  ↩️ Backing up ${fadeSamples} samples for next chunk overlap`);
         writePos -= fadeSamples;
