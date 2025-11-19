@@ -78,10 +78,10 @@ export const createWavBlob = (audioChunks) => {
   });
   console.log('📊 Sample Rate Distribution:', sampleRateStats);
 
-  // 🔥 FIX: Use 16kHz for better quality balance (professional phone standard)
-  // - Downsamples AI from 24k to 16k (smoother, removes artifacts)
-  // - Upsamples caller from 8k to 16k (2x instead of 3x, more natural)
-  const targetSampleRate = 16000;
+  // 🔥 REVERTED: Use 8kHz to match caller's native sample rate (original setup)
+  // - Keeps caller at 8kHz (no resampling, no speedup)
+  // - Downsamples AI from 24kHz to 8kHz (3x downsample)
+  const targetSampleRate = 8000;
   const resampledChunks = [];
   for (let i = 0; i < validChunks.length; i++) {
     const chunk = validChunks[i];

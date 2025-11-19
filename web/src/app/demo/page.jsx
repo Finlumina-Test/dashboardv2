@@ -17,7 +17,7 @@ export default function DemoLanding() {
     setShowCallPopup(true);
 
     // Open phone dialer
-    window.location.href = "tel:+14788008311";
+    window.location.href = "tel:+17275135412";
   };
 
   return (
@@ -85,7 +85,7 @@ export default function DemoLanding() {
           </h3>
           <p className="text-green-200 text-sm mb-2">
             Call{" "}
-            <span className="font-mono text-green-100">+1 (478) 800-8311</span>{" "}
+            <span className="font-mono text-green-100">+1 (727) 513-5412</span>{" "}
             to start a demo call
           </p>
           <p className="text-green-300 text-xs">
@@ -138,7 +138,7 @@ export default function DemoLanding() {
               <p className="text-gray-300 text-sm">
                 Call{" "}
                 <span className="font-mono text-green-400">
-                  +1 (478) 800-8311
+                  +1 (727) 513-5412
                 </span>{" "}
                 to receive your unique session ID
               </p>
