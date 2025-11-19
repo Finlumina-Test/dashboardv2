@@ -280,6 +280,8 @@ export default function FinluminaVoxDashboard({ params }) {
             selectedCallId={selectedCallId}
             setSelectedCallId={setSelectedCallId}
             audioActivity={audioActivity}
+            isCallMuted={isCallMuted}
+            toggleCallMute={toggleCallMute}
           />
         </div>
 

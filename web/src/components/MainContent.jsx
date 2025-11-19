@@ -39,6 +39,9 @@ export function MainContent({
   activeCallIds,
   selectedCallId,
   setSelectedCallId,
+  // 🔥 NEW: Per-call mute controls
+  isCallMuted,
+  toggleCallMute,
 }) {
   // 🔥 NEW: POS view toggle between Live Orders and Order History
   const [posViewMode, setPosViewMode] = useState("live"); // "live" or "history"
@@ -75,6 +78,8 @@ export function MainContent({
         manualSaveCall={manualSaveCall}
         isDemo={isDemo}
         callStatus={callStatus}
+        isCallMuted={isCallMuted}
+        toggleCallMute={toggleCallMute}
       />
     );
   }
@@ -178,6 +183,8 @@ export function MainContent({
       transcript={transcript}
       orderData={orderData}
       callDuration={callDuration}
+      isCallMuted={isCallMuted}
+      toggleCallMute={toggleCallMute}
     />
   );
 }

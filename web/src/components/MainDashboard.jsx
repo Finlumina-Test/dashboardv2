@@ -56,6 +56,9 @@ export function MainDashboard({
   transcript: transcriptProp,
   orderData: orderDataProp,
   callDuration: callDurationProp,
+  // 🔥 NEW: Per-call mute controls
+  isCallMuted,
+  toggleCallMute,
 }) {
   const [showTakeOverModal, setShowTakeOverModal] = useState(false);
   const [showEndCallModal, setShowEndCallModal] = useState(false);
@@ -392,13 +395,12 @@ export function MainDashboard({
                   orderData={orderData}
                   isConnected={isConnected}
                   error={error}
-                  audioEnabled={audioEnabled}
                   isTakenOver={isTakenOver}
                   clearTranscript={clearTranscript}
                   clearOrder={clearOrder}
-                  toggleAudio={toggleAudio}
-                  initAudioContext={initAudioContext}
-                  testAudio={testAudio}
+                  selectedCallId={selectedCallId}
+                  isCallMuted={isCallMuted}
+                  toggleCallMute={toggleCallMute}
                 />
               </div>
             </div>

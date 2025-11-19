@@ -6,13 +6,12 @@ export function LiveTranscript({
   orderData,
   isConnected,
   error,
-  audioEnabled,
   isTakenOver,
   clearTranscript,
   clearOrder,
-  toggleAudio,
-  initAudioContext,
-  testAudio,
+  selectedCallId,
+  isCallMuted,
+  toggleCallMute,
 }) {
   const transcriptEndRef = useRef(null);
 
@@ -46,17 +45,18 @@ export function LiveTranscript({
             </span>
           </div>
 
-          {/* Audio Controls - Simplified */}
+          {/* Audio Controls - Per-call mute (like quick actions) */}
           <button
-            onClick={toggleAudio}
+            onClick={() => selectedCallId && toggleCallMute(selectedCallId)}
+            disabled={!selectedCallId}
             className={`px-4 py-2.5 border rounded-lg font-medium transition-all text-sm shadow-lg ${
-              audioEnabled
-                ? "bg-gradient-to-r from-[#FD6262] to-[#ff8585] border-[#FD6262]/50 text-white hover:from-[#ff7272] hover:to-[#ff9595]"
-                : "border-white/10 text-gray-400 hover:border-[#FD6262]/50 hover:bg-black/40 bg-black/20"
-            }`}
+              isCallMuted
+                ? "border-white/10 text-gray-400 hover:border-[#FD6262]/50 hover:bg-black/40 bg-black/20"
+                : "bg-gradient-to-r from-[#FD6262] to-[#ff8585] border-[#FD6262]/50 text-white hover:from-[#ff7272] hover:to-[#ff9595]"
+            } ${!selectedCallId ? 'opacity-50 cursor-not-allowed' : ''}`}
             style={{ fontFamily: 'var(--font-body)' }}
           >
-            {audioEnabled ? "🔊 Audio ON" : "🔇 Audio OFF"}
+            {isCallMuted ? "🔇 Audio OFF" : "🔊 Audio ON"}
           </button>
         </div>
       </div>
