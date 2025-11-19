@@ -84,8 +84,7 @@ export const createWavBlob = (audioChunks) => {
     console.log(`  [${idx}] ${c.speaker}: ${c.sampleRate}Hz, ${c.data?.length} samples`);
   });
 
-  // 🔥 FORCE SLOW DOWN CALLER IN RECORDING ONLY (NOT realtime)
-  // Use 16kHz for recording WAV - this forces caller to play slower
+  // 🔥 FORCE SLOW DOWN CALLER TO 0.5x SPEED IN RECORDING ONLY (NOT realtime)
   const targetSampleRate = 16000;
   console.log(`🎯 WAV TARGET: ${targetSampleRate}Hz`);
   const resampledChunks = [];
@@ -93,18 +92,18 @@ export const createWavBlob = (audioChunks) => {
     const chunk = validChunks[i];
     const isCaller = chunk.speaker === 'caller' || chunk.speaker === 'customer' || chunk.speaker === 'Caller';
 
-    // 🔥 FORCE: Caller stored at 8kHz, but we'll upsample to 16kHz for recording
-    // This makes caller play at HALF speed (slower)
-    const chunkRate = chunk.sampleRate || (isCaller ? 8000 : 24000);
+    // 🔥 FORCE CALLER TO 0.5x: Always treat caller as 8kHz and upsample to 16kHz
+    // This makes caller play at HALF speed (0.5x)
+    const chunkRate = isCaller ? 8000 : (chunk.sampleRate || 24000);
 
     let resampledData;
 
-    if (chunkRate === targetSampleRate) {
-      // No resampling needed
+    if (!isCaller && chunkRate === targetSampleRate) {
+      // No resampling needed for non-caller
       resampledData = chunk.data;
       console.log(`  ✓ Chunk ${i}: ${chunk.speaker} ${chunkRate}Hz → ${targetSampleRate}Hz (NO RESAMPLE)`);
     } else {
-      // Resample to target rate
+      // ALWAYS resample (especially caller to force 0.5x slowdown)
       const ratio = targetSampleRate / chunkRate;
       const newLength = Math.floor(chunk.data.length * ratio);
       resampledData = new Float32Array(newLength);
@@ -123,7 +122,7 @@ export const createWavBlob = (audioChunks) => {
       }
 
       if (isCaller) {
-        console.log(`  🐌 SLOWING CALLER: ${chunkRate}Hz → ${targetSampleRate}Hz (${ratio.toFixed(2)}x upsample, ${chunk.data.length} → ${newLength} samples)`);
+        console.log(`  🐌 0.5x SPEED: Caller ${chunkRate}Hz → ${targetSampleRate}Hz (${ratio.toFixed(2)}x, ${chunk.data.length} → ${newLength} samples)`);
       } else {
         console.log(`  ↗ Chunk ${i}: ${chunk.speaker} ${chunkRate}Hz → ${targetSampleRate}Hz (${ratio.toFixed(2)}x resample, ${chunk.data.length} → ${newLength} samples)`);
       }
