@@ -17,7 +17,9 @@ export const takeOverCall = async ({
   endTakeOver,
   restaurantId,
 }) => {
-  if (!currentCallIdRef.current) {
+  const callId = currentCallIdRef.current;
+
+  if (!callId) {
     setError("No active call to take over");
     return;
   }
@@ -29,7 +31,7 @@ export const takeOverCall = async ({
 
   try {
     console.log(
-      `🎯 Taking over call: ${currentCallIdRef.current} for restaurant: ${restaurantId}`
+      `🎯 Taking over call: ${callId} for restaurant: ${restaurantId}`
     );
 
     const baseUrl = getBaseUrl(restaurantId);
@@ -48,7 +50,7 @@ export const takeOverCall = async ({
         "X-Restaurant-ID": restaurantId,
       },
       body: JSON.stringify({
-        callSid: currentCallIdRef.current,
+        callSid: callId,
         action: "enable",
         restaurantId: restaurantId,
       }),
@@ -69,9 +71,7 @@ export const takeOverCall = async ({
 
     // STEP 2: Connect to human audio WebSocket
     const humanAudioWs = new WebSocket(
-      `${baseUrl.replace("https://", "wss://")}/human-audio/${
-        currentCallIdRef.current
-      }?restaurant_id=${restaurantId}`
+      `${baseUrl.replace("https://", "wss://")}/human-audio/${callId}?restaurant_id=${restaurantId}`
     );
     humanAudioWsRef.current = humanAudioWs;
 
@@ -100,9 +100,10 @@ export const takeOverCall = async ({
         audioProcessorRef.current = processor;
 
         processor.onaudioprocess = (e) => {
+          // 🔥 FIX: Check mic mute status from ref (isMicMutedRef is now the whole object, indexed by callId)
           if (
             humanAudioWsRef.current?.readyState === WebSocket.OPEN &&
-            !isMicMutedRef.current
+            !isMicMutedRef[callId]
           ) {
             const pcmData = e.inputBuffer.getChannelData(0);
             const mulawData = encodeToMulaw(pcmData);

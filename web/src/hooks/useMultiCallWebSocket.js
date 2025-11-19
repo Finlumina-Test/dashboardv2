@@ -61,6 +61,7 @@ export function useMultiCallWebSocket(restaurantId) {
   const micStreamRef = useRef({}); // { [callId]: stream }
   const audioProcessorRef = useRef({}); // { [callId]: processor }
   const micAudioCtxRef = useRef({}); // { [callId]: ctx }
+  const isMicMutedRef = useRef({}); // { [callId]: boolean } - 🔥 FIX: Actual ref for mic mute state
 
   const [upload, { loading: uploading }] = useUpload();
 
@@ -776,6 +777,11 @@ export function useMultiCallWebSocket(restaurantId) {
     if (!callId) callId = selectedCallId;
     if (!callId) return;
 
+    // 🔥 FIX: Initialize mic mute ref for this call
+    if (!(callId in isMicMutedRef.current)) {
+      isMicMutedRef.current[callId] = false;
+    }
+
     await takeover({
       currentCallIdRef: { current: callId },
       setError,
@@ -784,7 +790,7 @@ export function useMultiCallWebSocket(restaurantId) {
       micStreamRef: { current: micStreamRef.current[callId] },
       audioProcessorRef: { current: audioProcessorRef.current[callId] },
       micAudioCtxRef: { current: micAudioCtxRef.current[callId] },
-      isMicMutedRef: { current: calls[callId]?.isMicMuted || false },
+      isMicMutedRef: isMicMutedRef.current, // 🔥 FIX: Pass the actual ref object, not a snapshot
       endTakeOver: () => endTakeOverHandler(callId),
       restaurantId,
     });
@@ -815,7 +821,14 @@ export function useMultiCallWebSocket(restaurantId) {
       console.log("⚠️ Cannot toggle mic - takeover not active");
       return;
     }
-    updateCall(callId, { isMicMuted: !call.isMicMuted });
+
+    const newMuteState = !call.isMicMuted;
+
+    // 🔥 FIX: Update BOTH state and ref so audio processor sees the change
+    updateCall(callId, { isMicMuted: newMuteState });
+    isMicMutedRef.current[callId] = newMuteState;
+
+    console.log(`🎤 Mic mute toggled for call ${callId}: ${newMuteState ? 'MUTED' : 'UNMUTED'}`);
   };
 
   const endCall = async (callId) => {
