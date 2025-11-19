@@ -3,11 +3,24 @@ import { uploadAudioToSupabase } from '@/utils/supabaseStorage';
 
 // Convert accumulated audio chunks to WAV blob - FIXED VERSION
 export const createWavBlob = (audioChunks) => {
+  console.log("🎬 ===== CREATE WAV BLOB STARTED =====");
   if (!audioChunks || audioChunks.length === 0) {
     console.log("🔇 No audio chunks to process");
     return null;
   }
   console.log(`🔍 Processing ${audioChunks.length} audio chunks...`);
+
+  // 🔥 DEBUG: Show FIRST caller chunk DETAILS
+  const firstCaller = audioChunks.find(c => c.speaker === 'caller' || c.speaker === 'customer' || c.speaker === 'Caller');
+  if (firstCaller) {
+    console.log("📞 FIRST CALLER CHUNK ANALYSIS:");
+    console.log("   speaker:", firstCaller.speaker);
+    console.log("   sampleRate:", firstCaller.sampleRate);
+    console.log("   data.length:", firstCaller.data?.length);
+    console.log("   timestamp:", firstCaller.timestamp);
+  } else {
+    console.warn("⚠️ NO CALLER CHUNKS FOUND IN AUDIO!");
+  }
 
   // 🔥 Remove duplicates by ID first
   const uniqueChunks = [];
@@ -92,39 +105,56 @@ export const createWavBlob = (audioChunks) => {
     const chunk = validChunks[i];
     const isCaller = chunk.speaker === 'caller' || chunk.speaker === 'customer' || chunk.speaker === 'Caller';
 
-    // 🔥 FORCE CALLER TO 0.5x: Always treat caller as 8kHz and upsample to 16kHz
-    // This makes caller play at HALF speed (0.5x)
-    const chunkRate = isCaller ? 8000 : (chunk.sampleRate || 24000);
+    // 🔥 CRITICAL FIX FOR 0.5x SPEED:
+    // Caller needs to be upsampled by 4x (not 2x) to achieve 0.5x speed
+    // 8kHz → 32kHz samples, then treated as 16kHz = 0.5x playback speed
+    let chunkRate;
+    if (isCaller) {
+      chunkRate = 8000; // Caller source rate
+    } else {
+      chunkRate = chunk.sampleRate || 24000; // AI source rate
+    }
 
     let resampledData;
+    let targetRatio;
 
-    if (!isCaller && chunkRate === targetSampleRate) {
-      // No resampling needed for non-caller
-      resampledData = chunk.data;
-      console.log(`  ✓ Chunk ${i}: ${chunk.speaker} ${chunkRate}Hz → ${targetSampleRate}Hz (NO RESAMPLE)`);
-    } else {
-      // ALWAYS resample (especially caller to force 0.5x slowdown)
-      const ratio = targetSampleRate / chunkRate;
-      const newLength = Math.floor(chunk.data.length * ratio);
+    if (isCaller) {
+      // 🔥 CALLER SLOWDOWN: Upsample by 4x (8kHz → 32kHz samples)
+      // These 32kHz samples will be marked as 16kHz in WAV = 0.5x speed
+      targetRatio = 32000 / chunkRate; // 4.0x
+      const newLength = Math.floor(chunk.data.length * targetRatio);
       resampledData = new Float32Array(newLength);
 
       for (let j = 0; j < newLength; j++) {
-        const srcPos = j / ratio;
+        const srcPos = j / targetRatio;
         const srcIndex = Math.floor(srcPos);
         const frac = srcPos - srcIndex;
 
         const s1 = chunk.data[srcIndex] || 0;
-        const s2 =
-          chunk.data[Math.min(chunk.data.length - 1, srcIndex + 1)] || 0;
-
-        // Linear interpolation
+        const s2 = chunk.data[Math.min(chunk.data.length - 1, srcIndex + 1)] || 0;
         resampledData[j] = s1 + (s2 - s1) * frac;
       }
-
-      if (isCaller) {
-        console.log(`  🐌 0.5x SPEED: Caller ${chunkRate}Hz → ${targetSampleRate}Hz (${ratio.toFixed(2)}x, ${chunk.data.length} → ${newLength} samples)`);
+      console.log(`  🐌 0.5x SPEED: Caller 8kHz → 32kHz samples (4x stretch) → marked as 16kHz = HALF SPEED (${chunk.data.length} → ${newLength})`);
+    } else {
+      // AI: Normal resampling to 16kHz
+      if (chunkRate === targetSampleRate) {
+        resampledData = chunk.data;
+        console.log(`  ✓ Chunk ${i}: ${chunk.speaker} ${chunkRate}Hz (NO RESAMPLE)`);
       } else {
-        console.log(`  ↗ Chunk ${i}: ${chunk.speaker} ${chunkRate}Hz → ${targetSampleRate}Hz (${ratio.toFixed(2)}x resample, ${chunk.data.length} → ${newLength} samples)`);
+        targetRatio = targetSampleRate / chunkRate;
+        const newLength = Math.floor(chunk.data.length * targetRatio);
+        resampledData = new Float32Array(newLength);
+
+        for (let j = 0; j < newLength; j++) {
+          const srcPos = j / targetRatio;
+          const srcIndex = Math.floor(srcPos);
+          const frac = srcPos - srcIndex;
+
+          const s1 = chunk.data[srcIndex] || 0;
+          const s2 = chunk.data[Math.min(chunk.data.length - 1, srcIndex + 1)] || 0;
+          resampledData[j] = s1 + (s2 - s1) * frac;
+        }
+        console.log(`  ↗ AI: ${chunkRate}Hz → ${targetSampleRate}Hz (${targetRatio.toFixed(2)}x, ${chunk.data.length} → ${newLength})`);
       }
     }
 
