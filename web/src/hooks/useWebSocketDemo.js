@@ -4,6 +4,7 @@ import { uploadCallAudio } from "./audio/audioRecording";
 import {
   takeOverCall as takeover,
   endTakeOver as endTakeover,
+  endCall as performEndCall,
 } from "./audio/takeoverLogic";
 import {
   handleWebSocketMessage,
@@ -35,7 +36,7 @@ export function useWebSocketDemo(sessionId) {
   const reconnectTimeoutRef = useRef(null);
   const audioCtxRef = useRef(null);
 
-  const isMicMutedRef = useRef(false);
+  const isMicMutedRef = useRef({}); // 🔥 FIX: Object to match multi-call system
   const isTakenOverRef = useRef(false);
 
   const audioChunksRef = useRef([]);
@@ -62,8 +63,11 @@ export function useWebSocketDemo(sessionId) {
     orderDataRef.current = orderData;
   }, [orderData]);
 
+  // 🔥 FIX: Sync mic mute ref for current call
   useEffect(() => {
-    isMicMutedRef.current = isMicMuted;
+    if (currentCallIdRef.current) {
+      isMicMutedRef.current[currentCallIdRef.current] = isMicMuted;
+    }
   }, [isMicMuted]);
 
   useEffect(() => {
@@ -529,6 +533,12 @@ export function useWebSocketDemo(sessionId) {
   };
 
   const takeOverCall = async () => {
+    // 🔥 FIX: Initialize mic mute ref for current call
+    const callId = currentCallIdRef.current;
+    if (callId && !(callId in isMicMutedRef.current)) {
+      isMicMutedRef.current[callId] = false;
+    }
+
     await takeover({
       currentCallIdRef,
       setError,
@@ -537,7 +547,7 @@ export function useWebSocketDemo(sessionId) {
       micStreamRef,
       audioProcessorRef,
       micAudioCtxRef,
-      isMicMutedRef,
+      isMicMutedRef: isMicMutedRef.current, // 🔥 FIX: Pass object, not ref
       endTakeOver: endTakeOverHandler,
       restaurantId: "demo",
     });
@@ -563,6 +573,11 @@ export function useWebSocketDemo(sessionId) {
     }
     setIsMicMuted((prev) => {
       const newState = !prev;
+      // 🔥 FIX: Update ref immediately so audio processor sees change
+      const callId = currentCallIdRef.current;
+      if (callId) {
+        isMicMutedRef.current[callId] = newState;
+      }
       console.log(`🎤 Demo microphone ${newState ? "MUTED" : "UNMUTED"}`);
       return newState;
     });
@@ -579,31 +594,8 @@ export function useWebSocketDemo(sessionId) {
       console.log(`📞 Call SID: ${currentCallIdRef.current}`);
       console.log(`🎭 Session ID: ${sessionId}`);
 
-      const baseUrl = getBaseUrl("demo");
-      if (!baseUrl) {
-        setError("Demo configuration not found");
-        return;
-      }
-
-      const response = await fetch(`${baseUrl}/end-call`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ callSid: currentCallIdRef.current }),
-      });
-
-      const responseText = await response.text();
-      console.log(
-        `📞 Demo end call response: ${response.status} - ${responseText}`,
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to end demo call: ${response.status} ${responseText}`,
-        );
-      }
+      // 🔥 FIX: Use shared endCall function like main dashboard
+      await performEndCall(currentCallIdRef, "demo");
 
       console.log("✅ Demo call ended successfully");
       setIsTakenOver(false);

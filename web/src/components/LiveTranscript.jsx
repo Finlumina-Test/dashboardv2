@@ -49,7 +49,7 @@ export function LiveTranscript({
           <button
             onClick={() => selectedCallId && toggleCallMute(selectedCallId)}
             disabled={!selectedCallId}
-            className={`px-2 py-1.5 lg:px-4 lg:py-2.5 border rounded-lg font-medium transition-all text-xs lg:text-sm shadow-lg ${
+            className={`px-1.5 py-1 lg:px-3 lg:py-2 border rounded-lg font-medium transition-all text-[10px] lg:text-sm shadow-lg ${
               isCallMuted
                 ? "border-white/10 text-gray-400 hover:border-[#FD6262]/50 hover:bg-black/40 bg-black/20"
                 : "bg-gradient-to-r from-[#FD6262] to-[#ff8585] border-[#FD6262]/50 text-white hover:from-[#ff7272] hover:to-[#ff9595]"
@@ -57,7 +57,7 @@ export function LiveTranscript({
             style={{ fontFamily: 'var(--font-body)' }}
           >
             <span className="hidden lg:inline">{isCallMuted ? "🔇 Audio OFF" : "🔊 Audio ON"}</span>
-            <span className="lg:hidden">{isCallMuted ? "🔇" : "🔊"}</span>
+            <span className="lg:hidden text-sm">{isCallMuted ? "🔇" : "🔊"}</span>
           </button>
         </div>
       </div>
