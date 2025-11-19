@@ -65,14 +65,14 @@ export default function LoginPage() {
             VOX
           </h1>
           <div className="text-sm text-gray-400 font-medium tracking-widest uppercase">
-            DASHBOARD LOGIN
+            AI VOICE ASSISTANT
           </div>
         </div>
 
         {/* Login Form */}
         <div className="bg-[#111111] border border-gray-800 rounded-lg p-8">
           <h2 className="text-xl font-semibold text-white mb-6 text-center">
-            Restaurant Login
+            Sign In
           </h2>
 
           <form onSubmit={handleLogin} className="space-y-6">
@@ -85,7 +85,7 @@ export default function LoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all"
-                placeholder="Enter restaurant username"
+                placeholder="Enter username"
                 required
               />
             </div>

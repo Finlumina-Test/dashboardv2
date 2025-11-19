@@ -112,7 +112,7 @@ export default function FinluminaVoxDashboard({ params }) {
 
   const confirmLogout = () => {
     localStorage.removeItem("restaurant_backend");
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
   // Show loading while checking authentication

@@ -113,13 +113,17 @@ export const createWavBlob = (audioChunks) => {
 
     totalLength += chunk.data.length;
 
-    // Subtract overlap if next chunk exists (ALWAYS crossfade)
+    // Subtract overlap if next chunk exists
     const nextChunk = i < resampledChunks.length - 1 ? resampledChunks[i + 1] : null;
     if (nextChunk) {
-      // 🔥 FIX: 50ms crossfade for ALL transitions - eliminates ALL gaps
-      const fadeDuration = 0.05;
+      // 🔥 FIX: Use smaller crossfade that fits in chunk sizes
+      // Caller chunks are ~320 samples (20ms), AI chunks are ~4000 samples (250ms)
+      const fadeDuration = isAI ? 0.03 : 0.01; // 30ms for AI, 10ms for caller
       const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
-      totalLength -= fadeSamples; // Subtract overlap
+
+      // 🔥 CRITICAL: Only subtract overlap if next chunk is long enough
+      const actualOverlap = Math.min(fadeSamples, nextChunk.data.length);
+      totalLength -= actualOverlap;
     }
   }
 
@@ -150,8 +154,9 @@ export const createWavBlob = (audioChunks) => {
 
     if (shouldCrossfade) {
       // Crossfade with previous chunk (same or different speaker)
-      // 🔥 Use 50ms for ANY transition to eliminate ALL gaps
-      const fadeDuration = 0.05; // 50ms for all transitions
+      // 🔥 Use adaptive crossfade based on speaker
+      const isAI = chunk.speaker === 'ai' || chunk.speaker === 'AI' || chunk.speaker === 'assistant';
+      const fadeDuration = isAI ? 0.03 : 0.01; // 30ms for AI, 10ms for caller
       const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
       const overlapLength = Math.min(fadeSamples, data.length);
 
@@ -180,13 +185,15 @@ export const createWavBlob = (audioChunks) => {
       writePos += data.length;
     }
 
-    // 🔥 CRITICAL: Back up for next chunk's overlap (ALWAYS, for all transitions)
+    // 🔥 CRITICAL: Back up for next chunk's overlap
     const nextChunk = i < resampledChunks.length - 1 ? resampledChunks[i + 1] : null;
     if (nextChunk) {
-      const fadeDuration = 0.05; // 50ms for all transitions
+      const nextIsAI = nextChunk.speaker === 'ai' || nextChunk.speaker === 'AI' || nextChunk.speaker === 'assistant';
+      const fadeDuration = nextIsAI ? 0.03 : 0.01; // 30ms for AI, 10ms for caller
       const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
-      console.log(`  ↩️ Backing up ${fadeSamples} samples for next chunk overlap`);
-      writePos -= fadeSamples;
+      const actualBackup = Math.min(fadeSamples, nextChunk.data.length);
+      console.log(`  ↩️ Backing up ${actualBackup} samples for next chunk overlap`);
+      writePos -= actualBackup;
     }
   }
 

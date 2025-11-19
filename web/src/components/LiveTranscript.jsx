@@ -27,14 +27,14 @@ export function LiveTranscript({
 
   return (
     <div className="flex flex-col card-gradient rounded-lg p-4 lg:p-6 h-[400px] lg:h-[500px] shadow-lg">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 lg:mb-6 gap-3 lg:gap-0 flex-shrink-0">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-4 lg:mb-6 gap-2 lg:gap-0 flex-shrink-0">
         <h3 className="text-base lg:text-lg font-light text-white" style={{ fontFamily: 'var(--font-heading)' }}>
           {t.liveTranscript}
         </h3>
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-2">
+        <div className="flex flex-row items-center gap-2">
           <div className="flex items-center gap-2">
             <div
-              className={`w-3 h-3 rounded-full shadow-lg ${
+              className={`w-2 h-2 lg:w-3 lg:h-3 rounded-full shadow-lg ${
                 isConnected
                   ? "bg-accent animate-pulse-soft shadow-accent/50"
                   : "bg-red-500 shadow-red-500/50"
@@ -49,14 +49,15 @@ export function LiveTranscript({
           <button
             onClick={() => selectedCallId && toggleCallMute(selectedCallId)}
             disabled={!selectedCallId}
-            className={`px-4 py-2.5 border rounded-lg font-medium transition-all text-sm shadow-lg ${
+            className={`px-2 py-1.5 lg:px-4 lg:py-2.5 border rounded-lg font-medium transition-all text-xs lg:text-sm shadow-lg ${
               isCallMuted
                 ? "border-white/10 text-gray-400 hover:border-[#FD6262]/50 hover:bg-black/40 bg-black/20"
                 : "bg-gradient-to-r from-[#FD6262] to-[#ff8585] border-[#FD6262]/50 text-white hover:from-[#ff7272] hover:to-[#ff9595]"
             } ${!selectedCallId ? 'opacity-50 cursor-not-allowed' : ''}`}
             style={{ fontFamily: 'var(--font-body)' }}
           >
-            {isCallMuted ? "🔇 Audio OFF" : "🔊 Audio ON"}
+            <span className="hidden lg:inline">{isCallMuted ? "🔇 Audio OFF" : "🔊 Audio ON"}</span>
+            <span className="lg:hidden">{isCallMuted ? "🔇" : "🔊"}</span>
           </button>
         </div>
       </div>
