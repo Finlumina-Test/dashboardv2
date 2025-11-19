@@ -124,6 +124,16 @@ export default function DemoLanding() {
             </li>
           </ul>
         </div>
+
+        {/* Navigation */}
+        <div className="pt-4">
+          <button
+            onClick={() => (window.location.href = "/")}
+            className="w-full flex items-center justify-center gap-2 bg-[#1a1a1a] hover:bg-[#222222] text-gray-300 hover:text-white py-3 px-4 rounded-lg text-sm font-medium transition-all border border-gray-700"
+          >
+            ← Back to Home
+          </button>
+        </div>
       </div>
 
       {/* Call Popup Modal */}

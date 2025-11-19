@@ -85,7 +85,10 @@ export const createWavBlob = (audioChunks) => {
   const resampledChunks = [];
   for (let i = 0; i < validChunks.length; i++) {
     const chunk = validChunks[i];
-    const chunkRate = chunk.sampleRate || 16000; // Default if missing
+    // 🔥 FIX: Smart default based on speaker
+    // Caller is always 8kHz, AI is usually 24kHz
+    const chunkRate = chunk.sampleRate ||
+      (chunk.speaker === 'caller' || chunk.speaker === 'customer' || chunk.speaker === 'Caller' ? 8000 : 24000);
 
     let resampledData;
 
