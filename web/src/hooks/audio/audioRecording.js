@@ -168,34 +168,33 @@ export const createWavBlob = (audioChunks) => {
         combinedAudio.set(data.subarray(overlapLength), writePos + overlapLength);
       }
 
-      console.log(`🎚️ Recording: ${isAI ? 'AI' : 'Caller'} chunk ${i} - ${(fadeDuration * 1000).toFixed(0)}ms crossfade (same speaker)`);
+      console.log(`🎚️ Recording: ${isAI ? 'AI' : 'Caller'} chunk ${i} at writePos=${writePos}, chunkLen=${data.length}, overlap=${overlapLength}`);
 
-      // Advance writePos by full chunk length
+      // Advance writePos by full chunk length (we wrote overlapLength + (data.length - overlapLength) = data.length)
       writePos += data.length;
     } else {
       // Different speaker or first chunk - just copy
       combinedAudio.set(data, writePos);
-      console.log(`📍 Recording: ${isAI ? 'AI' : 'Caller'} chunk ${i} - no crossfade (${i === 0 ? 'first' : 'speaker change'})`);
+      console.log(`📍 Recording: ${isAI ? 'AI' : 'Caller'} chunk ${i} at writePos=${writePos}, chunkLen=${data.length} (${i === 0 ? 'first' : 'speaker change'})`);
 
       // Advance writePos by full chunk length
       writePos += data.length;
     }
 
-    // Check if next chunk is same speaker - if so, back up for overlap
+    // 🔥 CRITICAL: Back up for next chunk's overlap if same speaker
     const nextChunk = i < resampledChunks.length - 1 ? resampledChunks[i + 1] : null;
     if (nextChunk) {
       const nextIsAI = nextChunk.speaker === 'ai' || nextChunk.speaker === 'AI' || nextChunk.speaker === 'assistant';
       if (isAI === nextIsAI) {
-        // Next chunk is same speaker - back up writePos for overlap
-        // 🔥 FIX: Use 10ms crossfade for AI (same as playback) - prevents choppy artifacts
         const fadeDuration = isAI ? 0.01 : 0.002;
         const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
-        writePos -= fadeSamples; // CRITICAL: Back up for overlap
         console.log(`  ↩️ Backing up ${fadeSamples} samples for next chunk overlap`);
+        writePos -= fadeSamples;
       }
     }
   }
 
+  console.log(`✅ Final writePos: ${writePos}, Expected totalLength: ${totalLength}`);
   // Trim to actual used length
   combinedAudio = combinedAudio.subarray(0, Math.min(writePos, totalLength));
   // Convert to 16-bit PCM
