@@ -78,17 +78,17 @@ export const createWavBlob = (audioChunks) => {
   });
   console.log('📊 Sample Rate Distribution:', sampleRateStats);
 
-  // 🔥 REVERTED: Use 8kHz to match caller's native sample rate (original setup)
-  // - Keeps caller at 8kHz (no resampling, no speedup)
-  // - Downsamples AI from 24kHz to 8kHz (3x downsample)
-  const targetSampleRate = 8000;
+  // 🔥 FORCE SLOW DOWN CALLER IN RECORDING ONLY (NOT realtime)
+  // Use 16kHz for recording WAV - this forces caller to play slower
+  const targetSampleRate = 16000;
   const resampledChunks = [];
   for (let i = 0; i < validChunks.length; i++) {
     const chunk = validChunks[i];
-    // 🔥 FIX: Smart default based on speaker
-    // Caller is always 8kHz, AI is usually 24kHz
-    const chunkRate = chunk.sampleRate ||
-      (chunk.speaker === 'caller' || chunk.speaker === 'customer' || chunk.speaker === 'Caller' ? 8000 : 24000);
+    const isCaller = chunk.speaker === 'caller' || chunk.speaker === 'customer' || chunk.speaker === 'Caller';
+
+    // 🔥 FORCE: Caller stored at 8kHz, but we'll upsample to 16kHz for recording
+    // This makes caller play at HALF speed (slower)
+    const chunkRate = chunk.sampleRate || (isCaller ? 8000 : 24000);
 
     let resampledData;
 
@@ -114,7 +114,12 @@ export const createWavBlob = (audioChunks) => {
         // Linear interpolation
         resampledData[j] = s1 + (s2 - s1) * frac;
       }
-      console.log(`  ↗ Chunk ${i}: ${chunk.speaker} ${chunkRate}Hz → ${targetSampleRate}Hz (${ratio.toFixed(2)}x resample, ${chunk.data.length} → ${newLength} samples)`);
+
+      if (isCaller) {
+        console.log(`  🐌 SLOWING CALLER: ${chunkRate}Hz → ${targetSampleRate}Hz (${ratio.toFixed(2)}x upsample, ${chunk.data.length} → ${newLength} samples)`);
+      } else {
+        console.log(`  ↗ Chunk ${i}: ${chunk.speaker} ${chunkRate}Hz → ${targetSampleRate}Hz (${ratio.toFixed(2)}x resample, ${chunk.data.length} → ${newLength} samples)`);
+      }
     }
 
     resampledChunks.push({ data: resampledData, speaker: chunk.speaker });
