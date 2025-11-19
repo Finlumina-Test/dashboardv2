@@ -611,6 +611,7 @@ export function useMultiCallWebSocket(restaurantId) {
 
       // 🔥 FIX: Determine sample rate based on speaker AND format
       let sampleRate = data.sampleRate || data.sample_rate;
+      const backendSentRate = sampleRate;
       if (!sampleRate) {
         // AI typically sends pcm16 at 24kHz, caller sends mulaw at 8kHz
         if (format === "pcm16") {
@@ -625,7 +626,15 @@ export function useMultiCallWebSocket(restaurantId) {
         }
       }
 
-      console.log(`🎵 Sample Rate Detection: Speaker=${speaker}, Format=${format}, Rate=${sampleRate}Hz`);
+      // 🔥 CRITICAL FIX: FORCE caller mulaw to 8kHz (backend might send wrong rate)
+      if ((speaker === "caller" || speaker === "customer" || speaker === "Caller") && format === "mulaw") {
+        if (sampleRate !== 8000) {
+          console.warn(`⚠️ OVERRIDING: Backend sent ${sampleRate}Hz for caller mulaw, forcing to 8000Hz`);
+        }
+        sampleRate = 8000;
+      }
+
+      console.log(`🎵 Audio: Speaker=${speaker}, Format=${format}, Backend=${backendSentRate || 'null'}, Final=${sampleRate}Hz`);
 
       const audioId =
         data.id ||

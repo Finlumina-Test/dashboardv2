@@ -208,6 +208,7 @@ export const handleWebSocketMessage = (
 
       // 🔥 FIX: Determine sample rate based on speaker AND format (same as main hook)
       let sampleRate = data.sampleRate || data.sample_rate;
+      const backendSentRate = sampleRate;
       if (!sampleRate) {
         if (format === "pcm16") {
           sampleRate = 24000;
@@ -220,7 +221,15 @@ export const handleWebSocketMessage = (
         }
       }
 
-      console.log(`🎵 [WS Handler] Sample Rate: Speaker=${speaker}, Format=${format}, Rate=${sampleRate}Hz`);
+      // 🔥 CRITICAL FIX: FORCE caller mulaw to 8kHz (backend might send wrong rate)
+      if ((speaker === "caller" || speaker === "customer" || speaker === "Caller") && format === "mulaw") {
+        if (sampleRate !== 8000) {
+          console.warn(`⚠️ OVERRIDING: Backend sent ${sampleRate}Hz for caller mulaw, forcing to 8000Hz`);
+        }
+        sampleRate = 8000;
+      }
+
+      console.log(`🎵 [Demo] Audio: Speaker=${speaker}, Format=${format}, Backend=${backendSentRate || 'null'}, Final=${sampleRate}Hz`);
 
       // 🔥 CRITICAL FIX: Create STABLE ID based on content hash, not random!
       // This prevents duplicate audio chunks from being played multiple times
