@@ -794,6 +794,9 @@ export function useMultiCallWebSocket(restaurantId) {
     // 🔥 FIX: Initialize mic mute ref for this call
     if (!(callId in isMicMutedRef.current)) {
       isMicMutedRef.current[callId] = false;
+      console.log(`🎤 Initialized isMicMutedRef[${callId}] = false (UNMUTED)`);
+    } else {
+      console.log(`🎤 isMicMutedRef[${callId}] already exists = ${isMicMutedRef.current[callId]}`);
     }
 
     await takeover({

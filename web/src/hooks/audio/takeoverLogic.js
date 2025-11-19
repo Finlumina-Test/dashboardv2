@@ -99,7 +99,20 @@ export const takeOverCall = async ({
         const processor = audioContext.createScriptProcessor(4096, 1, 1);
         audioProcessorRef.current = processor;
 
+        let audioSentCount = 0;
+        let lastLogTime = 0;
+
         processor.onaudioprocess = (e) => {
+          // 🔥 DEBUG: Log state every 100 chunks (~2 seconds)
+          const now = Date.now();
+          if (now - lastLogTime > 2000) {
+            const wsState = humanAudioWsRef.current?.readyState;
+            const isMuted = isMicMutedRef[callId];
+            console.log(`🎤 TAKEOVER AUDIO: WS=${wsState === WebSocket.OPEN ? 'OPEN' : 'NOT OPEN'}, Muted=${isMuted}, Sent=${audioSentCount} chunks`);
+            lastLogTime = now;
+            audioSentCount = 0;
+          }
+
           // 🔥 FIX: Check mic mute status from ref (isMicMutedRef is now the whole object, indexed by callId)
           if (
             humanAudioWsRef.current?.readyState === WebSocket.OPEN &&
@@ -115,6 +128,7 @@ export const takeOverCall = async ({
                 audio: base64,
               })
             );
+            audioSentCount++;
           }
         };
 

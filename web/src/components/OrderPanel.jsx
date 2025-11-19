@@ -430,7 +430,7 @@ function OrderDetailsPanel({
                     Calculating...
                   </span>
                 ) : (
-                  `PKR ${calculateTotal(orderData)}`
+                  `$${calculateTotal(orderData)}`
                 ))}
             </div>
             <div className="text-sm text-gray-500">
@@ -553,11 +553,11 @@ function OrderDetailsPanel({
                   <div className="text-right">
                     {item.price && (
                       <div className="text-lg font-bold text-green-400">
-                        PKR {(item.price * (item.quantity || 1)).toFixed(2)}
+                        ${(item.price * (item.quantity || 1)).toFixed(2)}
                       </div>
                     )}
                     <div className="text-sm text-gray-500">
-                      PKR {item.price || "0.00"} each
+                      ${item.price || "0.00"} each
                     </div>
                   </div>
                 </div>
@@ -575,13 +575,13 @@ function OrderDetailsPanel({
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-400">Subtotal:</span>
             <span className="text-white font-medium">
-              PKR {calculateTotal(orderData)}
+              ${calculateTotal(orderData)}
             </span>
           </div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-400">Tax (8.25%):</span>
             <span className="text-white font-medium">
-              PKR {(parseFloat(calculateTotal(orderData)) * 0.0825).toFixed(2)}
+              ${(parseFloat(calculateTotal(orderData)) * 0.0825).toFixed(2)}
             </span>
           </div>
           <div className="border-t border-gray-800 pt-2 mt-2">
@@ -589,7 +589,7 @@ function OrderDetailsPanel({
               <span className="text-xl font-bold text-white">Total:</span>
               <span className="text-2xl font-bold text-green-400">
                 {orderData.total_price ||
-                  `PKR ${(
+                  `$${(
                     parseFloat(calculateTotal(orderData)) * 1.0825
                   ).toFixed(2)}`}
               </span>

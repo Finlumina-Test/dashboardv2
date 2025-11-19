@@ -495,7 +495,7 @@ function CallDetailsView({
               <span className="text-gray-400">Total:</span>
               <span className="text-green-400 font-bold text-xl">
                 {selectedCall.total_price ||
-                  `PKR ${calculateTotal(selectedCall)}`}
+                  `$${calculateTotal(selectedCall)}`}
               </span>
             </div>
             <div className="flex justify-between">
@@ -550,11 +550,11 @@ function CallDetailsView({
                   <div className="text-right">
                     {item.price && (
                       <div className="text-green-400 font-semibold">
-                        PKR {(item.price * (item.quantity || 1)).toFixed(2)}
+                        ${(item.price * (item.quantity || 1)).toFixed(2)}
                       </div>
                     )}
                     <div className="text-sm text-gray-500">
-                      PKR {item.price || "0.00"} each
+                      ${item.price || "0.00"} each
                     </div>
                   </div>
                 </div>

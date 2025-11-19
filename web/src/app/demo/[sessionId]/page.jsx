@@ -228,14 +228,20 @@ export default function DemoSessionDashboard({ params }) {
             </div>
           </div>
 
-          {/* Back to Demo */}
-          <div className="pt-4 border-t border-gray-800">
+          {/* Navigation */}
+          <div className="pt-4 border-t border-gray-800 space-y-2">
+            <button
+              onClick={() => (window.location.href = "/")}
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#FD6262] to-[#ff8585] hover:from-[#ff7272] hover:to-[#ff9595] text-white py-2 px-4 rounded-lg text-sm font-medium transition-all shadow-lg"
+            >
+              <Home className="w-4 h-4" />
+              Back to Home
+            </button>
             <button
               onClick={() => (window.location.href = "/demo")}
               className="w-full flex items-center justify-center gap-2 bg-[#1a1a1a] hover:bg-[#222222] text-gray-300 hover:text-white py-2 px-4 rounded-lg text-sm font-medium transition-all border border-gray-700"
             >
-              <Home className="w-4 h-4" />
-              Back to Demo
+              Start New Demo
             </button>
           </div>
         </div>
