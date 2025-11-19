@@ -67,6 +67,17 @@ export const createWavBlob = (audioChunks) => {
     console.error("❌ No valid audio chunks!");
     return null;
   }
+
+  // 🔥 DEBUG: Log sample rate distribution
+  const sampleRateStats = {};
+  validChunks.forEach(chunk => {
+    const speaker = chunk.speaker || 'unknown';
+    const rate = chunk.sampleRate || 'missing';
+    const key = `${speaker}-${rate}Hz`;
+    sampleRateStats[key] = (sampleRateStats[key] || 0) + 1;
+  });
+  console.log('📊 Sample Rate Distribution:', sampleRateStats);
+
   // 🔥 FIX: Use 16kHz for better quality balance (professional phone standard)
   // - Downsamples AI from 24k to 16k (smoother, removes artifacts)
   // - Upsamples caller from 8k to 16k (2x instead of 3x, more natural)
@@ -81,6 +92,7 @@ export const createWavBlob = (audioChunks) => {
     if (chunkRate === targetSampleRate) {
       // No resampling needed
       resampledData = chunk.data;
+      console.log(`  ✓ Chunk ${i}: ${chunk.speaker} ${chunkRate}Hz → ${targetSampleRate}Hz (NO RESAMPLE)`);
     } else {
       // Resample to target rate
       const ratio = targetSampleRate / chunkRate;
@@ -99,6 +111,7 @@ export const createWavBlob = (audioChunks) => {
         // Linear interpolation
         resampledData[j] = s1 + (s2 - s1) * frac;
       }
+      console.log(`  ↗ Chunk ${i}: ${chunk.speaker} ${chunkRate}Hz → ${targetSampleRate}Hz (${ratio.toFixed(2)}x resample, ${chunk.data.length} → ${newLength} samples)`);
     }
 
     resampledChunks.push({ data: resampledData, speaker: chunk.speaker });
