@@ -67,13 +67,14 @@ export const createWavBlob = (audioChunks) => {
     console.error("❌ No valid audio chunks!");
     return null;
   }
-  // 🔥 FIX: Use 24kHz to avoid pitch shift (AI is 24k, caller is 8k)
-  // Downsampling to 16k was causing higher pitch
-  const targetSampleRate = 24000;
+  // 🔥 FIX: Use 16kHz for better quality balance (professional phone standard)
+  // - Downsamples AI from 24k to 16k (smoother, removes artifacts)
+  // - Upsamples caller from 8k to 16k (2x instead of 3x, more natural)
+  const targetSampleRate = 16000;
   const resampledChunks = [];
   for (let i = 0; i < validChunks.length; i++) {
     const chunk = validChunks[i];
-    const chunkRate = chunk.sampleRate || 24000; // Default if missing
+    const chunkRate = chunk.sampleRate || 16000; // Default if missing
 
     let resampledData;
 
@@ -117,8 +118,8 @@ export const createWavBlob = (audioChunks) => {
     if (nextChunk) {
       const nextIsAI = nextChunk.speaker === 'ai' || nextChunk.speaker === 'AI' || nextChunk.speaker === 'assistant';
       if (isAI === nextIsAI) {
-        // 🔥 FIX: Increase AI crossfade to 100ms for recordings - completely eliminates choppiness
-        const fadeDuration = isAI ? 0.1 : 0.002;
+        // 🔥 FIX: Use 10ms crossfade for AI (same as playback) - prevents choppy artifacts
+        const fadeDuration = isAI ? 0.01 : 0.002;
         const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
         totalLength -= fadeSamples; // Subtract overlap
       }
@@ -150,8 +151,8 @@ export const createWavBlob = (audioChunks) => {
 
     if (sameSpeakerPrev) {
       // Same speaker - blend with crossfade
-      // 🔥 FIX: Increase AI crossfade to 100ms for recordings - completely eliminates choppiness
-      const fadeDuration = isAI ? 0.1 : 0.002;
+      // 🔥 FIX: Use 10ms crossfade for AI (same as playback) - prevents choppy artifacts
+      const fadeDuration = isAI ? 0.01 : 0.002;
       const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
       const overlapLength = Math.min(fadeSamples, data.length);
 
@@ -186,8 +187,8 @@ export const createWavBlob = (audioChunks) => {
       const nextIsAI = nextChunk.speaker === 'ai' || nextChunk.speaker === 'AI' || nextChunk.speaker === 'assistant';
       if (isAI === nextIsAI) {
         // Next chunk is same speaker - back up writePos for overlap
-        // 🔥 FIX: Increase AI crossfade to 100ms for recordings - completely eliminates choppiness
-        const fadeDuration = isAI ? 0.1 : 0.002;
+        // 🔥 FIX: Use 10ms crossfade for AI (same as playback) - prevents choppy artifacts
+        const fadeDuration = isAI ? 0.01 : 0.002;
         const fadeSamples = Math.floor(targetSampleRate * fadeDuration);
         writePos -= fadeSamples; // CRITICAL: Back up for overlap
         console.log(`  ↩️ Backing up ${fadeSamples} samples for next chunk overlap`);
