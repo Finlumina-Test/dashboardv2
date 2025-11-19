@@ -421,9 +421,9 @@ export function MainDashboard({
                     // Take Over Button
                     <button
                       onClick={() => setShowTakeOverModal(true)}
-                      className="w-full px-6 py-4 bg-gradient-to-r from-[#FD6262] to-[#ff8585] hover:from-[#ff7272] hover:to-[#ff9595] text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg shadow-[#FD6262]/30 hover:shadow-[#FD6262]/50 hover:scale-105 border border-[#FD6262]/50"
+                      className="w-full px-3 py-2.5 lg:px-6 lg:py-4 bg-gradient-to-r from-[#FD6262] to-[#ff8585] hover:from-[#ff7272] hover:to-[#ff9595] text-white rounded-xl font-bold flex items-center justify-center gap-2 lg:gap-3 transition-all duration-300 shadow-lg shadow-[#FD6262]/30 hover:shadow-[#FD6262]/50 hover:scale-105 border border-[#FD6262]/50 text-sm lg:text-base"
                     >
-                      <UserCheck className="w-5 h-5" />
+                      <UserCheck className="w-4 h-4 lg:w-5 lg:h-5" />
                       Take Over Call
                     </button>
                   ) : (
@@ -432,22 +432,22 @@ export function MainDashboard({
                       {/* Mic Control */}
                       <button
                         onClick={toggleMicMute}
-                        className={`w-full px-6 py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg border ${
+                        className={`w-full px-3 py-2.5 lg:px-6 lg:py-4 rounded-xl font-bold flex items-center justify-center gap-2 lg:gap-3 transition-all duration-300 shadow-lg border text-sm lg:text-base ${
                           isMicMuted
                             ? 'bg-red-600 hover:bg-red-700 text-white shadow-red-600/30 border-red-500'
                             : 'bg-gradient-to-r from-[#FD6262] to-[#ff8585] hover:from-[#ff7272] hover:to-[#ff9595] text-white shadow-[#FD6262]/30 border-[#FD6262]/50'
                         }`}
                       >
-                        {isMicMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                        {isMicMuted ? <MicOff className="w-4 h-4 lg:w-5 lg:h-5" /> : <Mic className="w-4 h-4 lg:w-5 lg:h-5" />}
                         {isMicMuted ? 'Unmute Mic' : 'Mute Mic'}
                       </button>
 
                       {/* End Takeover Button */}
                       <button
                         onClick={() => setShowEndTakeOverModal(true)}
-                        className="w-full px-6 py-4 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg border border-gray-600"
+                        className="w-full px-3 py-2.5 lg:px-6 lg:py-4 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 lg:gap-3 transition-all duration-300 shadow-lg border border-gray-600 text-sm lg:text-base"
                       >
-                        <RotateCcw className="w-5 h-5" />
+                        <RotateCcw className="w-4 h-4 lg:w-5 lg:h-5" />
                         Return to AI
                       </button>
                     </div>
@@ -456,9 +456,9 @@ export function MainDashboard({
                   {/* End Call Button */}
                   <button
                     onClick={() => setShowEndCallModal(true)}
-                    className="w-full px-6 py-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold flex items-center justify-center gap-3 transition-all duration-300 shadow-lg shadow-red-600/30 hover:shadow-red-600/50 border border-red-500"
+                    className="w-full px-3 py-2.5 lg:px-6 lg:py-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 lg:gap-3 transition-all duration-300 shadow-lg shadow-red-600/30 hover:shadow-red-600/50 border border-red-500 text-sm lg:text-base"
                   >
-                    <PhoneOff className="w-5 h-5" />
+                    <PhoneOff className="w-4 h-4 lg:w-5 lg:h-5" />
                     End Call
                   </button>
                 </div>

@@ -578,10 +578,24 @@ export function useMultiCallWebSocket(restaurantId) {
       }
 
       const format = data.format || data.encoding || "mulaw";
-      const sampleRate =
-        data.sampleRate ||
-        data.sample_rate ||
-        (format === "pcm16" ? 24000 : 8000);
+
+      // 🔥 FIX: Determine sample rate based on speaker AND format
+      let sampleRate = data.sampleRate || data.sample_rate;
+      if (!sampleRate) {
+        // AI typically sends pcm16 at 24kHz, caller sends mulaw at 8kHz
+        if (format === "pcm16") {
+          sampleRate = 24000;
+        } else if (speaker === "caller" || speaker === "customer") {
+          sampleRate = 8000; // Caller is always 8kHz mulaw
+        } else if (speaker === "AI" || speaker === "ai" || speaker === "assistant") {
+          // AI might send mulaw (8kHz) or pcm16 (24kHz)
+          sampleRate = format === "mulaw" ? 8000 : 24000;
+        } else {
+          sampleRate = 8000; // Default fallback
+        }
+      }
+
+      console.log(`🎵 Sample Rate Detection: Speaker=${speaker}, Format=${format}, Rate=${sampleRate}Hz`);
 
       const audioId =
         data.id ||
