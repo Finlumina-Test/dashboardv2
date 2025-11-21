@@ -12,7 +12,52 @@ The frontend now expects Twilio recordings to be linked to calls. This guide exp
 
 After uploading a Twilio recording to Supabase Storage, your backend needs to **update the call record in the database** with the audio URL.
 
-### Option 1: Use the Update Audio Endpoint (Recommended)
+### Option 1: Use the Save Endpoint with Audio-Only Flag (Recommended - Works Now)
+
+**TEMPORARY WORKAROUND:** Until you restart your dev server, use the `/api/calls/save` endpoint with `update_audio_only: true`:
+
+```bash
+POST /api/calls/save
+Content-Type: application/json
+
+{
+  "call_sid": "CAxxxxx...",
+  "audio_url": "https://your-supabase-project.supabase.co/storage/v1/object/public/your-bucket/recording.mp3",
+  "update_audio_only": true
+}
+```
+
+**Example using Python:**
+```python
+import httpx
+import asyncio
+
+async def update_call_audio(call_sid, audio_url):
+    """Update call audio URL using save endpoint workaround"""
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{Config.FRONTEND_URL}/api/calls/save",
+            json={
+                "call_sid": call_sid,
+                "audio_url": audio_url,
+                "update_audio_only": True  # This flag makes it audio-only
+            },
+            timeout=10.0
+        )
+
+        if response.status_code == 200:
+            Log.info(f"✅ Audio URL updated: {call_sid}")
+            return response.json()
+        else:
+            Log.error(f"❌ Failed to update audio URL: {response.status_code}")
+            return None
+
+# After uploading recording to Supabase Storage
+audio_url = await upload_to_supabase(recording_file)
+await update_call_audio("CAfe8025859eef913c5b3b02d443c48cf6", audio_url)
+```
+
+### Option 2: Use the Update Audio Endpoint (After Dev Server Restart)
 
 After uploading to Supabase Storage, call this endpoint:
 

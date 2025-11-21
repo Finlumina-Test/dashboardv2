@@ -33,6 +33,7 @@ async function saveCall(request) {
       transcript,
       audio_url,
       restaurant_id,
+      update_audio_only, // 🔥 NEW: Flag for audio-only updates
     } = body;
 
     if (!call_id) {
@@ -41,6 +42,44 @@ async function saveCall(request) {
         { success: false, error: "call_id is required" },
         { status: 400 },
       );
+    }
+
+    // 🔥 NEW: Handle audio-only updates (workaround for route not loading)
+    if (update_audio_only) {
+      console.log(`🎵 Audio-only update for call ${call_id}`);
+
+      if (!audio_url) {
+        return Response.json(
+          { success: false, error: "audio_url is required for audio updates" },
+          { status: 400 },
+        );
+      }
+
+      // Update only the audio URL
+      const { data, error } = await supabase
+        .from('calls')
+        .update({
+          audio_url: audio_url,
+          updated_at: new Date().toISOString()
+        })
+        .eq('call_sid', call_id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("❌ Error updating audio URL:", error);
+        throw error;
+      }
+
+      if (!data) {
+        return Response.json(
+          { success: false, error: "Call not found" },
+          { status: 404 },
+        );
+      }
+
+      console.log(`✅ Audio URL updated: ${audio_url}`);
+      return Response.json({ success: true, call: data, message: "Audio URL updated" });
     }
 
     if (!restaurant_id) {
