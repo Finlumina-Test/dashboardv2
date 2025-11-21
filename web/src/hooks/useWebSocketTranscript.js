@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { initAudioContext } from "./audio/audioUtils";
-import { uploadCallAudio } from "./audio/audioRecording";
 import {
   takeOverCall as takeover,
   endTakeOver as endTakeover,
@@ -11,7 +10,6 @@ import {
   saveCallToDatabase,
 } from "./audio/websocketHandlers";
 import { getBaseUrl } from "@/utils/restaurantConfig";
-import useUpload from "@/utils/useUpload"; // 🔥 NEW: Import upload hook
 
 export function useWebSocketTranscript(restaurantId) {
   const [transcript, setTranscript] = useState([]);
@@ -39,7 +37,6 @@ export function useWebSocketTranscript(restaurantId) {
   // 🔥 FIXED: Ref should match new default state (false = audio enabled)
   const isCallMutedRef = useRef(false);
 
-  const audioChunksRef = useRef([]);
   const currentCallIdRef = useRef(null);
   const callSessionActiveRef = useRef(false);
   const hasBeenSavedRef = useRef(false);
@@ -75,11 +72,8 @@ export function useWebSocketTranscript(restaurantId) {
     }
   };
 
-  // 🔥 NEW: Initialize upload hook for large files
-  const [upload, { loading: uploading }] = useUpload();
-
   const manualSaveCall = async () => {
-    if (isSaving || uploading) {
+    if (isSaving) {
       console.log("⚠️ Save already in progress");
       return;
     }
@@ -117,20 +111,14 @@ export function useWebSocketTranscript(restaurantId) {
     console.log("💾 Starting manual save...");
 
     try {
-      // 🔥 NEW: Use frontend upload hook instead of backend API
-      const audioUrl = await uploadCallAudio(
-        currentCallIdRef.current,
-        audioChunksRef,
-        upload, // Pass upload function for large files
-      );
-
       const saveResult = await saveCallToDatabase(
         orderData || {},
         transcript || [],
         currentCallIdRef.current,
         callStartTime,
-        audioUrl,
+        null, // Backend will provide Twilio recording URL
         restaurantId,
+        null, // No audio chunks - backend handles recording
       );
 
       hasBeenSavedRef.current = true;
@@ -182,21 +170,15 @@ export function useWebSocketTranscript(restaurantId) {
     console.log(`💾 Auto-saving call (${triggerReason})...`);
 
     try {
-      // 🔥 NEW: Use frontend upload hook instead of backend API
-      const audioUrl = await uploadCallAudio(
-        currentCallIdRef.current,
-        audioChunksRef,
-        upload, // Pass upload function for large files
-      );
-
       // 🔥 FIXED: Use current values from refs
       const saveResult = await saveCallToDatabase(
         currentOrderData || {},
         currentTranscript || [],
         currentCallIdRef.current,
         callStartTime,
-        audioUrl,
+        null, // Backend will provide Twilio recording URL
         restaurantId,
+        null, // No audio chunks - backend handles recording
       );
 
       hasBeenSavedRef.current = true;
@@ -299,7 +281,6 @@ export function useWebSocketTranscript(restaurantId) {
         await initAudioContext(audioCtxRef, setAudioEnabled, setError);
 
         callSessionActiveRef.current = true;
-        audioChunksRef.current = [];
         currentCallIdRef.current = null;
         hasBeenSavedRef.current = false;
         callTimerStartedRef.current = false;
@@ -335,7 +316,7 @@ export function useWebSocketTranscript(restaurantId) {
             }
           },
           audioCtxRef,
-          audioChunksRef,
+          audioChunksRef: null, // No audio recording - backend handles via Twilio
           isTakenOverRef,
           restaurantId,
           callTimerStartedRef,

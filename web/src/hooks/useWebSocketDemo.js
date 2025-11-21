@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { initAudioContext } from "./audio/audioUtils";
-import { uploadCallAudio } from "./audio/audioRecording";
 import {
   takeOverCall as takeover,
   endTakeOver as endTakeover,
@@ -11,7 +10,6 @@ import {
   saveCallToDatabase,
 } from "./audio/websocketHandlers";
 import { getBaseUrl } from "@/utils/restaurantConfig";
-import useUpload from "@/utils/useUpload"; // 🔥 NEW: Import upload hook
 
 export function useWebSocketDemo(sessionId) {
   const [transcript, setTranscript] = useState([]);
@@ -29,9 +27,6 @@ export function useWebSocketDemo(sessionId) {
   const [lastSaveStatus, setLastSaveStatus] = useState(null);
   const [callStatus, setCallStatus] = useState("waiting"); // waiting, active, ended
 
-  // 🔥 NEW: Initialize upload hook for large files
-  const [upload, { loading: uploading }] = useUpload();
-
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const audioCtxRef = useRef(null);
@@ -39,7 +34,6 @@ export function useWebSocketDemo(sessionId) {
   const isMicMutedRef = useRef({}); // 🔥 FIX: Object to match multi-call system
   const isTakenOverRef = useRef(false);
 
-  const audioChunksRef = useRef([]);
   const currentCallIdRef = useRef(null);
   const callSessionActiveRef = useRef(false);
   const hasBeenSavedRef = useRef(false);
@@ -157,21 +151,14 @@ export function useWebSocketDemo(sessionId) {
     console.log("💾 ===== DEMO MANUAL SAVE INITIATED =====");
 
     try {
-      // 🔥 NEW: Use frontend upload hook instead of backend API
-      const audioUrl = await uploadCallAudio(
-        currentCallIdRef.current,
-        audioChunksRef,
-        upload, // Pass upload function for large files
-      );
-      console.log("🎵 Audio upload result:", audioUrl || "no audio");
-
       const saveResult = await saveCallToDatabase(
         orderData || {},
         transcript || [],
         currentCallIdRef.current,
         callStartTime,
-        audioUrl,
+        null, // Backend will provide Twilio recording URL
         "demo", // Always use demo restaurant ID
+        null, // No audio chunks - backend handles recording
       );
 
       hasBeenSavedRef.current = true;
@@ -239,21 +226,14 @@ export function useWebSocketDemo(sessionId) {
     console.log(`💾 ===== DEMO AUTO-SAVE TRIGGERED: ${triggerReason} =====`);
 
     try {
-      // 🔥 NEW: Use frontend upload hook instead of backend API
-      const audioUrl = await uploadCallAudio(
-        currentCallIdRef.current,
-        audioChunksRef,
-        upload, // Pass upload function for large files
-      );
-      console.log("🎵 Audio upload result:", audioUrl || "no audio");
-
       const saveResult = await saveCallToDatabase(
         currentOrderData || {},
         currentTranscript || [],
         currentCallIdRef.current,
         callStartTime,
-        audioUrl,
+        null, // Backend will provide Twilio recording URL
         "demo", // Always use demo restaurant ID
+        null, // No audio chunks - backend handles recording
       );
 
       hasBeenSavedRef.current = true;
@@ -303,7 +283,6 @@ export function useWebSocketDemo(sessionId) {
         await initAudioContext(audioCtxRef, setAudioEnabled, setError);
 
         callSessionActiveRef.current = true;
-        audioChunksRef.current = [];
         currentCallIdRef.current = null;
         hasBeenSavedRef.current = false;
         callTimerStartedRef.current = false;
@@ -348,7 +327,7 @@ export function useWebSocketDemo(sessionId) {
             }
           },
           audioCtxRef,
-          audioChunksRef,
+          audioChunksRef: null, // No audio recording - backend handles via Twilio
           isTakenOverRef,
           restaurantId: "demo",
           callTimerStartedRef,

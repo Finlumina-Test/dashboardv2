@@ -338,9 +338,9 @@ export const playAudioHQ = async (
     const originalPeak = Math.max(...originalFloat32.map(Math.abs));
     console.log(`📥 AUDIO CHUNK: Speaker=${speaker}, Format=${sourceFormat}, Peak=${originalPeak.toFixed(4)}, Samples=${pcm16Data.length}, ID=${uniqueId}`);
 
-    // 🔥 ALWAYS RECORD: Store ALL audio chunks for recording (even duplicates)
-    // Recording needs complete audio, only playback should deduplicate
-    if (callSessionActiveRef.current) {
+    // 🔥 OPTIONAL RECORDING: Store audio chunks only if audioChunksRef is provided
+    // Backend now handles recording via Twilio, so this is optional for backward compatibility
+    if (audioChunksRef && audioChunksRef.current && callSessionActiveRef.current) {
       audioChunksRef.current.push({
         id: uniqueId,
         data: originalFloat32,

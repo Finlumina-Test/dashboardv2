@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { initAudioContext, playAudioHQ } from "./audio/audioUtils";
-import { uploadCallAudio } from "./audio/audioRecording";
 import {
   takeOverCall as takeover,
   endTakeOver as endTakeover,
@@ -11,7 +10,6 @@ import {
   saveCallToDatabase,
 } from "./audio/websocketHandlers";
 import { getBaseUrl } from "@/utils/restaurantConfig";
-import useUpload from "@/utils/useUpload";
 
 // 🔥 NEW: Check call status from backend
 const checkCallStatus = async (callId, restaurantId) => {
@@ -37,7 +35,7 @@ const checkCallStatus = async (callId, restaurantId) => {
 
 export function useMultiCallWebSocket(restaurantId) {
   // 🔥 NEW: Multi-call state structure
-  // calls = { [callId]: { transcript, orderData, startTime, duration, isTakenOver, isMicMuted, audioChunks, hasBeenSaved, ... } }
+  // calls = { [callId]: { transcript, orderData, startTime, duration, isTakenOver, isMicMuted, hasBeenSaved, ... } }
   const [calls, setCalls] = useState({});
   const [activeCallIds, setActiveCallIds] = useState([]);
   const [selectedCallId, setSelectedCallId] = useState(null);
@@ -62,8 +60,6 @@ export function useMultiCallWebSocket(restaurantId) {
   const audioProcessorRef = useRef({}); // { [callId]: processor }
   const micAudioCtxRef = useRef({}); // { [callId]: ctx }
   const isMicMutedRef = useRef({}); // { [callId]: boolean } - 🔥 FIX: Actual ref for mic mute state
-
-  const [upload, { loading: uploading }] = useUpload();
 
   // Sync calls ref with state
   useEffect(() => {
@@ -121,7 +117,6 @@ export function useMultiCallWebSocket(restaurantId) {
         isTakenOver: false,
         isMicMuted: false,
         isAudioMuted: false, // 🔥 NEW: Per-call audio mute state
-        audioChunks: [],
         hasBeenSaved: false,
         isCallEnded: false,
         isSaving: false,
@@ -252,7 +247,7 @@ export function useMultiCallWebSocket(restaurantId) {
       return;
     }
 
-    if (call.isSaving || uploading) {
+    if (call.isSaving) {
       console.log("⚠️ Save already in progress");
       return;
     }
@@ -277,19 +272,17 @@ export function useMultiCallWebSocket(restaurantId) {
 
     updateCall(callId, { isSaving: true, lastSaveStatus: null });
     console.log(`💾 ===== MANUAL SAVE CALL ${callId} =====`);
-    console.log(`💾 Audio chunks available: ${call.audioChunks?.length || 0}`);
     console.log(`💾 Transcript messages: ${call.transcript?.length || 0}`);
 
     try {
-      // 🔥 NEW: Pass audioChunksRef directly - saveCallToDatabase will upload to Supabase
       const saveResult = await saveCallToDatabase(
         call.orderData || {},
         call.transcript || [],
         callId,
         call.startTime,
-        null, // No pre-uploaded audio URL
+        null, // Backend will provide audio URL from Twilio recording
         restaurantId,
-        { current: call.audioChunks }, // Pass audio chunks for Supabase upload
+        null, // No audio chunks - backend handles recording
       );
 
       updateCall(callId, {
@@ -357,19 +350,17 @@ export function useMultiCallWebSocket(restaurantId) {
     }
 
     console.log(`💾 ===== AUTO-SAVING CALL ${callId} (${triggerReason}) =====`);
-    console.log(`💾 Audio chunks available: ${call.audioChunks?.length || 0}`);
     console.log(`💾 Transcript messages: ${call.transcript?.length || 0}`);
 
     try {
-      // 🔥 NEW: Pass audioChunksRef directly - saveCallToDatabase will upload to Supabase
       await saveCallToDatabase(
         call.orderData || {},
         call.transcript || [],
         callId,
         call.startTime,
-        null, // No pre-uploaded audio URL
+        null, // Backend will provide audio URL from Twilio recording
         restaurantId,
-        { current: call.audioChunks }, // Pass audio chunks for Supabase upload
+        null, // No audio chunks - backend handles recording
       );
 
       updateCall(callId, { hasBeenSaved: true });
@@ -660,34 +651,19 @@ export function useMultiCallWebSocket(restaurantId) {
         updateCall(callId, { audioNotReadyWarned: true });
       }
 
-      // 🔥 FIX: ALWAYS record audio (even for non-selected calls), but only PLAY for selected call
+      // 🔥 Play audio for selected call (backend handles recording via Twilio)
       try {
-        // Create a temporary array to collect new chunks from playAudioHQ
-        const tempChunksArray = [];
-        const audioChunksRef = { current: tempChunksArray };
-
         playAudioHQ(
           base64Audio,
           audioCtxRef,
-          audioChunksRef, // Pass mutable ref
-          { current: true }, // callSessionActive - always record
+          null, // No audio chunk collection - backend handles recording
+          { current: true }, // callSessionActive
           format,
           sampleRate,
           speaker,
           audioId,
           isMuted // Mute non-selected calls
         );
-
-        // 🔥 FIX: Append new chunks to existing chunks (don't overwrite!)
-        if (tempChunksArray.length > 0) {
-          updateCall(callId, (prevCall) => {
-            const newTotal = prevCall.audioChunks.length + tempChunksArray.length;
-            console.log(`🎵 Audio chunks for ${callId}: ${prevCall.audioChunks.length} + ${tempChunksArray.length} = ${newTotal} total`);
-            return {
-              audioChunks: [...prevCall.audioChunks, ...tempChunksArray]
-            };
-          });
-        }
       } catch (audioError) {
         console.error("❌ Audio playback error:", audioError);
       }

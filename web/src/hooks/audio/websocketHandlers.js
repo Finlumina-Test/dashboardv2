@@ -1,7 +1,6 @@
 // WebSocket message handlers for dashboard stream
 
 import { playAudioHQ } from "./audioUtils";
-import { uploadCallAudioToSupabase } from "./audioRecording";
 
 // Save call to database (used by manual and auto-save)
 export const saveCallToDatabase = async (
@@ -21,8 +20,7 @@ export const saveCallToDatabase = async (
     console.log("💾 ===== SAVE CALL DEBUG =====");
     console.log("💾 Call ID:", callId || "❌ MISSING");
     console.log("💾 Restaurant ID:", restaurantId || "❌ MISSING");
-    console.log("💾 Audio URL received:", audioUrl || "❌ NULL/MISSING");
-    console.log("💾 Audio chunks available:", !!audioChunksRef?.current);
+    console.log("💾 Audio URL received:", audioUrl || "❌ NULL/MISSING (backend will add Twilio recording)");
     console.log("💾 Order Data exists:", !!finalOrderData);
     console.log("💾 Transcript length:", finalTranscript?.length || 0);
     console.log("💾 Call duration:", callDuration, "seconds");
@@ -36,34 +34,6 @@ export const saveCallToDatabase = async (
       console.error("❌ No restaurant ID provided to save function!");
       throw new Error("No restaurant ID provided");
     }
-
-    // 🔥 NEW: Upload audio to Supabase if chunks are available
-    let finalAudioUrl = audioUrl;
-    console.log("📤 ===== AUDIO UPLOAD SECTION =====");
-    console.log("📤 audioChunksRef exists:", !!audioChunksRef);
-    console.log("📤 audioChunksRef.current exists:", !!audioChunksRef?.current);
-    console.log("📤 audioChunks count:", audioChunksRef?.current?.length || 0);
-
-    if (audioChunksRef?.current && audioChunksRef.current.length > 0) {
-      console.log("📤 Uploading audio to Supabase Storage...");
-      const uploadedUrl = await uploadCallAudioToSupabase(callId, audioChunksRef);
-      console.log("📤 Upload returned:", uploadedUrl);
-      console.log("📤 Upload returned type:", typeof uploadedUrl);
-
-      if (uploadedUrl) {
-        finalAudioUrl = uploadedUrl;
-        console.log("✅ Audio uploaded to Supabase successfully!");
-        console.log("✅ Final audio URL set to:", finalAudioUrl);
-      } else {
-        console.error("❌ Audio upload to Supabase returned null/undefined");
-        console.warn("⚠️ Proceeding without audio");
-      }
-    } else {
-      console.warn("⚠️ No audio chunks available for upload");
-    }
-
-    console.log("📤 finalAudioUrl for database:", finalAudioUrl);
-    console.log("📤 ===== END AUDIO UPLOAD SECTION =====");
 
     console.log("💾 Saving call to database...");
 
@@ -79,12 +49,12 @@ export const saveCallToDatabase = async (
       total_price: finalOrderData?.total_price || null,
       call_duration: callDuration,
       transcript: finalTranscript || [],
-      audio_url: finalAudioUrl, // ✅ Use Supabase URL or fallback
+      audio_url: audioUrl, // Backend will provide Twilio recording URL
       restaurant_id: restaurantId,
     };
 
     console.log("💾 ===== SAVE PAYLOAD DEBUG =====");
-    console.log("💾 Audio URL in payload:", payload.audio_url);
+    console.log("💾 Audio URL in payload:", payload.audio_url || "null (backend will add Twilio recording)");
     console.log("💾 Payload keys:", Object.keys(payload));
 
     // Use internal API endpoint
