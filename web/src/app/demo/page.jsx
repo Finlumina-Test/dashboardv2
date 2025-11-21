@@ -13,15 +13,11 @@ export default function DemoLanding() {
   };
 
   const handleCallForId = () => {
-    // Copy phone number to clipboard
-    const phoneNumber = "+1 (727) 513-5412";
-    navigator.clipboard.writeText(phoneNumber).then(() => {
-      // Show popup after copying
-      setShowCallPopup(true);
-    }).catch(() => {
-      // If clipboard fails, still show popup
-      setShowCallPopup(true);
-    });
+    // Show popup first
+    setShowCallPopup(true);
+
+    // Open phone dialer
+    window.location.href = "tel:+17275132412";
   };
 
   return (
@@ -89,7 +85,7 @@ export default function DemoLanding() {
           </h3>
           <p className="text-green-200 text-sm mb-2">
             Call{" "}
-            <span className="font-mono text-green-100">+1 (727) 513-5412</span>{" "}
+            <span className="font-mono text-green-100">+1 (727) 513-2412</span>{" "}
             to start a demo call
           </p>
           <p className="text-green-300 text-xs">
@@ -164,18 +160,20 @@ export default function DemoLanding() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-6 max-w-sm w-full">
             <div className="text-center space-y-4">
-              <div className="text-4xl">📋</div>
+              <div className="text-4xl">📞</div>
               <h3 className="text-xl font-semibold text-white">
-                Number Copied!
+                Calling Demo Line
               </h3>
               <p className="text-gray-300 text-sm">
+                Call{" "}
                 <span className="font-mono text-green-400">
-                  +1 (727) 513-5412
+                  +1 (727) 513-2412
                 </span>{" "}
-                has been copied to your clipboard.
+                to receive your unique session ID
               </p>
               <p className="text-gray-400 text-xs">
-                Once you get your session ID from the call, return here and enter it to access your dashboard
+                Once you get your session ID from the call, return here and
+                enter it to access your dashboard
               </p>
               <button
                 onClick={() => setShowCallPopup(false)}
