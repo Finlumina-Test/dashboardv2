@@ -34,6 +34,7 @@ async function saveCall(request) {
       audio_url,
       restaurant_id,
       update_audio_only, // 🔥 NEW: Flag for audio-only updates
+      retry_count, // 🔥 NEW: Track retry attempts
     } = body;
 
     if (!call_id) {
@@ -46,7 +47,8 @@ async function saveCall(request) {
 
     // 🔥 NEW: Handle audio-only updates (workaround for route not loading)
     if (update_audio_only) {
-      console.log(`🎵 Audio-only update for call ${call_id}`);
+      const currentRetry = retry_count || 0;
+      console.log(`🎵 Audio-only update for call ${call_id} (attempt ${currentRetry + 1}/6)`);
 
       if (!audio_url) {
         return Response.json(
@@ -55,32 +57,68 @@ async function saveCall(request) {
         );
       }
 
-      // Update only the audio URL
-      const { data, error } = await supabase
+      // First check if the call exists
+      const { data: existingCall, error: checkError } = await supabase
+        .from('calls')
+        .select('id, call_sid, restaurant_id, customer_name')
+        .eq('call_sid', call_id)
+        .maybeSingle(); // Use maybeSingle instead of single to avoid error on 0 rows
+
+      if (checkError) {
+        console.error("❌ Error checking for call:", checkError);
+        throw checkError;
+      }
+
+      if (!existingCall) {
+        console.warn(`⚠️ Call ${call_id} not found in database yet (attempt ${currentRetry + 1}/6)`);
+        console.warn(`⚠️ This is normal - frontend may still be saving the call`);
+
+        // Tell backend to retry with exponential backoff
+        if (currentRetry < 5) {
+          const retryAfter = Math.pow(2, currentRetry) * 1000; // 1s, 2s, 4s, 8s, 16s
+          console.log(`⏳ Suggesting retry after ${retryAfter}ms`);
+          return Response.json(
+            {
+              success: false,
+              error: "Call not found yet - still being saved by frontend",
+              retry: true,
+              retry_after: retryAfter,
+              retry_count: currentRetry
+            },
+            { status: 404 },
+          );
+        } else {
+          console.error(`❌ Call ${call_id} not found after 6 attempts - giving up`);
+          return Response.json(
+            {
+              success: false,
+              error: "Call not found after maximum retries",
+              retry: false
+            },
+            { status: 404 },
+          );
+        }
+      }
+
+      // Call exists, update the audio URL
+      const { data: updatedCall, error: updateError } = await supabase
         .from('calls')
         .update({
           audio_url: audio_url,
           updated_at: new Date().toISOString()
         })
-        .eq('call_sid', call_id)
+        .eq('id', existingCall.id)
         .select()
         .single();
 
-      if (error) {
-        console.error("❌ Error updating audio URL:", error);
-        throw error;
-      }
-
-      if (!data) {
-        return Response.json(
-          { success: false, error: "Call not found" },
-          { status: 404 },
-        );
+      if (updateError) {
+        console.error("❌ Error updating audio URL:", updateError);
+        throw updateError;
       }
 
       console.log(`✅ Audio URL updated: ${audio_url}`);
-      console.log(`📋 Call details: id=${data.id}, call_sid=${data.call_sid}, restaurant_id=${data.restaurant_id || 'NULL'}, customer_name=${data.customer_name || 'NULL'}`);
-      return Response.json({ success: true, call: data, message: "Audio URL updated" });
+      console.log(`📋 Call details: id=${updatedCall.id}, call_sid=${updatedCall.call_sid}, restaurant_id=${updatedCall.restaurant_id || 'NULL'}, customer_name=${updatedCall.customer_name || 'NULL'}`);
+      return Response.json({ success: true, call: updatedCall, message: "Audio URL updated" });
     }
 
     if (!restaurant_id) {

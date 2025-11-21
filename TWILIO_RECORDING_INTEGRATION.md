@@ -27,35 +27,52 @@ Content-Type: application/json
 }
 ```
 
-**Example using Python:**
+**Example using Python (with retry handling):**
 ```python
 import httpx
 import asyncio
 
-async def update_call_audio(call_sid, audio_url):
-    """Update call audio URL using save endpoint workaround"""
+async def update_call_audio(call_sid, audio_url, retry_count=0):
+    """Update call audio URL using save endpoint with retry handling"""
     async with httpx.AsyncClient() as client:
         response = await client.post(
             f"{Config.FRONTEND_URL}/api/calls/save",
             json={
-                "call_sid": call_sid,
+                "call_id": call_sid,  # Use call_id instead of call_sid
                 "audio_url": audio_url,
-                "update_audio_only": True  # This flag makes it audio-only
+                "update_audio_only": True,
+                "retry_count": retry_count
             },
             timeout=10.0
         )
 
+        data = response.json()
+
+        # Handle retry for race condition (call not saved yet by frontend)
+        if response.status_code == 404 and data.get("retry"):
+            retry_after = data.get("retry_after", 1000) / 1000  # ms to seconds
+            Log.info(f"⏳ Call not found yet (retry {retry_count + 1}/6), waiting {retry_after}s...")
+            await asyncio.sleep(retry_after)
+            return await update_call_audio(call_sid, audio_url, retry_count + 1)
+
         if response.status_code == 200:
             Log.info(f"✅ Audio URL updated: {call_sid}")
-            return response.json()
+            return data
         else:
-            Log.error(f"❌ Failed to update audio URL: {response.status_code}")
+            Log.error(f"❌ Failed to update audio URL: {response.status_code} - {data}")
             return None
 
 # After uploading recording to Supabase Storage
 audio_url = await upload_to_supabase(recording_file)
 await update_call_audio("CAfe8025859eef913c5b3b02d443c48cf6", audio_url)
 ```
+
+**Important Notes:**
+- The endpoint now handles race conditions automatically
+- If the call doesn't exist yet (frontend still saving), it will suggest a retry delay
+- Uses exponential backoff: 1s, 2s, 4s, 8s, 16s
+- Max 6 attempts before giving up
+- This ensures the audio URL gets linked even if backend is faster than frontend
 
 ### Option 2: Use the Update Audio Endpoint (After Dev Server Restart)
 
