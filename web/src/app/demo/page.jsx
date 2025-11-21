@@ -22,7 +22,7 @@ export default function DemoLanding() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-inter flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full space-y-6">
+      <div className="max-w-md w-full space-y-8">
         {/* Logo and Title */}
         <div className="text-center space-y-4">
           <img
@@ -34,77 +34,13 @@ export default function DemoLanding() {
             }}
           />
           <div>
-            <h1 className="text-4xl font-bold text-white tracking-wide">
-              TEST VOX AI
+            <h1 className="text-3xl font-bold text-white tracking-wide">
+              VOX DEMO
             </h1>
-            <p className="text-gray-400 mt-2 text-lg">
-              Experience lightning-fast, interruption-ready AI voice ordering
+            <p className="text-gray-400 mt-2">
+              Call our demo line or enter your session ID to view your call
+              dashboard
             </p>
-          </div>
-        </div>
-
-        {/* Technical Highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-br from-blue-950/30 to-blue-900/10 border border-blue-800/30 rounded-lg p-4 text-center">
-            <div className="text-3xl font-bold text-blue-400 mb-1">~400ms</div>
-            <div className="text-sm text-blue-200">Response Latency</div>
-            <div className="text-xs text-gray-400 mt-1">Near-instant replies</div>
-          </div>
-          <div className="bg-gradient-to-br from-purple-950/30 to-purple-900/10 border border-purple-800/30 rounded-lg p-4 text-center">
-            <div className="text-3xl font-bold text-purple-400 mb-1">~200ms</div>
-            <div className="text-sm text-purple-200">Interruption Speed</div>
-            <div className="text-xs text-gray-400 mt-1">Natural conversation flow</div>
-          </div>
-          <div className="bg-gradient-to-br from-green-950/30 to-green-900/10 border border-green-800/30 rounded-lg p-4 text-center">
-            <div className="text-3xl font-bold text-green-400 mb-1">40+</div>
-            <div className="text-sm text-green-200">Languages</div>
-            <div className="text-xs text-gray-400 mt-1">Seamless switching</div>
-          </div>
-        </div>
-
-        {/* Key Features */}
-        <div className="bg-[#111111] border border-gray-800 rounded-xl p-6">
-          <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <span className="text-2xl">⚡</span>
-            What Makes VOX Different
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-[#FD6262]/20 border border-[#FD6262]/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[#FD6262] text-xs">⚡</span>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-white">Ultra-Low Latency</div>
-                <div className="text-xs text-gray-400">Responds faster than human reaction time</div>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-[#FD6262]/20 border border-[#FD6262]/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[#FD6262] text-xs">🎯</span>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-white">Natural Interruptions</div>
-                <div className="text-xs text-gray-400">Handles mid-sentence changes like a human</div>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-[#FD6262]/20 border border-[#FD6262]/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[#FD6262] text-xs">🌍</span>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-white">Multi-Language Support</div>
-                <div className="text-xs text-gray-400">Auto-detects & switches languages mid-call</div>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-[#FD6262]/20 border border-[#FD6262]/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-[#FD6262] text-xs">🎙️</span>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-white">Real-Time Dashboard</div>
-                <div className="text-xs text-gray-400">Watch orders form as customers speak</div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -119,7 +55,7 @@ export default function DemoLanding() {
               value={sessionId}
               onChange={(e) => setSessionId(e.target.value)}
               placeholder="e.g., x7k9mN"
-              className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FD6262] focus:border-transparent"
+              className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
               onKeyPress={(e) => e.key === "Enter" && handleJoinSession()}
             />
           </div>
@@ -143,29 +79,66 @@ export default function DemoLanding() {
         </div>
 
         {/* Call Instructions */}
-        <div className="bg-gradient-to-br from-green-950/40 to-green-900/20 border border-green-800/50 rounded-xl p-5">
-          <h3 className="text-green-400 font-semibold mb-2 flex items-center gap-2">
-            <span className="text-xl">📞</span>
-            Get Your Session ID
+        <div className="bg-green-950 border border-green-800 rounded-lg p-4">
+          <h3 className="text-green-400 font-semibold mb-2">
+            📞 Get Your Session ID
           </h3>
           <p className="text-green-200 text-sm mb-2">
             Call{" "}
-            <span className="font-mono text-green-100 bg-green-950/50 px-2 py-1 rounded">+1 (727) 513-5412</span>{" "}
+            <span className="font-mono text-green-100">+1 (727) 513-5412</span>{" "}
             to start a demo call
           </p>
           <p className="text-green-300 text-xs">
-            Your unique session ID will be provided during the call for dashboard access
+            Your unique session ID will be provided during the call for
+            dashboard access
           </p>
+        </div>
+
+        {/* What to Test */}
+        <div className="bg-[#111111] border border-gray-800 rounded-lg p-5 space-y-3">
+          <h3 className="text-lg font-semibold text-white mb-3">💡 What to Test:</h3>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-start gap-3">
+              <span className="text-[#FD6262] mt-0.5">⚡</span>
+              <div>
+                <div className="text-white font-medium">Response Speed</div>
+                <div className="text-gray-400 text-xs">Avg &lt;500ms latency - Try asking questions back-to-back</div>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-[#FD6262] mt-0.5">🎯</span>
+              <div>
+                <div className="text-white font-medium">Interruptions</div>
+                <div className="text-gray-400 text-xs">~300ms - Cut the AI off mid-sentence and change your mind</div>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-[#FD6262] mt-0.5">🌍</span>
+              <div>
+                <div className="text-white font-medium">Language Switching</div>
+                <div className="text-gray-400 text-xs">50+ languages - Switch between English/Urdu/Arabic mid-call</div>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-[#FD6262] mt-0.5">🎙️</span>
+              <div>
+                <div className="text-white font-medium">Live Dashboard</div>
+                <div className="text-gray-400 text-xs">Watch the transcript & order details update in real-time</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Info */}
         <div className="text-center text-sm text-gray-500 space-y-2">
           <p>Each call gets a unique session ID</p>
-          <p>Your dashboard will show real-time call data for that session only</p>
+          <p>
+            Your dashboard will show real-time call data for that session only
+          </p>
         </div>
 
         {/* Navigation */}
-        <div className="pt-2">
+        <div className="pt-4">
           <button
             onClick={() => (window.location.href = "/")}
             className="w-full flex items-center justify-center gap-2 bg-[#1a1a1a] hover:bg-[#222222] text-gray-300 hover:text-white py-3 px-4 rounded-lg text-sm font-medium transition-all border border-gray-700"
@@ -208,7 +181,7 @@ export default function DemoLanding() {
 
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        
+
         .font-inter {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
