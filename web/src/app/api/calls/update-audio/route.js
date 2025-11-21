@@ -19,7 +19,7 @@ async function updateAudioUrl(request) {
       );
     }
 
-    const { call_sid, audio_url } = body;
+    const { call_sid, audio_url, retry_count = 0 } = body;
 
     if (!call_sid) {
       console.error("❌ No call_sid provided!");
@@ -38,6 +38,57 @@ async function updateAudioUrl(request) {
     }
 
     console.log(`🔍 Updating audio URL for call ${call_sid}...`);
+    console.log(`🎵 Audio URL: ${audio_url}`);
+
+    // Check if call exists first
+    const { data: existingCall, error: checkError } = await supabase
+      .from('calls')
+      .select('id, audio_url')
+      .eq('call_sid', call_sid)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error("❌ Error checking for call:", checkError);
+      throw checkError;
+    }
+
+    if (!existingCall) {
+      console.warn(`⚠️ Call not found yet: ${call_sid} (attempt ${retry_count + 1}/3)`);
+
+      // If call doesn't exist yet, it might be a race condition
+      // Frontend might still be saving it
+      if (retry_count < 2) {
+        console.log(`⏳ Will retry in 2 seconds...`);
+        return Response.json({
+          success: false,
+          error: "Call not found yet, retry",
+          retry: true,
+          retry_after: 2000
+        }, { status: 404 });
+      }
+
+      console.error(`❌ Call not found after ${retry_count + 1} attempts: ${call_sid}`);
+      return Response.json(
+        { success: false, error: "Call not found" },
+        { status: 404 },
+      );
+    }
+
+    // Check if audio URL is already set
+    if (existingCall.audio_url) {
+      console.log(`ℹ️ Audio URL already set for call ${call_sid}`);
+      console.log(`   Current: ${existingCall.audio_url}`);
+      console.log(`   New: ${audio_url}`);
+
+      // If URLs are the same, this is a duplicate update
+      if (existingCall.audio_url === audio_url) {
+        return Response.json({
+          success: true,
+          call: existingCall,
+          message: "Audio URL already set (duplicate update ignored)"
+        });
+      }
+    }
 
     // Update the call with the audio URL
     const { data, error } = await supabase
@@ -53,14 +104,6 @@ async function updateAudioUrl(request) {
     if (error) {
       console.error("❌ Error updating call:", error);
       throw error;
-    }
-
-    if (!data) {
-      console.error(`❌ Call not found: ${call_sid}`);
-      return Response.json(
-        { success: false, error: "Call not found" },
-        { status: 404 },
-      );
     }
 
     console.log(`✅ Audio URL updated for call ${call_sid}`);

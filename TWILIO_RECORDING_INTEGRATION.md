@@ -26,23 +26,47 @@ Content-Type: application/json
 }
 ```
 
-**Example using Python:**
+**Example using Python (with retry handling):**
 ```python
-import requests
+import httpx
+import asyncio
 
-def update_call_audio(call_sid, audio_url):
-    response = requests.post(
-        "https://your-frontend-url.com/api/calls/update-audio",
-        json={
-            "call_sid": call_sid,
-            "audio_url": audio_url
-        }
-    )
-    return response.json()
+async def update_call_audio(call_sid, audio_url, retry_count=0):
+    """Update call audio URL with retry handling for race conditions"""
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{Config.FRONTEND_URL}/api/calls/update-audio",
+            json={
+                "call_sid": call_sid,
+                "audio_url": audio_url,
+                "retry_count": retry_count
+            },
+            timeout=10.0
+        )
+
+        data = response.json()
+
+        # Handle retry for race condition (call not saved yet)
+        if response.status_code == 404 and data.get("retry"):
+            if retry_count < 2:
+                retry_after = data.get("retry_after", 2000) / 1000  # ms to seconds
+                Log.info(f"⏳ Call not found yet, retrying in {retry_after}s...")
+                await asyncio.sleep(retry_after)
+                return await update_call_audio(call_sid, audio_url, retry_count + 1)
+            else:
+                Log.error(f"❌ Call not found after 3 attempts: {call_sid}")
+                return None
+
+        if response.status_code == 200:
+            Log.info(f"✅ Audio URL updated: {call_sid}")
+            return data
+        else:
+            Log.error(f"❌ Failed to update audio URL: {response.status_code}")
+            return None
 
 # After uploading recording to Supabase Storage
-audio_url = upload_to_supabase(recording_file)
-update_call_audio("CAfe8025859eef913c5b3b02d443c48cf6", audio_url)
+audio_url = await upload_to_supabase(recording_file)
+await update_call_audio("CAfe8025859eef913c5b3b02d443c48cf6", audio_url)
 ```
 
 **Example using Node.js:**
