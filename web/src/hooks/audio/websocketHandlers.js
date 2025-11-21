@@ -2,6 +2,44 @@
 
 import { playAudioHQ } from "./audioUtils";
 
+// Poll for audio URL to be added by backend
+const pollForAudioUrl = async (callDatabaseId, maxAttempts = 10, intervalMs = 2000) => {
+  let attempts = 0;
+
+  const checkAudioUrl = async () => {
+    attempts++;
+    console.log(`🔄 Polling for audio URL (attempt ${attempts}/${maxAttempts})...`);
+
+    try {
+      const response = await fetch(`/api/calls/details/${callDatabaseId}`);
+      if (!response.ok) {
+        console.error(`❌ Poll failed: ${response.status}`);
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data?.call?.audio_url) {
+        console.log(`✅ Audio URL found: ${data.call.audio_url}`);
+        // Audio URL is now in database, history will pick it up on next refresh
+        return;
+      }
+
+      // No audio URL yet, continue polling if attempts left
+      if (attempts < maxAttempts) {
+        setTimeout(checkAudioUrl, intervalMs);
+      } else {
+        console.warn(`⚠️ Audio URL not found after ${maxAttempts} attempts. Backend may still be processing.`);
+      }
+    } catch (error) {
+      console.error("❌ Error polling for audio URL:", error);
+    }
+  };
+
+  // Start polling
+  setTimeout(checkAudioUrl, intervalMs);
+};
+
 // Save call to database (used by manual and auto-save)
 export const saveCallToDatabase = async (
   finalOrderData,
@@ -77,6 +115,13 @@ export const saveCallToDatabase = async (
     const result = JSON.parse(responseText);
     console.log("✅ CALL SAVED SUCCESSFULLY");
     console.log("✅ Audio URL in saved result:", result?.call?.audio_url);
+
+    // 🔥 NEW: If no audio URL yet, poll for it (backend adds it async)
+    if (!result?.call?.audio_url && result?.call?.id) {
+      console.log("⏳ No audio URL yet - backend will add Twilio recording. Polling...");
+      pollForAudioUrl(result.call.id, 10, 2000); // Poll 10 times, 2 seconds apart
+    }
+
     return result;
   } catch (error) {
     console.error("❌ ===== SAVE CALL FAILED =====");
