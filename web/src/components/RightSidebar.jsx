@@ -6,10 +6,84 @@ import {
   Clock,
   DollarSign,
   FileText,
+  PhoneOff,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 
-export function RightSidebar({ t, selectedCall, orderData }) {
-  // ✅ Only show sidebar content when there's an active call with orderData
+export function RightSidebar({ t, selectedCall, orderData, lastEndedCall, clearLastEndedCall }) {
+  // 🔥 NEW: Show call ended screen if call just ended
+  if (lastEndedCall && !orderData) {
+    const { saveStatus, duration, callId, endedAt } = lastEndedCall;
+    const isSuccess = saveStatus?.success;
+
+    return (
+      <div className="w-80 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-xl border-l border-white/10 p-6 overflow-y-auto h-screen flex flex-col">
+        <div className="flex items-center justify-center flex-1 animate-fadeInUp">
+          <div className="text-center max-w-xs">
+            {/* Icon */}
+            <div className={`w-24 h-24 bg-gradient-to-br ${isSuccess ? 'from-green-500/20 to-green-500/5 border-green-500/20 shadow-green-500/10' : 'from-red-500/20 to-red-500/5 border-red-500/20 shadow-red-500/10'} rounded-3xl flex items-center justify-center mx-auto mb-6 border shadow-2xl`}>
+              {isSuccess ? (
+                <CheckCircle2 className={`w-12 h-12 ${isSuccess ? 'text-green-500/70' : 'text-red-500/70'}`} />
+              ) : (
+                <XCircle className="w-12 h-12 text-red-500/70" />
+              )}
+            </div>
+
+            {/* Title */}
+            <h3 className="text-xl font-light mb-3 text-white" style={{ fontFamily: 'var(--font-heading)' }}>
+              Call Ended
+            </h3>
+
+            {/* Duration */}
+            {duration && (
+              <p className="text-sm text-gray-400 mb-4" style={{ fontFamily: 'var(--font-body)' }}>
+                Duration: {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, '0')}
+              </p>
+            )}
+
+            {/* Save Status */}
+            <div className={`bg-gradient-to-br ${isSuccess ? 'from-green-500/10 to-green-500/5 border-green-500/30' : 'from-red-500/10 to-red-500/5 border-red-500/30'} backdrop-blur-xl border rounded-lg p-4 mb-6`}>
+              <div className="flex items-start gap-3">
+                {isSuccess ? (
+                  <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                )}
+                <div className="text-left flex-1">
+                  <p className={`text-sm font-medium mb-1 ${isSuccess ? 'text-green-400' : 'text-red-400'}`} style={{ fontFamily: 'var(--font-body)' }}>
+                    {isSuccess ? 'Call Saved Successfully' : 'Call Not Saved'}
+                  </p>
+                  <p className="text-xs text-gray-400" style={{ fontFamily: 'var(--font-body)' }}>
+                    {saveStatus?.reason || 'Unknown status'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Clear Button */}
+            <button
+              onClick={clearLastEndedCall}
+              className="w-full bg-gradient-to-br from-[#FD6262]/20 to-[#FD6262]/10 hover:from-[#FD6262]/30 hover:to-[#FD6262]/15 border border-[#FD6262]/30 rounded-lg px-4 py-3 text-white text-sm font-medium transition-all flex items-center justify-center gap-2"
+              style={{ fontFamily: 'var(--font-body)' }}
+            >
+              <RefreshCw className="w-4 h-4" />
+              Clear & Wait for Next Call
+            </button>
+
+            {/* Call ID */}
+            <p className="text-xs text-gray-500 mt-4" style={{ fontFamily: 'var(--font-body)' }}>
+              Call ID: {callId?.slice(0, 12)}...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ Show waiting screen when no active call and no recently ended call
   if (!orderData) {
     return (
       <div className="w-80 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-xl border-l border-white/10 p-6 overflow-y-auto h-screen flex flex-col">

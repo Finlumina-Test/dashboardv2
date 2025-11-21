@@ -51,6 +51,10 @@ export default function FinluminaVoxDashboard({ params }) {
     isCallMuted,
     toggleCallMute,
 
+    // Call ended state
+    lastEndedCall,
+    clearLastEndedCall,
+
     // Actions
     manualSaveCall,
     clearTranscript,
@@ -292,6 +296,8 @@ export default function FinluminaVoxDashboard({ params }) {
               t={t}
               selectedCall={multiCallSelectedCall} // 🔥 FIX: Use multiCallSelectedCall
               orderData={orderData}
+              lastEndedCall={lastEndedCall}
+              clearLastEndedCall={clearLastEndedCall}
             />
           </div>
         )}

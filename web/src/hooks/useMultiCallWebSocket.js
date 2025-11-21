@@ -46,6 +46,9 @@ export function useMultiCallWebSocket(restaurantId) {
   const [audioActivity, setAudioActivity] = useState({}); // { [callId]: activityLevel }
   const [isCallMuted, setIsCallMuted] = useState(false);
 
+  // 🔥 NEW: Track last ended call with save status for UI display
+  const [lastEndedCall, setLastEndedCall] = useState(null);
+
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const audioCtxRef = useRef(null);
@@ -316,12 +319,12 @@ export function useMultiCallWebSocket(restaurantId) {
     const call = callsRef.current[callId];
     if (!call) {
       console.log(`❌ AUTO-SAVE SKIPPED: Call not found`);
-      return;
+      return { success: false, reason: 'Call not found' };
     }
 
     if (call.hasBeenSaved) {
       console.log(`⏭️ AUTO-SAVE SKIPPED: Call already saved`);
-      return;
+      return { success: true, reason: 'Already saved', alreadySaved: true };
     }
 
     const hasOrderData =
@@ -346,7 +349,7 @@ export function useMultiCallWebSocket(restaurantId) {
 
     if (!hasOrderData) {
       console.log(`❌ AUTO-SAVE SKIPPED: No valid order data to save`);
-      return;
+      return { success: false, reason: 'No valid order data extracted from conversation' };
     }
 
     console.log(`💾 ===== AUTO-SAVING CALL ${callId} (${triggerReason}) =====`);
@@ -367,11 +370,13 @@ export function useMultiCallWebSocket(restaurantId) {
       console.log(
         `✅ Auto-save complete for call ${callId} (${triggerReason})`,
       );
+      return { success: true, reason: 'Saved successfully' };
     } catch (saveError) {
       console.error(
         `❌ Auto-save failed for call ${callId}:`,
         saveError.message,
       );
+      return { success: false, reason: `Save failed: ${saveError.message}`, error: saveError };
     }
   };
 
@@ -546,8 +551,23 @@ export function useMultiCallWebSocket(restaurantId) {
       });
 
       console.log(`📞 Triggering auto-save...`);
-      performAutoSave(callId, "CALL_ENDED").finally(() => {
+      performAutoSave(callId, "CALL_ENDED").then((saveStatus) => {
         console.log(`📞 Auto-save complete, ending call session...`);
+        console.log(`📞 Save status:`, saveStatus);
+
+        // 🔥 NEW: Store ended call info for display
+        const endedCall = callsRef.current[callId];
+        if (endedCall) {
+          setLastEndedCall({
+            callId,
+            duration: endedCall.duration,
+            orderData: endedCall.orderData,
+            transcript: endedCall.transcript,
+            saveStatus: saveStatus || { success: false, reason: 'Unknown error' },
+            endedAt: new Date(),
+          });
+        }
+
         endCallSession(callId);
       });
       return;
@@ -944,6 +964,12 @@ export function useMultiCallWebSocket(restaurantId) {
   // Get selected call data
   const selectedCall = selectedCallId ? calls[selectedCallId] : null;
 
+  // Clear last ended call (for refreshing the UI)
+  const clearLastEndedCall = () => {
+    console.log('🔄 Clearing last ended call status');
+    setLastEndedCall(null);
+  };
+
   return {
     // Multi-call state
     calls,
@@ -959,6 +985,10 @@ export function useMultiCallWebSocket(restaurantId) {
     audioActivity,
     isCallMuted,
     toggleCallMute,
+
+    // Call ended state
+    lastEndedCall,
+    clearLastEndedCall,
 
     // Call-specific getters
     getCall: (callId) => calls[callId],
