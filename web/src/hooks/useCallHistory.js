@@ -12,20 +12,28 @@ export function useCallHistory(search, restaurantId, isConnected) {
       isConnected,
     });
 
-    // ✅ FIXED: Only fetch calls when server is connected
-    if (restaurantId && isConnected) {
+    // ✅ FIXED: Fetch calls regardless of connection status
+    // Call history is from database, not dependent on WebSocket connection
+    if (restaurantId) {
       fetchCalls();
     } else {
-      console.log(
-        "⚠️ Not fetching calls - server not connected or no restaurantId",
-      );
+      console.log("⚠️ Not fetching calls - no restaurantId");
       setCalls([]);
       setLoading(false);
-      if (!isConnected) {
-        setError("Server not connected");
-      }
     }
-  }, [search, restaurantId, isConnected]);
+  }, [search, restaurantId]); // ✅ FIXED: Removed isConnected dependency
+
+  // ✅ NEW: Auto-refresh every 10 seconds to show new calls
+  useEffect(() => {
+    if (!restaurantId) return;
+
+    const interval = setInterval(() => {
+      console.log("🔄 Auto-refreshing call history...");
+      fetchCalls();
+    }, 10000); // Refresh every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [restaurantId, search]);
 
   const fetchCalls = async () => {
     try {

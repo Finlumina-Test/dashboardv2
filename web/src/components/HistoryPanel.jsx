@@ -85,31 +85,23 @@ export function HistoryPanel({ t, backendUrl, isConnected }) {
         />
       </div>
 
-      {!isConnected && (
-        <div className="text-center py-12 animate-fadeInUp">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-            <div className="w-8 h-8 rounded-full bg-red-500 animate-pulse-soft"></div>
-          </div>
-          <h3 className="text-lg font-light text-[#b0b0b0] mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
-            Server Not Connected
-          </h3>
-          <p className="text-[#666]" style={{ fontFamily: 'var(--font-body)' }}>
-            Call history will appear when connected to the server
+      {!isConnected && calls.length === 0 && !loading && (
+        <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+          <p className="text-yellow-400 text-sm">
+            ⚠️ Server not connected. Showing saved call history from database.
           </p>
         </div>
       )}
 
-      {isConnected && (
-        <CallListView
-          calls={calls}
-          loading={loading}
-          error={error}
-          search={search}
-          onSelectCall={setSelectedCall}
-          formatDate={formatDate}
-          formatCallDuration={formatCallDuration}
-        />
-      )}
+      <CallListView
+        calls={calls}
+        loading={loading}
+        error={error}
+        search={search}
+        onSelectCall={setSelectedCall}
+        formatDate={formatDate}
+        formatCallDuration={formatCallDuration}
+      />
     </div>
   );
 }
@@ -363,14 +355,17 @@ function CallDetailsView({
           <audio
             controls
             className="w-full"
+            src={selectedCall.audio_url}
             style={{
               filter: "invert(1) hue-rotate(180deg)",
               height: "40px",
             }}
           >
-            <source src={selectedCall.audio_url} type="audio/wav" />
             Your browser does not support audio playback.
           </audio>
+          <p className="text-xs text-gray-500 mt-1">
+            Audio URL: {selectedCall.audio_url}
+          </p>
           <p className="text-xs text-gray-600 mt-2">
             Full call recording •{" "}
             {formatCallDuration(selectedCall.call_duration)}
