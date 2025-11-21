@@ -11,12 +11,14 @@ import {
   XCircle,
   AlertCircle,
   RefreshCw,
+  Loader2,
 } from "lucide-react";
 
 export function RightSidebar({ t, selectedCall, orderData, lastEndedCall, clearLastEndedCall }) {
   // 🔥 NEW: Show call ended screen if call just ended
   if (lastEndedCall && !orderData) {
     const { saveStatus, duration, callId, endedAt } = lastEndedCall;
+    const isSaving = saveStatus?.saving;
     const isSuccess = saveStatus?.success;
 
     return (
@@ -24,9 +26,11 @@ export function RightSidebar({ t, selectedCall, orderData, lastEndedCall, clearL
         <div className="flex items-center justify-center flex-1 animate-fadeInUp">
           <div className="text-center max-w-xs">
             {/* Icon */}
-            <div className={`w-24 h-24 bg-gradient-to-br ${isSuccess ? 'from-green-500/20 to-green-500/5 border-green-500/20 shadow-green-500/10' : 'from-red-500/20 to-red-500/5 border-red-500/20 shadow-red-500/10'} rounded-3xl flex items-center justify-center mx-auto mb-6 border shadow-2xl`}>
-              {isSuccess ? (
-                <CheckCircle2 className={`w-12 h-12 ${isSuccess ? 'text-green-500/70' : 'text-red-500/70'}`} />
+            <div className={`w-24 h-24 bg-gradient-to-br ${isSaving ? 'from-blue-500/20 to-blue-500/5 border-blue-500/20 shadow-blue-500/10' : isSuccess ? 'from-green-500/20 to-green-500/5 border-green-500/20 shadow-green-500/10' : 'from-red-500/20 to-red-500/5 border-red-500/20 shadow-red-500/10'} rounded-3xl flex items-center justify-center mx-auto mb-6 border shadow-2xl`}>
+              {isSaving ? (
+                <Loader2 className="w-12 h-12 text-blue-500/70 animate-spin" />
+              ) : isSuccess ? (
+                <CheckCircle2 className="w-12 h-12 text-green-500/70" />
               ) : (
                 <XCircle className="w-12 h-12 text-red-500/70" />
               )}
@@ -45,16 +49,18 @@ export function RightSidebar({ t, selectedCall, orderData, lastEndedCall, clearL
             )}
 
             {/* Save Status */}
-            <div className={`bg-gradient-to-br ${isSuccess ? 'from-green-500/10 to-green-500/5 border-green-500/30' : 'from-red-500/10 to-red-500/5 border-red-500/30'} backdrop-blur-xl border rounded-lg p-4 mb-6`}>
+            <div className={`bg-gradient-to-br ${isSaving ? 'from-blue-500/10 to-blue-500/5 border-blue-500/30' : isSuccess ? 'from-green-500/10 to-green-500/5 border-green-500/30' : 'from-red-500/10 to-red-500/5 border-red-500/30'} backdrop-blur-xl border rounded-lg p-4 mb-6`}>
               <div className="flex items-start gap-3">
-                {isSuccess ? (
+                {isSaving ? (
+                  <Loader2 className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0 animate-spin" />
+                ) : isSuccess ? (
                   <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
                 ) : (
                   <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
                 )}
                 <div className="text-left flex-1">
-                  <p className={`text-sm font-medium mb-1 ${isSuccess ? 'text-green-400' : 'text-red-400'}`} style={{ fontFamily: 'var(--font-body)' }}>
-                    {isSuccess ? 'Call Saved Successfully' : 'Call Not Saved'}
+                  <p className={`text-sm font-medium mb-1 ${isSaving ? 'text-blue-400' : isSuccess ? 'text-green-400' : 'text-red-400'}`} style={{ fontFamily: 'var(--font-body)' }}>
+                    {isSaving ? 'Saving Call...' : isSuccess ? 'Call Saved Successfully' : 'Call Not Saved'}
                   </p>
                   <p className="text-xs text-gray-400" style={{ fontFamily: 'var(--font-body)' }}>
                     {saveStatus?.reason || 'Unknown status'}
@@ -63,15 +69,17 @@ export function RightSidebar({ t, selectedCall, orderData, lastEndedCall, clearL
               </div>
             </div>
 
-            {/* Clear Button */}
-            <button
-              onClick={clearLastEndedCall}
-              className="w-full bg-gradient-to-br from-[#FD6262]/20 to-[#FD6262]/10 hover:from-[#FD6262]/30 hover:to-[#FD6262]/15 border border-[#FD6262]/30 rounded-lg px-4 py-3 text-white text-sm font-medium transition-all flex items-center justify-center gap-2"
-              style={{ fontFamily: 'var(--font-body)' }}
-            >
-              <RefreshCw className="w-4 h-4" />
-              Clear & Wait for Next Call
-            </button>
+            {/* Clear Button - Only show when not saving */}
+            {!isSaving && (
+              <button
+                onClick={clearLastEndedCall}
+                className="w-full bg-gradient-to-br from-[#FD6262]/20 to-[#FD6262]/10 hover:from-[#FD6262]/30 hover:to-[#FD6262]/15 border border-[#FD6262]/30 rounded-lg px-4 py-3 text-white text-sm font-medium transition-all flex items-center justify-center gap-2"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                <RefreshCw className="w-4 h-4" />
+                Clear & Wait for Next Call
+              </button>
+            )}
 
             {/* Call ID */}
             <p className="text-xs text-gray-500 mt-4" style={{ fontFamily: 'var(--font-body)' }}>

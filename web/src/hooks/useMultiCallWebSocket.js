@@ -518,6 +518,19 @@ export function useMultiCallWebSocket(restaurantId) {
       console.log(`📞 Call ID: ${callId}`);
       console.log(`📞 Backend sent: callEnded message`);
 
+      // 🔥 NEW: Show call ended screen IMMEDIATELY before saving
+      const endedCall = callsRef.current[callId];
+      if (endedCall) {
+        setLastEndedCall({
+          callId,
+          duration: endedCall.duration,
+          orderData: endedCall.orderData,
+          transcript: endedCall.transcript,
+          saveStatus: { success: null, reason: 'Saving...', saving: true }, // 🔥 Show saving state
+          endedAt: new Date(),
+        });
+      }
+
       // 🔥 NEW: Check call-status endpoint to verify call state
       checkCallStatus(callId, restaurantId).then((status) => {
         if (status) {
@@ -532,14 +545,14 @@ export function useMultiCallWebSocket(restaurantId) {
         console.log(`📞 Auto-save complete, ending call session...`);
         console.log(`📞 Save status:`, saveStatus);
 
-        // 🔥 NEW: Store ended call info for display
-        const endedCall = callsRef.current[callId];
-        if (endedCall) {
+        // 🔥 NEW: Update call ended screen with final save status
+        const finalEndedCall = callsRef.current[callId];
+        if (finalEndedCall) {
           setLastEndedCall({
             callId,
-            duration: endedCall.duration,
-            orderData: endedCall.orderData,
-            transcript: endedCall.transcript,
+            duration: finalEndedCall.duration,
+            orderData: finalEndedCall.orderData,
+            transcript: finalEndedCall.transcript,
             saveStatus: saveStatus || { success: false, reason: 'Unknown error' },
             endedAt: new Date(),
           });
