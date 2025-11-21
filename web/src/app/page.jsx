@@ -398,9 +398,24 @@ export default function HomePage() {
         scrolling="no"
       />
 
-      {/* Use Cases Section */}
+      {/* Pricing Section */}
       <iframe
         ref={(el) => (iframeRefs.current[3] = el)}
+        src="/homepage-sections/pricing.html"
+        style={{
+          width: '100%',
+          minHeight: '1000px',
+          border: 'none',
+          display: 'block',
+          overflow: 'hidden'
+        }}
+        title="Pricing Section"
+        scrolling="no"
+      />
+
+      {/* Use Cases Section */}
+      <iframe
+        ref={(el) => (iframeRefs.current[4] = el)}
         src="/homepage-sections/use-cases.html"
         style={{
           width: '100%',
@@ -415,7 +430,7 @@ export default function HomePage() {
 
       {/* Trust & Speed Section */}
       <iframe
-        ref={(el) => (iframeRefs.current[4] = el)}
+        ref={(el) => (iframeRefs.current[5] = el)}
         src="/homepage-sections/trust.html"
         style={{
           width: '100%',
@@ -430,7 +445,7 @@ export default function HomePage() {
 
       {/* Comparison Section */}
       <iframe
-        ref={(el) => (iframeRefs.current[5] = el)}
+        ref={(el) => (iframeRefs.current[6] = el)}
         src="/homepage-sections/comparison.html"
         style={{
           width: '100%',
@@ -445,7 +460,7 @@ export default function HomePage() {
 
       {/* Voices Section */}
       <iframe
-        ref={(el) => (iframeRefs.current[6] = el)}
+        ref={(el) => (iframeRefs.current[7] = el)}
         src="/homepage-sections/voices.html"
         style={{
           width: '100%',
@@ -460,7 +475,7 @@ export default function HomePage() {
 
       {/* FAQ Section */}
       <iframe
-        ref={(el) => (iframeRefs.current[7] = el)}
+        ref={(el) => (iframeRefs.current[8] = el)}
         src="/homepage-sections/faq.html"
         style={{
           width: '100%',
@@ -475,7 +490,7 @@ export default function HomePage() {
 
       {/* Final CTA Section */}
       <iframe
-        ref={(el) => (iframeRefs.current[8] = el)}
+        ref={(el) => (iframeRefs.current[9] = el)}
         src="/homepage-sections/cta.html"
         style={{
           width: '100%',
