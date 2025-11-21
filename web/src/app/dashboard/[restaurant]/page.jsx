@@ -6,6 +6,7 @@ import { useMultiCallWebSocket } from "../../../hooks/useMultiCallWebSocket"; //
 import { LeftSidebar } from "@/components/LeftSidebar";
 import { MainContent } from "@/components/MainContent";
 import { RightSidebar } from "@/components/RightSidebar";
+import { CallEndedNotification } from "@/components/CallEndedNotification";
 import { LogOut } from "lucide-react";
 import { getBaseUrl, getRestaurantConfig } from "@/utils/restaurantConfig";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
@@ -311,6 +312,12 @@ export default function FinluminaVoxDashboard({ params }) {
           message="Are you sure you want to log out?"
           confirmText="Logout"
           cancelText="Cancel"
+        />
+
+        {/* Call Ended Notification - Slides in from right */}
+        <CallEndedNotification
+          lastEndedCall={lastEndedCall}
+          onDismiss={clearLastEndedCall}
         />
 
         <style jsx global>{`
