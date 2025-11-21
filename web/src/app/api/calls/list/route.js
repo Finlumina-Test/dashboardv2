@@ -10,8 +10,9 @@ async function listCalls(request) {
     const offset = parseInt(searchParams.get("offset") || "0");
 
     console.log(
-      `🔍 API /calls/list - Backend: ${backend}, Search: "${search}"`,
+      `🔍 API /calls/list - Backend: ${backend}, Search: "${search}", Limit: ${limit}, Offset: ${offset}`,
     );
+    console.log(`🔍 Will filter by restaurant_id: ${backend || 'NO FILTER'}`);
 
     // Check if Supabase is configured
     if (!isSupabaseConfigured()) {
@@ -50,20 +51,20 @@ async function listCalls(request) {
       throw error;
     }
 
-    console.log(`✅ Fetched ${calls?.length || 0} calls for backend: ${backend}`);
+    console.log(`✅ Fetched ${calls?.length || 0} calls for restaurant_id: ${backend || 'ALL'}`);
 
-    // Debug: Log first call if exists
+    // Debug: Log all calls with their restaurant_ids
     if (calls && calls.length > 0) {
-      console.log("📋 First call:", {
-        id: calls[0].id,
-        call_sid: calls[0].call_sid,
-        customer_name: calls[0].customer_name,
-        restaurant_id: calls[0].restaurant_id,
-        has_transcript: !!calls[0].transcript,
-        has_audio: !!calls[0].audio_url,
+      console.log("📋 Calls found:");
+      calls.slice(0, 5).forEach((call, idx) => {
+        console.log(`  ${idx + 1}. call_sid=${call.call_sid}, restaurant_id=${call.restaurant_id || 'NULL'}, customer=${call.customer_name || 'NULL'}, audio=${call.audio_url ? 'YES' : 'NO'}`);
       });
+      if (calls.length > 5) {
+        console.log(`  ... and ${calls.length - 5} more calls`);
+      }
     } else {
-      console.log("⚠️ No calls found in database for restaurant:", backend);
+      console.log(`⚠️ No calls found in database for restaurant_id: ${backend || 'ALL'}`);
+      console.log(`⚠️ This means either: 1) No calls saved yet, 2) restaurant_id mismatch, 3) All calls filtered out by search term`);
     }
 
     return Response.json({ success: true, calls: calls || [] });

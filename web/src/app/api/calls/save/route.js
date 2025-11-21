@@ -79,6 +79,7 @@ async function saveCall(request) {
       }
 
       console.log(`✅ Audio URL updated: ${audio_url}`);
+      console.log(`📋 Call details: id=${data.id}, call_sid=${data.call_sid}, restaurant_id=${data.restaurant_id || 'NULL'}, customer_name=${data.customer_name || 'NULL'}`);
       return Response.json({ success: true, call: data, message: "Audio URL updated" });
     }
 
@@ -105,6 +106,9 @@ async function saveCall(request) {
     }
 
     console.log(`📊 Existing record:`, existing ? 'Found' : 'Not found');
+
+    console.log(`🏪 Restaurant ID being used: ${restaurant_id}`);
+    console.log(`📞 Call SID: ${call_id}`);
 
     // Prepare data object
     const callData = {
@@ -140,6 +144,7 @@ async function saveCall(request) {
       if (error) throw error;
       result = data;
       console.log("✅ Update successful:", result?.id);
+      console.log(`✅ Updated call: call_sid=${result?.call_sid}, restaurant_id=${result?.restaurant_id}, customer=${result?.customer_name || 'NULL'}`);
     } else {
       console.log(`➕ Inserting new call ${call_id}...`);
 
@@ -153,6 +158,7 @@ async function saveCall(request) {
       if (error) throw error;
       result = data;
       console.log("✅ Insert successful:", result?.id);
+      console.log(`✅ Inserted call: call_sid=${result?.call_sid}, restaurant_id=${result?.restaurant_id}, customer=${result?.customer_name || 'NULL'}`);
     }
 
     return Response.json({ success: true, call: result });
