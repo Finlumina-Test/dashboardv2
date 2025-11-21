@@ -126,6 +126,13 @@ export default function DemoLanding() {
                 <div className="text-gray-400 text-xs">Watch the transcript & order details update in real-time</div>
               </div>
             </div>
+            <div className="flex items-start gap-3">
+              <span className="text-[#FD6262] mt-0.5">✨</span>
+              <div>
+                <div className="text-white font-medium">Your Ideas</div>
+                <div className="text-gray-400 text-xs">Or whatever else you want - get creative!</div>
+              </div>
+            </div>
           </div>
         </div>
 
