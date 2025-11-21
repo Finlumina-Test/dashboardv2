@@ -327,33 +327,10 @@ export function useMultiCallWebSocket(restaurantId) {
       return { success: true, reason: 'Already saved', alreadySaved: true };
     }
 
-    const hasOrderData =
-      call.orderData &&
-      (call.orderData.customer_name ||
-        call.orderData.phone_number ||
-        call.orderData.delivery_address ||
-        call.orderData.total_price ||
-        (call.orderData.order_items && call.orderData.order_items.length > 0));
-
-    console.log(`🔍 Order data exists: ${!!call.orderData}`);
-    console.log(`🔍 Has valid order data: ${hasOrderData}`);
-    if (call.orderData && !hasOrderData) {
-      console.log(`🔍 Order data present but invalid:`, {
-        customer_name: call.orderData.customer_name,
-        phone_number: call.orderData.phone_number,
-        delivery_address: call.orderData.delivery_address,
-        total_price: call.orderData.total_price,
-        order_items_count: call.orderData.order_items?.length || 0,
-      });
-    }
-
-    if (!hasOrderData) {
-      console.log(`❌ AUTO-SAVE SKIPPED: No valid order data to save`);
-      return { success: false, reason: 'No valid order data extracted from conversation' };
-    }
-
+    // 🔥 REMOVED: No validation checks - save all calls regardless of order data
     console.log(`💾 ===== AUTO-SAVING CALL ${callId} (${triggerReason}) =====`);
     console.log(`💾 Transcript messages: ${call.transcript?.length || 0}`);
+    console.log(`💾 Order data present: ${!!call.orderData}`);
 
     try {
       await saveCallToDatabase(
