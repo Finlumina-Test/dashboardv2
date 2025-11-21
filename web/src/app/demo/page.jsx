@@ -13,11 +13,15 @@ export default function DemoLanding() {
   };
 
   const handleCallForId = () => {
-    // Show popup first
-    setShowCallPopup(true);
-
-    // Open phone dialer
-    window.location.href = "tel:+17275135412";
+    // Copy phone number to clipboard
+    const phoneNumber = "+1 (727) 513-5412";
+    navigator.clipboard.writeText(phoneNumber).then(() => {
+      // Show popup after copying
+      setShowCallPopup(true);
+    }).catch(() => {
+      // If clipboard fails, still show popup
+      setShowCallPopup(true);
+    });
   };
 
   return (
@@ -160,20 +164,18 @@ export default function DemoLanding() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-[#1a1a1a] border border-gray-700 rounded-lg p-6 max-w-sm w-full">
             <div className="text-center space-y-4">
-              <div className="text-4xl">📞</div>
+              <div className="text-4xl">📋</div>
               <h3 className="text-xl font-semibold text-white">
-                Calling Demo Line
+                Number Copied!
               </h3>
               <p className="text-gray-300 text-sm">
-                Call{" "}
                 <span className="font-mono text-green-400">
                   +1 (727) 513-5412
                 </span>{" "}
-                to receive your unique session ID
+                has been copied to your clipboard.
               </p>
               <p className="text-gray-400 text-xs">
-                Once you get your session ID from the call, return here and
-                enter it to access your dashboard
+                Once you get your session ID from the call, return here and enter it to access your dashboard
               </p>
               <button
                 onClick={() => setShowCallPopup(false)}
