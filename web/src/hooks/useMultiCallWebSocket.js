@@ -105,14 +105,16 @@ export function useMultiCallWebSocket(restaurantId) {
   }, []);
 
   // 🔥 NEW: Initialize a new call
-  const initializeCall = (callId) => {
+  const initializeCall = (callId, phoneNumber = null) => {
     console.log(`📞 ===== NEW CALL STARTED =====`);
     console.log(`📞 Call ID: ${callId}`);
+    console.log(`📞 Phone Number: ${phoneNumber || 'Not provided'}`);
 
     setCalls((prev) => ({
       ...prev,
       [callId]: {
         id: callId,
+        phoneNumber: phoneNumber,
         transcript: [],
         orderData: null,
         startTime: null,
@@ -286,6 +288,7 @@ export function useMultiCallWebSocket(restaurantId) {
         null, // Backend will provide audio URL from Twilio recording
         restaurantId,
         null, // No audio chunks - backend handles recording
+        call.phoneNumber, // 🔥 NEW: Caller phone number
       );
 
       updateCall(callId, {
@@ -341,6 +344,7 @@ export function useMultiCallWebSocket(restaurantId) {
         null, // Backend will provide audio URL from Twilio recording
         restaurantId,
         null, // No audio chunks - backend handles recording
+        call.phoneNumber, // 🔥 NEW: Caller phone number
       );
 
       updateCall(callId, { hasBeenSaved: true });
@@ -440,7 +444,8 @@ export function useMultiCallWebSocket(restaurantId) {
 
         // Initialize call if new
         if (callId && !callsRef.current[callId]) {
-          initializeCall(callId);
+          const phoneNumber = data.phoneNumber || data.phone_number || data.from || null;
+          initializeCall(callId, phoneNumber);
           // 🔥 CRITICAL: Force immediate selection of new call if none selected
           if (!selectedCallIdRef.current) {
             console.log(`🎯 FORCE-SELECTING new call immediately: ${callId}`);
@@ -523,6 +528,7 @@ export function useMultiCallWebSocket(restaurantId) {
       if (endedCall) {
         setLastEndedCall({
           callId,
+          phoneNumber: endedCall.phoneNumber,
           duration: endedCall.duration,
           orderData: endedCall.orderData,
           transcript: endedCall.transcript,
@@ -550,6 +556,7 @@ export function useMultiCallWebSocket(restaurantId) {
         if (finalEndedCall) {
           setLastEndedCall({
             callId,
+            phoneNumber: finalEndedCall.phoneNumber,
             duration: finalEndedCall.duration,
             orderData: finalEndedCall.orderData,
             transcript: finalEndedCall.transcript,

@@ -49,6 +49,7 @@ export const saveCallToDatabase = async (
   audioUrl = null,
   restaurantId, // ✅ REQUIRED
   audioChunksRef = null, // 🔥 NEW: Audio chunks for Supabase upload
+  phoneNumber = null, // 🔥 NEW: Caller phone number
 ) => {
   try {
     const callDuration = callStartTime
@@ -78,7 +79,7 @@ export const saveCallToDatabase = async (
     const payload = {
       call_id: callId,
       customer_name: finalOrderData?.customer_name || null,
-      phone_number: finalOrderData?.phone_number || null,
+      phone_number: phoneNumber || finalOrderData?.phone_number || null, // 🔥 NEW: Caller phone number from backend
       delivery_address: finalOrderData?.delivery_address || null,
       order_items: finalOrderData?.order_items || [],
       special_instructions: finalOrderData?.special_instructions || null,

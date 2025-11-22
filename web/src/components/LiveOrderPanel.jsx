@@ -29,6 +29,7 @@ export function LiveOrderPanel({
 
         return {
           callId,
+          phoneNumber: call.phoneNumber, // 🔥 NEW: Caller phone number
           orderData: call.orderData,
           duration: call.duration || 0,
           isSelected: callId === selectedCallId,
@@ -82,7 +83,7 @@ export function LiveOrderPanel({
 
       {/* Orders Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-        {activeOrders.map(({ callId, orderData, duration, isSelected }) => (
+        {activeOrders.map(({ callId, phoneNumber, orderData, duration, isSelected }) => (
           <div
             key={callId}
             onClick={() => handleOrderClick(callId)}
@@ -108,6 +109,12 @@ export function LiveOrderPanel({
                   <h3 className="font-semibold text-white">
                     {orderData.customer_name || "Incoming Order"}
                   </h3>
+                  {phoneNumber && (
+                    <div className="text-xs text-gray-300 flex items-center gap-1">
+                      <Phone className="w-3 h-3" />
+                      {phoneNumber}
+                    </div>
+                  )}
                   <div className="text-xs text-gray-400 flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {formatDuration(duration)}

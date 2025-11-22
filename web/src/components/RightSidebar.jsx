@@ -17,7 +17,7 @@ import {
 export function RightSidebar({ t, selectedCall, orderData, lastEndedCall, clearLastEndedCall }) {
   // 🔥 NEW: Show call ended screen if call just ended
   if (lastEndedCall && !orderData) {
-    const { saveStatus, duration, callId, endedAt } = lastEndedCall;
+    const { saveStatus, duration, callId, phoneNumber, endedAt } = lastEndedCall;
     const isSaving = saveStatus?.saving;
     const isSuccess = saveStatus?.success;
 
@@ -40,6 +40,13 @@ export function RightSidebar({ t, selectedCall, orderData, lastEndedCall, clearL
             <h3 className="text-xl font-light mb-3 text-white" style={{ fontFamily: 'var(--font-heading)' }}>
               Call Ended
             </h3>
+
+            {/* Caller Phone Number */}
+            {phoneNumber && (
+              <p className="text-sm text-gray-300 mb-2" style={{ fontFamily: 'var(--font-body)' }}>
+                {phoneNumber}
+              </p>
+            )}
 
             {/* Duration */}
             {duration && (
@@ -121,6 +128,14 @@ export function RightSidebar({ t, selectedCall, orderData, lastEndedCall, clearL
             Customer Info
           </h4>
           <div className="space-y-2 text-sm">
+            {selectedCall?.phoneNumber && (
+              <div className="flex justify-between">
+                <span className="text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>Caller:</span>
+                <span className="text-white" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
+                  {selectedCall.phoneNumber}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-[#b0b0b0]" style={{ fontFamily: 'var(--font-body)' }}>Name:</span>
               <span className="text-white" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
