@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VOX Grid - Browser Export (No Tools Needed)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0c0c0e;
+      --accent: #FD6262;
+      --white: #FFFFFF;
+      --gray: #9a9a9a;
+      --dim: #4a4a4a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #060607;
+      font-family: 'Poppins', sans-serif;
+      color: var(--white);
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .instructions {
+      max-width: 800px;
+      margin: 0 auto 40px;
+      background: rgba(253,98,98,0.1);
+      border: 1px solid rgba(253,98,98,0.3);
+      border-radius: 12px;
+      padding: 30px;
+    }
+
+    .instructions h2 {
+      color: var(--accent);
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+
+    .instructions ol {
+      margin-left: 20px;
+      line-height: 1.8;
+    }
+
+    .instructions li {
+      margin-bottom: 10px;
+      color: var(--gray);
+    }
+
+    .instructions code {
+      background: rgba(0,0,0,0.4);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: var(--white);
+      font-size: 12px;
+    }
+
+    .instructions strong {
+      color: var(--white);
+    }
+
+    .key-combo {
+      display: inline-block;
+      background: #1a1a1d;
+      border: 1px solid #3a3a3d;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      margin: 0 4px;
+    }
+
+    .grid-wrapper {
+      display: flex;
+      justify-content: center;
+      margin: 40px 0;
+    }
+
+    /* ===== GRID ===== */
+    .grid {
+      width: 1080px;
+      height: 1080px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      position: relative;
+      background: var(--bg);
+      overflow: hidden;
+      border: 2px solid rgba(253,98,98,0.3);
+      border-radius: 4px;
+    }
+
+    .grid::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(253,98,98,0.08) 0%, rgba(253,98,98,0.04) 40%, transparent 70%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .cell {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .cell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(255,255,255,0.03);
+      pointer-events: none;
+    }
+
+    .glass {
+      background: linear-gradient(
+        145deg,
+        rgba(255,255,255,0.1) 0%,
+        rgba(255,255,255,0.03) 40%,
+        rgba(255,255,255,0.06) 100%
+      );
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    }
+
+    .glass::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 45%;
+      background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.1) 0%,
+        rgba(255,255,255,0.02) 50%,
+        transparent 100%
+      );
+      border-radius: 28px 28px 0 0;
+      pointer-events: none;
+    }
+
+    .hero-card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 440px;
+      height: 220px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 25px 50px rgba(0,0,0,0.5),
+        0 0 100px rgba(253,98,98,0.12);
+    }
+
+    .hero-card .hero-title {
+      font-size: 44px;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: -0.5px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .hero-card .hero-title span {
+      color: var(--accent);
+      text-shadow: 0 0 30px rgba(253,98,98,0.5);
+    }
+
+    .hero-card .hero-sub {
+      font-size: 15px;
+      color: var(--gray);
+      font-weight: 300;
+      margin-top: 10px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .stats-bar {
+      position: absolute;
+      bottom: calc(33.333% - 38px);
+      left: 80px;
+      right: 80px;
+      height: 76px;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      box-shadow:
+        0 20px 40px rgba(0,0,0,0.4),
+        0 0 60px rgba(253,98,98,0.08);
+    }
+
+    .stat {
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .stat .num {
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--white);
+      letter-spacing: -0.5px;
+    }
+
+    .stat .num span {
+      color: var(--accent);
+      text-shadow:
+        0 0 20px rgba(253,98,98,0.25),
+        0 0 40px rgba(253,98,98,0.15),
+        0 0 80px rgba(253,98,98,0.08);
+    }
+
+    .stat .label {
+      font-size: 9px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    .stat-divider {
+      width: 1px;
+      height: 36px;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.15), transparent);
+    }
+
+    .cell-1 {
+      position: relative;
+    }
+
+    .cell-1::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(253,98,98,0.12) 0%, rgba(253,98,98,0.06) 30%, rgba(253,98,98,0.02) 60%, transparent 80%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .cell-1 .logo {
+      font-size: 88px;
+      font-weight: 700;
+      letter-spacing: 8px;
+      color: var(--white);
+      position: relative;
+      z-index: 2;
+    }
+
+    .cell-1 .logo span {
+      color: var(--accent);
+      text-shadow:
+        0 0 30px rgba(253,98,98,0.3),
+        0 0 60px rgba(253,98,98,0.2),
+        0 0 120px rgba(253,98,98,0.15),
+        0 0 200px rgba(253,98,98,0.1);
+    }
+
+    .cell-2 .tagline-pre {
+      font-size: 11px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-bottom: 12px;
+    }
+
+    .cell-2 .tagline {
+      font-size: 28px;
+      font-weight: 400;
+      color: var(--accent);
+      text-align: center;
+      line-height: 1.35;
+      text-shadow:
+        0 0 25px rgba(253,98,98,0.2),
+        0 0 50px rgba(253,98,98,0.12),
+        0 0 100px rgba(253,98,98,0.06);
+    }
+
+    .cell-3 .metric {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .cell-3 .metric-symbol {
+      font-size: 36px;
+      font-weight: 200;
+      color: var(--gray);
+    }
+
+    .cell-3 .metric-num {
+      font-size: 64px;
+      font-weight: 200;
+      color: var(--accent);
+      text-shadow:
+        0 0 30px rgba(253,98,98,0.25),
+        0 0 70px rgba(253,98,98,0.15),
+        0 0 140px rgba(253,98,98,0.08);
+    }
+
+    .cell-3 .metric-unit {
+      font-size: 22px;
+      font-weight: 300;
+      color: var(--gray);
+      margin-left: 2px;
+    }
+
+    .cell-3 .metric-label {
+      font-size: 9px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 10px;
+    }
+
+    .cell-4 .icon-wrap {
+      width: 80px;
+      height: 80px;
+      border: 1.5px solid rgba(253,98,98,0.35);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      background: rgba(253,98,98,0.05);
+      box-shadow:
+        0 0 40px rgba(253,98,98,0.1),
+        0 0 80px rgba(253,98,98,0.05);
+    }
+
+    .cell-4 .icon-wrap svg {
+      width: 36px;
+      height: 36px;
+      stroke: var(--accent);
+      stroke-width: 1.5;
+      fill: none;
+      filter: drop-shadow(0 0 15px rgba(253,98,98,0.3));
+    }
+
+    .cell-4 .feat-label {
+      font-size: 12px;
+      color: var(--gray);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .cell-6 .time-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 68px;
+      font-weight: 400;
+      color: var(--white);
+      letter-spacing: -2px;
+    }
+
+    .cell-6 .time-label {
+      font-size: 10px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-top: 8px;
+    }
+
+    .cell-7 .lang-num {
+      font-size: 68px;
+      font-weight: 200;
+      color: var(--accent);
+      line-height: 1;
+      text-shadow:
+        0 0 30px rgba(253,98,98,0.25),
+        0 0 70px rgba(253,98,98,0.15),
+        0 0 140px rgba(253,98,98,0.08);
+    }
+
+    .cell-7 .lang-plus {
+      font-size: 32px;
+      color: rgba(253,98,98,0.6);
+      text-shadow:
+        0 0 20px rgba(253,98,98,0.15),
+        0 0 50px rgba(253,98,98,0.08);
+    }
+
+    .cell-7 .lang-label {
+      font-size: 10px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 10px;
+    }
+
+    .cell-8 .cta-btn {
+      background: var(--accent);
+      color: var(--white);
+      padding: 16px 44px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      border-radius: 8px;
+      box-shadow:
+        0 4px 20px rgba(253,98,98,0.4),
+        0 0 60px rgba(253,98,98,0.15),
+        0 0 120px rgba(253,98,98,0.08);
+    }
+
+    .cell-8 .cta-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--dim);
+      margin-top: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .cell-9 .brand-pre {
+      font-size: 8px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-bottom: 10px;
+    }
+
+    .cell-9 .brand-name {
+      font-size: 18px;
+      font-weight: 300;
+      color: var(--white);
+      letter-spacing: 6px;
+    }
+
+    .cell-9 .brand-tag {
+      font-size: 7px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 10px;
+      opacity: 0.9;
+      text-shadow:
+        0 0 15px rgba(253,98,98,0.2),
+        0 0 40px rgba(253,98,98,0.1);
+    }
+
+    .splitter-info {
+      max-width: 700px;
+      margin: 40px auto;
+      text-align: center;
+      color: var(--gray);
+      font-size: 14px;
+    }
+
+    .splitter-info a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .splitter-info a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="instructions">
+    <h2>🎯 Perfect Quality Export (No Tools Needed)</h2>
+    <ol>
+      <li><strong>Take Full Grid Screenshot:</strong>
+        <ul style="margin-top: 8px;">
+          <li><strong>Windows:</strong> Press <span class="key-combo">Win + Shift + S</span> → Select the grid below</li>
+          <li><strong>Mac:</strong> Press <span class="key-combo">Cmd + Shift + 4</span> → Select the grid below</li>
+          <li><strong>Linux:</strong> Use Spectacle or screenshot tool</li>
+        </ul>
+      </li>
+      <li style="margin-top: 15px;"><strong>Split Into 9 Posts:</strong> Go to <a href="https://www.imgonline.com.ua/eng/cut-photo-into-pieces.php" target="_blank" style="color: var(--accent);">imgonline.com.ua</a>
+        <ul style="margin-top: 8px;">
+          <li>Upload your screenshot</li>
+          <li>Set: <code>3 columns × 3 rows</code></li>
+          <li>Download all 9 pieces</li>
+        </ul>
+      </li>
+      <li style="margin-top: 15px;"><strong>Upload to Instagram:</strong> Upload in order <code>9 → 8 → 7 → 6 → 5 → 4 → 3 → 2 → 1</code> (bottom-right to top-left)</li>
+    </ol>
+  </div>
+
+  <div class="grid-wrapper">
+    <div class="grid" id="grid">
+
+      <div class="hero-card glass">
+        <div class="hero-title">AI That <span>Answers</span></div>
+        <div class="hero-sub">Human-quality conversations at scale</div>
+      </div>
+
+      <div class="stats-bar glass">
+        <div class="stat">
+          <div class="num">&lt;<span>500</span>ms</div>
+          <div class="label">Response</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="num"><span>80</span>%</div>
+          <div class="label">Cost Saved</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="num"><span>Live</span></div>
+          <div class="label">Monitoring</div>
+        </div>
+      </div>
+
+      <div class="cell cell-1">
+        <div class="logo">V<span>O</span>X</div>
+      </div>
+
+      <div class="cell cell-2">
+        <div class="tagline-pre">AI Voice Agents</div>
+        <div class="tagline">Zero<br>Wait Times</div>
+      </div>
+
+      <div class="cell cell-3">
+        <div class="metric">
+          <span class="metric-symbol">&lt;</span>
+          <span class="metric-num">100</span>
+          <span class="metric-unit">ms</span>
+        </div>
+        <div class="metric-label">Human Takeover</div>
+      </div>
+
+      <div class="cell cell-4">
+        <div class="icon-wrap">
+          <svg viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div class="feat-label">Unlimited<br>concurrent calls</div>
+      </div>
+
+      <div class="cell cell-5"></div>
+
+      <div class="cell cell-6">
+        <div class="time-num">24/7</div>
+        <div class="time-label">Always On</div>
+      </div>
+
+      <div class="cell cell-7">
+        <div class="lang-num">50<span class="lang-plus">+</span></div>
+        <div class="lang-label">Languages</div>
+      </div>
+
+      <div class="cell cell-8">
+        <div class="cta-btn">Try Demo</div>
+        <div class="cta-sub">+1 (727) 513-2412</div>
+      </div>
+
+      <div class="cell cell-9">
+        <div class="brand-pre">Powered By</div>
+        <div class="brand-name">FINLUMINA</div>
+        <div class="brand-tag">Illuminating Tomorrow</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="splitter-info">
+    ✨ This method captures <strong>everything</strong> perfectly - all text, glass effects, shadows, and gradients.<br>
+    Alternative splitter: <a href="https://pinetools.com/split-image" target="_blank">pinetools.com/split-image</a>
+  </div>
+
+</body>
+</html>

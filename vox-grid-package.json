@@ -1,0 +1,13 @@
+{
+  "name": "vox-grid-export",
+  "version": "1.0.0",
+  "description": "Export VOX Instagram grid with Puppeteer",
+  "main": "vox-grid-export.js",
+  "scripts": {
+    "export": "node vox-grid-export.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.6.1",
+    "sharp": "^0.33.1"
+  }
+}
