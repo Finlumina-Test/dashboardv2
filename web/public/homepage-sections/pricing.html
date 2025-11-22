@@ -535,11 +535,11 @@ body {
   .vox-pricing-container {
     flex-direction: column;
   }
-  
+
   .vox-pricing-grid {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
-  
+
   .vox-more-addons {
     width: 100%;
     max-width: 300px;
@@ -552,30 +552,30 @@ body {
   .vox-pricing-section {
     padding: 80px 16px;
   }
-  
+
   .vox-launch-banner {
     padding: 32px 20px;
     margin-bottom: 48px;
   }
-  
+
   .vox-pricing-card {
     padding: 32px 24px;
   }
-  
+
   .vox-price-old {
     font-size: 24px;
   }
-  
+
   .vox-more-addons {
     width: 100%;
     max-width: 250px;
     padding: 24px 16px;
   }
-  
+
   .vox-addons-title {
     font-size: 24px;
   }
-  
+
   .vox-addons-icon {
     font-size: 40px;
     margin-bottom: 12px;
@@ -588,7 +588,7 @@ body {
     <h2>Simple, Transparent Pricing</h2>
     <p>Get started with our launch offer. No hidden fees, cancel anytime.</p>
   </div>
-  
+
   <!-- LAUNCH BANNER -->
   <div class="vox-launch-banner">
     <div class="vox-launch-badge">🚀 Limited Launch Offer</div>
@@ -598,7 +598,7 @@ body {
       ⚠️ Only <strong>10 spots available</strong> at launch pricing • First come, first served
     </div>
   </div>
-  
+
   <!-- PRICING CONTAINER -->
   <div class="vox-pricing-container">
     <!-- PRICING CARDS -->
@@ -611,7 +611,7 @@ body {
         </svg>
         <h3>Starter</h3>
         <p class="vox-pricing-launch-tag">✨ Launch Program</p>
-        
+
         <div class="vox-pricing-price">
           <div class="vox-price-strike">
             <span class="vox-price-old">$99</span>
@@ -622,9 +622,9 @@ body {
           <span class="vox-price-then">Then $99/mo (Month 1) → $297/mo after</span>
           <span class="vox-setup-fee waived">Setup fee waived (normally $149)</span>
         </div>
-        
+
         <p>Perfect for solo practices or small teams just getting started</p>
-        
+
         <ul class="vox-pricing-list">
           <li>250 calls/month included</li>
           <li>2 concurrent lines</li>
@@ -633,10 +633,10 @@ body {
           <li>Basic setup & training</li>
           <li>Cancel anytime</li>
         </ul>
-        
+
         <a href="https://finlumina.com/contact" class="vox-pricing-cta">Start Free Trial</a>
       </div>
-      
+
       <!-- PROFESSIONAL (POPULAR) -->
       <div class="vox-pricing-card popular">
         <svg class="vox-pricing-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
@@ -647,15 +647,15 @@ body {
         </svg>
         <h3>Professional</h3>
         <p class="vox-pricing-launch-tag">⭐ Most Popular</p>
-        
+
         <div class="vox-pricing-price">
           <span class="vox-price-main">$497/mo</span>
           <span class="vox-price-then">Save $1,000+/mo vs traditional</span>
           <span class="vox-setup-fee">$299 setup fee (one-time)</span>
         </div>
-        
+
         <p>For growing practices that need more capacity and premium support</p>
-        
+
         <ul class="vox-pricing-list">
           <li>400 calls/month included</li>
           <li>3 concurrent lines</li>
@@ -664,10 +664,10 @@ body {
           <li>Custom voice training</li>
           <li>Add-ons available</li>
         </ul>
-        
+
         <a href="https://finlumina.com/contact" class="vox-pricing-cta">Get Started</a>
       </div>
-      
+
       <!-- ENTERPRISE -->
       <div class="vox-pricing-card">
         <svg class="vox-pricing-icon" viewBox="0 0 24 24" fill="none" stroke="#FD6262" stroke-width="2">
@@ -676,15 +676,15 @@ body {
         </svg>
         <h3>Enterprise</h3>
         <p class="vox-pricing-launch-tag">💎 Premium</p>
-        
+
         <div class="vox-pricing-price">
           <span class="vox-price-main">$897/mo</span>
           <span class="vox-price-then">Save $1,500+/mo vs traditional</span>
           <span class="vox-setup-fee">$499 setup fee (one-time)</span>
         </div>
-        
+
         <p>For large practices and multi-location businesses needing VIP support</p>
-        
+
         <ul class="vox-pricing-list">
           <li>750 calls/month included</li>
           <li>5 concurrent lines</li>
@@ -693,11 +693,11 @@ body {
           <li>Custom voice clone</li>
           <li>Quarterly strategy calls</li>
         </ul>
-        
+
         <a href="https://finlumina.com/contact" class="vox-pricing-cta">Contact Sales</a>
       </div>
     </div>
-    
+
     <!-- MORE ADDONS CARD -->
     <div class="vox-more-addons">
       <div class="vox-addons-icon">+</div>
@@ -710,11 +710,11 @@ body {
       </p>
     </div>
   </div>
-  
+
   <!-- PRICE WARNING -->
   <div class="vox-price-warning">
     <p>
-      ⏰ <strong>Prices will increase in 3 months</strong> for all new customers. 
+      ⏰ <strong>Prices will increase in 3 months</strong> for all new customers.
       Lock in current pricing today—existing customers keep their rate forever.
     </p>
   </div>
@@ -732,13 +732,10 @@ body {
       }
     });
   }, { threshold: 0.1, rootMargin: '-50px' });
-  
+
   document.querySelectorAll('.vox-pricing-card, .vox-more-addons').forEach(el => observer.observe(el));
 })();
 </script>
 
 </body>
 </html>
-```
-
----
