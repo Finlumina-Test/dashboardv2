@@ -1,7 +1,7 @@
 // ===== FILE 1: takeoverLogic.js =====
 // Replace your entire takeoverLogic.js with this
 
-import { encodeToMulaw } from "./audioUtils";
+import { encodeToMulaw, cancelScheduledAIAudio } from "./audioUtils";
 import { getBaseUrl } from "@/utils/restaurantConfig";
 
 // Take over call function
@@ -67,6 +67,10 @@ export const takeOverCall = async ({
     const result = await takeoverResponse.json();
     console.log("✅ Takeover API response:", result);
     console.log("✅ Takeover enabled on server - AI stopped");
+
+    // 🔥 NEW: Cancel all scheduled AI audio immediately
+    cancelScheduledAIAudio();
+
     setIsTakenOver(true);
 
     // STEP 2: Connect to human audio WebSocket

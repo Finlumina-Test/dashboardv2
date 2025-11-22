@@ -272,6 +272,37 @@ const getAudioQueue = (speaker) => {
   return audioQueue.get(speaker);
 };
 
+// 🔥 NEW: Cancel all scheduled AI audio (used during human takeover)
+export const cancelScheduledAIAudio = () => {
+  console.log("🛑 Cancelling all scheduled AI audio...");
+
+  // Cancel AI/assistant audio
+  const aiSpeakers = ['ai', 'AI', 'assistant'];
+
+  aiSpeakers.forEach(speaker => {
+    if (audioQueue.has(speaker)) {
+      const queue = audioQueue.get(speaker);
+
+      // Stop all scheduled sources
+      queue.scheduledSources.forEach(({ source }) => {
+        try {
+          source.stop();
+        } catch (e) {
+          // Source may have already finished, ignore error
+        }
+      });
+
+      console.log(`🛑 Cancelled ${queue.scheduledSources.length} scheduled audio chunks for ${speaker}`);
+
+      // Clear the queue
+      queue.scheduledSources = [];
+      queue.nextStartTime = 0;
+    }
+  });
+
+  console.log("✅ All scheduled AI audio cancelled");
+};
+
 // High-quality audio playback WITH proper recording and enhancement
 export const playAudioHQ = async (
   base64Audio,
