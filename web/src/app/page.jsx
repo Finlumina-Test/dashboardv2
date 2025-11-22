@@ -398,24 +398,9 @@ export default function HomePage() {
         scrolling="no"
       />
 
-      {/* Pricing Section */}
-      <iframe
-        ref={(el) => (iframeRefs.current[3] = el)}
-        src="/homepage-sections/pricing.html"
-        style={{
-          width: '100%',
-          minHeight: '1000px',
-          border: 'none',
-          display: 'block',
-          overflow: 'hidden'
-        }}
-        title="Pricing Section"
-        scrolling="no"
-      />
-
       {/* Use Cases Section */}
       <iframe
-        ref={(el) => (iframeRefs.current[4] = el)}
+        ref={(el) => (iframeRefs.current[3] = el)}
         src="/homepage-sections/use-cases.html"
         style={{
           width: '100%',
@@ -430,7 +415,7 @@ export default function HomePage() {
 
       {/* Trust & Speed Section */}
       <iframe
-        ref={(el) => (iframeRefs.current[5] = el)}
+        ref={(el) => (iframeRefs.current[4] = el)}
         src="/homepage-sections/trust.html"
         style={{
           width: '100%',
@@ -440,6 +425,21 @@ export default function HomePage() {
           overflow: 'hidden'
         }}
         title="Trust Section"
+        scrolling="no"
+      />
+
+      {/* Pricing Section */}
+      <iframe
+        ref={(el) => (iframeRefs.current[5] = el)}
+        src="/homepage-sections/pricing.html"
+        style={{
+          width: '100%',
+          minHeight: '1000px',
+          border: 'none',
+          display: 'block',
+          overflow: 'hidden'
+        }}
+        title="Pricing Section"
         scrolling="no"
       />
 
